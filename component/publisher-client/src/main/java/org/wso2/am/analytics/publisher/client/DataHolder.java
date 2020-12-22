@@ -26,8 +26,6 @@ public class DataHolder {
             new String[]{"deploymentId1", "deploymentId2", "deploymentId3", "deploymentId4", "deploymentId5"};
     static final String[] API_UUID = new String[]{"apiUUID1", "apiUUID2", "apiUUID3", "apiUUID4", "apiUUID5"};
     static final String[] REGION_ID = new String[]{"region1", "region2", "region3", "region4", "region5"};
-    static final String[] SUBSCRIBER =
-            new String[]{"subscriber1", "subscriber2", "subscriber3", "subscriber4", "subscriber5"};
     static final String[] GATEWAY_TYPE = new String[]{"type1", "type2", "type3", "type4", "type5"};
     static final String[] DESTINATION =
             new String[]{"destination1", "destination2", "destination3", "destination4", "destination5"};

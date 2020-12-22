@@ -86,7 +86,6 @@ public class EventHubClient implements Runnable {
             jsonObject.addProperty("nodeId", DataHolder.NODE_ID[i % 5]);
             jsonObject.addProperty("deploymentId", DataHolder.DEPLOYMENT_ID[i % 5]);
             jsonObject.addProperty("apiId", DataHolder.API_UUID[i % 5]);
-            jsonObject.addProperty("subscriber", DataHolder.SUBSCRIBER[i % 5]);
             jsonObject.addProperty("gatewayType", DataHolder.GATEWAY_TYPE[i % 5]);
             jsonObject.addProperty("destination", DataHolder.DESTINATION[i % 5]);
             jsonObject.addProperty("protocol", DataHolder.PROTOCOL[i % 5]);
