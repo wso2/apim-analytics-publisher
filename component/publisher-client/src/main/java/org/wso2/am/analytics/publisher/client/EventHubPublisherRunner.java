@@ -56,7 +56,8 @@ public class EventHubPublisherRunner {
             try {
                 service.submit(client);
             } catch (Exception e) {
-                log.error(e.getMessage(), e);
+                log.error("Error occurred when submitting publisher job. " + e.getMessage().replaceAll("[\r\n]", ""),
+                          e);
             }
         }
         try {
