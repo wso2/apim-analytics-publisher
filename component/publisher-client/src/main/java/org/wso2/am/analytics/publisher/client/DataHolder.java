@@ -23,7 +23,7 @@ package org.wso2.am.analytics.publisher.client;
 public class DataHolder {
     static final String[] NODE_ID = new String[]{"1", "2", "3", "4", "5"};
     static final String[] DEPLOYMENT_ID =
-            new String[]{"deploymentId1", "deploymentId2", "deploymentId3", "deploymentId4", "deploymentId5"};
+            new String[]{"prod", "prod", "prod", "prod", "prod"};
     static final String[] API_UUID = new String[]{"apiUUID1", "apiUUID2", "apiUUID3", "apiUUID4", "apiUUID5"};
     static final String[] REGION_ID = new String[]{"region1", "region2", "region3", "region4", "region5"};
     static final String[] GATEWAY_TYPE = new String[]{"type1", "type2", "type3", "type4", "type5"};
@@ -46,7 +46,8 @@ public class DataHolder {
     static final String[] APPLICATION_NAME = new String[]{"app1", "app2", "app3", "app4", "app5"};
     static final String[] KEY_TYPE = new String[]{"type1", "type2", "type3", "type4", "type5"};
     static final String[]
-            API_CREATOR_TENANT_DOMAIN = new String[]{"tenant1", "tenant2", "tenant3", "tenant4", "tenant5"};
+            API_CREATOR_TENANT_DOMAIN = new String[]{"carbon.super", "carbon.super", "carbon.super", "carbon.super",
+                                                     "carbon.super"};
     static final String[] API_TIER = new String[]{"tier1", "tier2", "tier3", "tier4", "tier5"};
     static final String[] LABEL = new String[]{"label1", "label2", "label3", "label4", "label5"};
     static final String[] APPLICATION_CONSUMER_KEY = new String[]{"key1", "key2", "key3", "key4", "key5"};
