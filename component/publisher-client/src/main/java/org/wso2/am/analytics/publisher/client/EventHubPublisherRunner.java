@@ -48,15 +48,15 @@ public class EventHubPublisherRunner {
         if (target == null || target.isEmpty()) {
             log.error("SAS Token is not provided. Publisher can not be initialized");
         }
-        log.info("Publisher Started with following configs. publishers: " + publisherCount + ", Event "
-                         + "count: " + eventCount);
+        log.info(("Publisher Started with following configs. publishers: " + publisherCount + ", Event "
+                         + "count: " + eventCount).replaceAll("[\r\n]", ""));
         ExecutorService service = Executors.newFixedThreadPool(publisherCount);
         for (int i = 0; i < publisherCount; i++) {
             EventHubClient client = new EventHubClient(target, eventCount);
             try {
                 service.submit(client);
             } catch (Exception e) {
-                log.error("Error occurred when submitting publisher job. " + e.getMessage().replaceAll("[\r\n]", ""),
+                log.error(("Error occurred when submitting publisher job. " + e.getMessage()).replaceAll("[\r\n]", ""),
                           e);
             }
         }
