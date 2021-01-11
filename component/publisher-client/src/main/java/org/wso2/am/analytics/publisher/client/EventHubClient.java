@@ -121,13 +121,13 @@ public class EventHubClient implements Runnable {
             String payload = jsonObject.toString();
             EventData eventData = new EventData(payload);
             if (!batch.tryAdd(eventData)) {
-                log.info("Sending Events: " + batch.getCount());
+                log.info(("Sending Events: " + batch.getCount()).replaceAll("[\r\n]", ""));
                 producer.send(batch);
                 batch = producer.createBatch();
                 batch.tryAdd(eventData);
             }
         }
-        log.info("Sending Events: " + batch.getCount());
+        log.info(("Sending Events: " + batch.getCount()).replaceAll("[\r\n]", ""));
         producer.send(batch);
     }
 }
