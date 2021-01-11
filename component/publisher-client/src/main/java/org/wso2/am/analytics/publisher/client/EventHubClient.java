@@ -91,7 +91,7 @@ public class EventHubClient implements Runnable {
             jsonObject.addProperty("responseMediationLatency", DataHolder.RESPONSE_MED_LATENCY[i % 5]);
             jsonObject.addProperty("responseCode", DataHolder.RESPONSE_CODE[i % 5]);
             jsonObject.addProperty("responseSize", DataHolder.RESPONSE_SIZE[i % 5]);
-            jsonObject.addProperty("responseLatency", DataHolder.RESPONSE_SIZE[i % 5]);
+            jsonObject.addProperty("responseLatency", DataHolder.RESPONSE_LATENCY[i % 5]);
             jsonObject.addProperty("apiCreator", DataHolder.API_CREATOR[i % 5]);
             jsonObject.addProperty("apiMethod", DataHolder.API_METHOD[i % 5]);
             jsonObject.addProperty("apiResourceTemplate", DataHolder.API_RESOURCE_TEMPLATE[i % 5]);

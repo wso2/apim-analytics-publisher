@@ -31,6 +31,7 @@ public class DataHolder {
             new String[]{"destination1", "destination2", "destination3", "destination4", "destination5"};
     static final String[] REQUEST_MED_LATENCY = new String[]{"100", "200", "300", "400", "500"};
     static final String[] RESPONSE_MED_LATENCY = new String[]{"500", "400", "300", "200", "100"};
+    static final String[] RESPONSE_LATENCY = new String[]{"100", "200", "300", "400", "500"};
     static final String[] RESPONSE_CODE = new String[]{"100", "200", "300", "400", "500"};
     static final String[] RESPONSE_SIZE = new String[]{"100", "200", "300", "400", "500"};
     static final String[]
