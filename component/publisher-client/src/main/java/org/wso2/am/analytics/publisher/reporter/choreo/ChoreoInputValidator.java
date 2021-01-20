@@ -20,18 +20,18 @@ package org.wso2.am.analytics.publisher.reporter.choreo;
 
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 
-import static org.wso2.am.analytics.publisher.util.Constants.API_CONTEXT;
 import static org.wso2.am.analytics.publisher.util.Constants.API_CREATION;
-import static org.wso2.am.analytics.publisher.util.Constants.API_CREATOR_TENANT_DOMAIN;
 import static org.wso2.am.analytics.publisher.util.Constants.API_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.API_METHOD;
 import static org.wso2.am.analytics.publisher.util.Constants.API_NAME;
+import static org.wso2.am.analytics.publisher.util.Constants.API_RESOURCE_TEMPLATE;
 import static org.wso2.am.analytics.publisher.util.Constants.API_VERSION;
 import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_CONSUMER_KEY;
 import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_NAME;
 import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_OWNER;
 import static org.wso2.am.analytics.publisher.util.Constants.AUTH_API_URL;
+import static org.wso2.am.analytics.publisher.util.Constants.BACKEND_LATENCY;
 import static org.wso2.am.analytics.publisher.util.Constants.CONSUMER_KEY;
 import static org.wso2.am.analytics.publisher.util.Constants.CONSUMER_SECRET;
 import static org.wso2.am.analytics.publisher.util.Constants.CORRELATION_ID;
@@ -54,12 +54,12 @@ import static org.wso2.am.analytics.publisher.util.Constants.USER_AGENT;
  */
 public class ChoreoInputValidator {
     private static final ChoreoInputValidator INSTANCE = new ChoreoInputValidator();
-    private static final String[] responseSchema = {CORRELATION_ID, KEY_TYPE, API_ID, API_NAME, API_CONTEXT,
-                                                    API_VERSION, API_CREATION, API_METHOD, API_CREATOR_TENANT_DOMAIN,
+    private static final String[] responseSchema = {CORRELATION_ID, KEY_TYPE, API_ID, API_NAME,
+                                                    API_VERSION, API_CREATION, API_METHOD, API_RESOURCE_TEMPLATE,
                                                     DESTINATION, APPLICATION_ID, APPLICATION_NAME,
                                                     APPLICATION_CONSUMER_KEY, APPLICATION_OWNER, REGION_ID,
                                                     GATEWAY_TYPE, USER_AGENT, RESPONSE_CODE, RESPONSE_CACHE_HIT,
-                                                    RESPONSE_LATENCY, REQUEST_MEDIATION_LATENCY,
+                                                    RESPONSE_LATENCY, BACKEND_LATENCY, REQUEST_MEDIATION_LATENCY,
                                                     RESPONSE_MEDIATION_LATENCY, DEPLOYMENT_ID};
     private static final String[] configProperties = {TOKEN_API_URL, CONSUMER_KEY, CONSUMER_SECRET, AUTH_API_URL};
 

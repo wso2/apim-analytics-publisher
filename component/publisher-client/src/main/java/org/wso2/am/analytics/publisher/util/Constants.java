@@ -31,6 +31,7 @@ public class Constants {
     public static final String API_VERSION = "apiVersion";
     public static final String API_CREATION = "apiCreator";
     public static final String API_METHOD = "apiMethod";
+    public static final String API_RESOURCE_TEMPLATE = "apiResourceTemplate";
     public static final String API_CREATOR_TENANT_DOMAIN = "apiCreatorTenantDomain";
     public static final String DESTINATION = "destination";
     public static final String APPLICATION_ID = "applicationId";
@@ -43,6 +44,7 @@ public class Constants {
     public static final String RESPONSE_CODE = "responseCode";
     public static final String RESPONSE_CACHE_HIT = "responseCacheHit";
     public static final String RESPONSE_LATENCY = "responseLatency";
+    public static final String BACKEND_LATENCY = "backendLatency";
     public static final String REQUEST_MEDIATION_LATENCY = "requestMediationLatency";
     public static final String RESPONSE_MEDIATION_LATENCY = "responseMediationLatency";
     public static final String DEPLOYMENT_ID = "deploymentId";

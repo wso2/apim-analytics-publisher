@@ -93,11 +93,11 @@ public class MetricReporterTestCase {
         event.put("keyType", "pub_key");
         event.put("apiId", "121");
         event.put("apiName", "pizzashak");
-        event.put("apiContext", "/pizzashak");
         event.put("apiVersion", "1.0.0");
         event.put("responseCode", "200");
         event.put("apiCreator", "admin");
         event.put("apiMethod", "GET");
+        event.put("apiResourceTemplate", "GET");
         event.put("apiCreatorTenantDomain", "carbon.super");
         event.put("destination", "localhost");
         event.put("applicationId", "5");
@@ -109,6 +109,7 @@ public class MetricReporterTestCase {
         event.put("userAgent", "Mozilla");
         event.put("responseCacheHit", "false");
         event.put("responseLatency", "2000");
+        event.put("backendLatency", "3000");
         event.put("requestMediationLatency", "250");
         event.put("responseMediationLatency", "1750");
         event.put("deploymentId", "1");
