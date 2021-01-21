@@ -49,6 +49,10 @@ public class Constants {
     public static final String RESPONSE_MEDIATION_LATENCY = "responseMediationLatency";
     public static final String DEPLOYMENT_ID = "deploymentId";
 
+    public static final String ERROR_TYPE = "errorType";
+    public static final String ERROR_CODE = "errorCode";
+    public static final String ERROR_MESSAGE = "errorMessage";
+
     public static final String AUTH_API_URL = "auth.api.url";
     public static final String TOKEN_API_URL = "token.api.url";
     public static final String CONSUMER_KEY = "consumer.key";

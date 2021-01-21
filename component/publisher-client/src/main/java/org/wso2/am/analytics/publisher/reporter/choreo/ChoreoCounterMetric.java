@@ -34,13 +34,11 @@ public class ChoreoCounterMetric implements CounterMetric {
     private static final Logger log = Logger.getLogger(ChoreoCounterMetric.class);
     private String name;
     private EventHubClient client;
-    private MetricSchema schema;
     private String[] requiredAttributes;
 
     protected ChoreoCounterMetric(String name, EventHubClient client, MetricSchema schema) {
         this.name = name;
         this.client = client;
-        this.schema = schema;
         requiredAttributes = ChoreoInputValidator.getInstance().getEventSchema(schema);
     }
 
@@ -52,9 +50,7 @@ public class ChoreoCounterMetric implements CounterMetric {
     @Override
     public int incrementCount(Map<String, String> attributes) throws MetricReportingException {
         if (attributes != null) {
-            if (schema != null) {
-                validateAttributes(attributes);
-            }
+            validateAttributes(attributes);
             String event = new Gson().toJson(attributes);
             log.info("Publishing single message to Choreo. " + event.replaceAll("[\r\n]", ""));
             return 0;
