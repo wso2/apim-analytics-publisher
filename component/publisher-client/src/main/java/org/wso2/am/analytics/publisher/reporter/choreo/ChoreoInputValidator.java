@@ -19,7 +19,6 @@
 package org.wso2.am.analytics.publisher.reporter.choreo;
 
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
-import org.wso2.am.analytics.publisher.util.Constants;
 
 import static org.wso2.am.analytics.publisher.util.Constants.API_CREATION;
 import static org.wso2.am.analytics.publisher.util.Constants.API_CREATOR_TENANT_DOMAIN;
@@ -44,13 +43,14 @@ import static org.wso2.am.analytics.publisher.util.Constants.ERROR_MESSAGE;
 import static org.wso2.am.analytics.publisher.util.Constants.ERROR_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.GATEWAY_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.KEY_TYPE;
+import static org.wso2.am.analytics.publisher.util.Constants.PROXY_RESPONSE_CODE;
 import static org.wso2.am.analytics.publisher.util.Constants.REGION_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.REQUEST_MEDIATION_LATENCY;
 import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_CACHE_HIT;
-import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_CODE;
 import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_LATENCY;
 import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_MEDIATION_LATENCY;
 import static org.wso2.am.analytics.publisher.util.Constants.SAS_TOKEN;
+import static org.wso2.am.analytics.publisher.util.Constants.TARGET_RESPONSE_CODE;
 import static org.wso2.am.analytics.publisher.util.Constants.TOKEN_API_URL;
 import static org.wso2.am.analytics.publisher.util.Constants.USER_AGENT;
 
@@ -62,16 +62,17 @@ public class ChoreoInputValidator {
     private static final ChoreoInputValidator INSTANCE = new ChoreoInputValidator();
     private static final String[] responseSchema = {CORRELATION_ID, KEY_TYPE, API_ID, API_NAME,
                                                     API_VERSION, API_CREATION, API_METHOD, API_RESOURCE_TEMPLATE,
-                                                    DESTINATION, APPLICATION_ID, APPLICATION_NAME,
-                                                    APPLICATION_CONSUMER_KEY, APPLICATION_OWNER, REGION_ID,
-                                                    GATEWAY_TYPE, USER_AGENT, RESPONSE_CODE, RESPONSE_CACHE_HIT,
-                                                    RESPONSE_LATENCY, BACKEND_LATENCY, REQUEST_MEDIATION_LATENCY,
+                                                    API_CREATOR_TENANT_DOMAIN, DESTINATION, APPLICATION_ID,
+                                                    APPLICATION_NAME, APPLICATION_OWNER,
+                                                    REGION_ID, GATEWAY_TYPE, USER_AGENT, PROXY_RESPONSE_CODE,
+                                                    TARGET_RESPONSE_CODE, RESPONSE_CACHE_HIT, RESPONSE_LATENCY,
+                                                    BACKEND_LATENCY, REQUEST_MEDIATION_LATENCY,
                                                     RESPONSE_MEDIATION_LATENCY, DEPLOYMENT_ID};
     private static final String[] faultSchema = {CORRELATION_ID, ERROR_TYPE, ERROR_CODE, ERROR_MESSAGE, API_ID,
                                                  API_NAME, API_VERSION, API_CREATION, API_METHOD,
                                                  API_CREATOR_TENANT_DOMAIN, APPLICATION_ID, APPLICATION_NAME,
                                                  APPLICATION_CONSUMER_KEY, APPLICATION_OWNER, REGION_ID, GATEWAY_TYPE,
-                                                 RESPONSE_CODE, DEPLOYMENT_ID};
+                                                 PROXY_RESPONSE_CODE, TARGET_RESPONSE_CODE, DEPLOYMENT_ID};
     private static final String[] configProperties = {TOKEN_API_URL, CONSUMER_KEY, CONSUMER_SECRET, AUTH_API_URL,
                                                       SAS_TOKEN};
 

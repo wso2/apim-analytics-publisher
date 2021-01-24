@@ -20,7 +20,6 @@ package org.wso2.am.analytics.publisher.reporter;
 
 import org.apache.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
-import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 
 import java.util.HashMap;
 import java.util.Map;

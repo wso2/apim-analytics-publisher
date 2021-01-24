@@ -19,12 +19,10 @@ package org.wso2.am.analytics.publisher.client;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.messaging.eventhubs.EventData;
-import com.azure.messaging.eventhubs.EventDataBatch;
 import com.azure.messaging.eventhubs.EventHubClientBuilder;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
 import com.azure.messaging.eventhubs.implementation.EventHubSharedKeyCredential;
 import org.apache.log4j.Logger;
-import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -38,7 +36,7 @@ public class EventHubClient {
     private static final Logger log = Logger.getLogger(EventHubClient.class);
     private EventHubProducerClient producer;
 
-    public EventHubClient(String sasToken){
+    public EventHubClient(String sasToken) {
         if (null == sasToken || sasToken.isEmpty()) {
             sasToken = System.getenv("API_ANL_SAS_TOKEN");
             if (sasToken == null || sasToken.isEmpty()) {
