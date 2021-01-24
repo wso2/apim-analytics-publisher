@@ -64,6 +64,7 @@ public class MetricReporterTestCase {
         configs.put("token.api.url", "localhost/token-api");
         configs.put("auth.api.url", "localhost/auth-api");
         configs.put("consumer.secret", "some_secret");
+        configs.put("sas.token", "some_token");
         configs.put("consumer.key", null);
         createAndPublish(configs, null);
     }
@@ -75,157 +76,12 @@ public class MetricReporterTestCase {
         Map<String, String> configs = new HashMap<>();
         configs.put("token.api.url", "localhost/token-api");
         configs.put("auth.api.url", "localhost/auth-api");
+        configs.put("sas.token", "some_token");
         configs.put("consumer.secret", "some_secret");
         configs.put("consumer.key", "");
         createAndPublish(configs, null);
     }
 
-    @Test(dependsOnMethods = {"testMetricReporterCreationWithEmptyConfigs"})
-    public void testMetricReporterCreation() {
-        Map<String, String> configs = new HashMap<>();
-        configs.put("token.api.url", "localhost/token-api");
-        configs.put("auth.api.url", "localhost/auth-api");
-        configs.put("consumer.secret", "some_secret");
-        configs.put("consumer.key", "some_key");
-
-        Map<String, String> event = new HashMap<>();
-        event.put("correlationId", "12345");
-        event.put("keyType", "pub_key");
-        event.put("apiId", "121");
-        event.put("apiName", "pizzashak");
-        event.put("apiVersion", "1.0.0");
-        event.put("responseCode", "200");
-        event.put("apiCreator", "admin");
-        event.put("apiMethod", "GET");
-        event.put("apiResourceTemplate", "GET");
-        event.put("apiCreatorTenantDomain", "carbon.super");
-        event.put("destination", "localhost");
-        event.put("applicationId", "5");
-        event.put("applicationName", "pizza-app");
-        event.put("applicationConsumerKey", "consumer_key");
-        event.put("applicationOwner", "admin");
-        event.put("regionId", "2");
-        event.put("gatewayType", "synapse");
-        event.put("userAgent", "Mozilla");
-        event.put("responseCacheHit", "false");
-        event.put("responseLatency", "2000");
-        event.put("backendLatency", "3000");
-        event.put("requestMediationLatency", "250");
-        event.put("responseMediationLatency", "1750");
-        event.put("deploymentId", "1");
-        try {
-            createAndPublish(configs, event);
-        } catch (MetricReportingException e) {
-            log.error(e.getMessage(), e);
-            Assert.fail("Metric reporting failed failed");
-        } catch (MetricCreationException e) {
-            log.error(e.getMessage(), e);
-            Assert.fail("Metric Reporter creation failed");
-        }
-    }
-
-    @Test(expectedExceptions = MetricReportingException.class, dependsOnMethods =
-            {"testMetricReporterCreation"})
-    public void testMetricReporterCreationWithoutAttributes() throws MetricCreationException,
-                                                                     MetricReportingException {
-        Map<String, String> configs = new HashMap<>();
-        configs.put("token.api.url", "localhost/token-api");
-        configs.put("auth.api.url", "localhost/auth-api");
-        configs.put("consumer.secret", "some_secret");
-        configs.put("consumer.key", "some_key");
-        createAndPublish(configs, null);
-    }
-
-    @Test(expectedExceptions = MetricReportingException.class, dependsOnMethods =
-            {"testMetricReporterCreationWithoutAttributes"})
-    public void testMetricReporterCreationWithMissingAttributes() throws MetricCreationException,
-                                                                         MetricReportingException {
-        Map<String, String> configs = new HashMap<>();
-        configs.put("token.api.url", "localhost/token-api");
-        configs.put("auth.api.url", "localhost/auth-api");
-        configs.put("consumer.secret", "some_secret");
-        configs.put("consumer.key", "some_key");
-
-        Map<String, String> event = new HashMap<>();
-        event.put("correlationId", "12345");
-        event.put("keyType", "pub_key");
-        event.put("apiId", "121");
-        createAndPublish(configs, event);
-    }
-
-    @Test(expectedExceptions = MetricReportingException.class, dependsOnMethods =
-            {"testMetricReporterCreationWithMissingAttributes"})
-    public void testMetricReporterCreationWithNullAttributes() throws MetricCreationException,
-                                                                      MetricReportingException {
-        Map<String, String> configs = new HashMap<>();
-        configs.put("token.api.url", "localhost/token-api");
-        configs.put("auth.api.url", "localhost/auth-api");
-        configs.put("consumer.secret", "some_secret");
-        configs.put("consumer.key", "some_key");
-
-        Map<String, String> event = new HashMap<>();
-        event.put("correlationId", "12345");
-        event.put("keyType", "pub_key");
-        event.put("apiId", "121");
-        event.put("apiName", "pizzashak");
-        event.put("apiContext", "/pizzashak");
-        event.put("apiVersion", "1.0.0");
-        event.put("responseCode", "200");
-        event.put("apiCreator", "admin");
-        event.put("apiMethod", "GET");
-        event.put("apiCreatorTenantDomain", "carbon.super");
-        event.put("destination", "localhost");
-        event.put("applicationId", "5");
-        event.put("applicationName", "pizza-app");
-        event.put("applicationConsumerKey", "consumer_key");
-        event.put("applicationOwner", "admin");
-        event.put("regionId", "2");
-        event.put("gatewayType", "synapse");
-        event.put("userAgent", "Mozilla");
-        event.put("responseCacheHit", "false");
-        event.put("responseLatency", "2000");
-        event.put("requestMediationLatency", "250");
-        event.put("responseMediationLatency", "1750");
-        event.put("deploymentId", null);
-        createAndPublish(configs, event);
-    }
-
-    @Test(expectedExceptions = MetricReportingException.class, dependsOnMethods =
-            {"testMetricReporterCreationWithNullAttributes"})
-    public void testMetricReporterCreationWithEmptyAttributes() throws MetricCreationException,
-                                                                       MetricReportingException {
-        Map<String, String> configs = new HashMap<>();
-        configs.put("token.api.url", "localhost/token-api");
-        configs.put("auth.api.url", "localhost/auth-api");
-        configs.put("consumer.secret", "some_secret");
-        configs.put("consumer.key", "some_key");
-
-        Map<String, String> event = new HashMap<>();
-        event.put("correlationId", "12345");
-        event.put("keyType", "pub_key");
-        event.put("apiId", "121");
-        event.put("apiName", "pizzashak");
-        event.put("apiContext", "/pizzashak");
-        event.put("apiVersion", "1.0.0");
-        event.put("responseCode", "200");
-        event.put("apiCreator", "admin");
-        event.put("apiMethod", "GET");
-        event.put("apiCreatorTenantDomain", "carbon.super");
-        event.put("destination", "localhost");
-        event.put("applicationId", "5");
-        event.put("applicationName", "pizza-app");
-        event.put("applicationConsumerKey", "consumer_key");
-        event.put("applicationOwner", "admin");
-        event.put("regionId", "2");
-        event.put("gatewayType", "synapse");
-        event.put("userAgent", "Mozilla");
-        event.put("responseCacheHit", "false");
-        event.put("responseLatency", "2000");
-        event.put("requestMediationLatency", "250");
-        event.put("responseMediationLatency", "1750");
-        event.put("deploymentId", "");
-        createAndPublish(configs, event);
-    }
 
     /**
      * Helper method to create and publish metrics for testing purposes

@@ -57,4 +57,5 @@ public class Constants {
     public static final String TOKEN_API_URL = "token.api.url";
     public static final String CONSUMER_KEY = "consumer.key";
     public static final String CONSUMER_SECRET = "consumer.secret";
+    public static final String SAS_TOKEN = "sas.token";
 }

@@ -52,7 +52,7 @@ public class ChoreoCounterMetric implements CounterMetric {
         if (attributes != null) {
             validateAttributes(attributes);
             String event = new Gson().toJson(attributes);
-            log.info("Publishing single message to Choreo. " + event.replaceAll("[\r\n]", ""));
+            client.sendEvent(event);
             return 0;
         } else {
             throw new MetricReportingException("Event attributes cannot be null");

@@ -20,10 +20,12 @@ package org.wso2.am.analytics.publisher.reporter.choreo;
 
 import org.wso2.am.analytics.publisher.client.EventHubClient;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
+import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricReporter;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import org.wso2.am.analytics.publisher.reporter.TimerMetric;
+import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.util.Map;
 
@@ -62,7 +64,7 @@ public class ChoreoAnalyticsMetricReporter extends AbstractMetricReporter {
         return null;
     }
 
-    private EventHubClient getEventHubClient() {
-        return null;
+    private EventHubClient getEventHubClient(){
+        return new EventHubClient(getConfiguration().get(Constants.SAS_TOKEN));
     }
 }
