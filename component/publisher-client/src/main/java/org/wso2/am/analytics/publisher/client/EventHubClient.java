@@ -19,33 +19,31 @@ package org.wso2.am.analytics.publisher.client;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.messaging.eventhubs.EventData;
-import com.azure.messaging.eventhubs.EventDataBatch;
 import com.azure.messaging.eventhubs.EventHubClientBuilder;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
 import com.azure.messaging.eventhubs.implementation.EventHubSharedKeyCredential;
-import com.google.gson.JsonObject;
 import org.apache.log4j.Logger;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.Collections;
 
 /**
- * Event Hub client is responsible for sending provided number of events to
+ * Event Hub client is responsible for sending events to
  * Azure Event Hub.
  */
-public class EventHubClient implements Runnable {
+public class EventHubClient {
     private static final Logger log = Logger.getLogger(EventHubClient.class);
     private EventHubProducerClient producer;
-    private int eventCount;
-    private EventDataBatch batch;
 
-    public EventHubClient(String sasToken, int eventCount) {
-        this.eventCount = eventCount;
+    public EventHubClient(String sasToken) {
+        if (null == sasToken || sasToken.isEmpty()) {
+            sasToken = System.getenv("API_ANL_SAS_TOKEN");
+            if (sasToken == null || sasToken.isEmpty()) {
+                log.error("SAS Token is not provided. Publisher can not be initialized");
+                return;
+            }
+        }
         TokenCredential tokenCredential = new EventHubSharedKeyCredential(sasToken);
         String resourceURI = getResourceURI(sasToken);
         String fullyQualifiedNamespace = resourceURI.split("/")[0];
@@ -53,7 +51,6 @@ public class EventHubClient implements Runnable {
         producer = new EventHubClientBuilder()
                 .credential(fullyQualifiedNamespace, eventhubName, tokenCredential)
                 .buildProducerClient();
-        batch = producer.createBatch();
     }
 
     /**
@@ -74,48 +71,10 @@ public class EventHubClient implements Runnable {
         return resourceURI.replace("sb://", "");
     }
 
-    @Override public void run() {
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        df.setTimeZone(tz);
-        for (int i = 0; i < eventCount; i++) {
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("requestTimestamp", df.format(new Date()));
-            jsonObject.addProperty("correlationId", String.valueOf(UUID.randomUUID()));
-            jsonObject.addProperty("keyType", DataHolder.KEY_TYPE[i % 2]);
-            jsonObject.addProperty("deploymentId", DataHolder.DEPLOYMENT_ID[i % 5]);
-            jsonObject.addProperty("apiId", DataHolder.API_UUID[i % 5]);
-            jsonObject.addProperty("gatewayType", DataHolder.GATEWAY_TYPE[i % 5]);
-            jsonObject.addProperty("destination", DataHolder.DESTINATION[i % 5]);
-            jsonObject.addProperty("requestMediationLatency", DataHolder.REQUEST_MED_LATENCY[i % 5]);
-            jsonObject.addProperty("responseMediationLatency", DataHolder.RESPONSE_MED_LATENCY[i % 5]);
-            jsonObject.addProperty("responseCode", DataHolder.RESPONSE_CODE[i % 5]);
-            jsonObject.addProperty("responseSize", DataHolder.RESPONSE_SIZE[i % 5]);
-            jsonObject.addProperty("responseLatency", DataHolder.RESPONSE_LATENCY[i % 5]);
-            jsonObject.addProperty("apiCreator", DataHolder.API_CREATOR[i % 5]);
-            jsonObject.addProperty("apiMethod", DataHolder.API_METHOD[i % 5]);
-            jsonObject.addProperty("apiResourceTemplate", DataHolder.API_RESOURCE_TEMPLATE[i % 5]);
-            jsonObject.addProperty("apiVersion", DataHolder.API_VERSION[i % 5]);
-            jsonObject.addProperty("apiName", DataHolder.API_NAME[i % 5]);
-            jsonObject.addProperty("apiContext", DataHolder.API_CONTEXT[i % 5]);
-            jsonObject.addProperty("apiCreatorTenantDomain", DataHolder.API_CREATOR_TENANT_DOMAIN[i % 5]);
-            jsonObject.addProperty("applicationName", DataHolder.APPLICATION_NAME[i % 5]);
-            jsonObject.addProperty("applicationId", DataHolder.NODE_ID[i % 5]);
-            jsonObject.addProperty("applicationConsumerKey", DataHolder.APPLICATION_CONSUMER_KEY[i % 5]);
-            jsonObject.addProperty("applicationOwner", DataHolder.APPLICATION_OWNER[i % 5]);
-            jsonObject.addProperty("regionId", DataHolder.REGION_ID[i % 5]);
-            jsonObject.addProperty("userAgent", DataHolder.USER_AGENT[i % 5]);
-            jsonObject.addProperty("eventType", DataHolder.EVENT_TYPE[i % 5]);
-            String payload = jsonObject.toString();
-            EventData eventData = new EventData(payload);
-            if (!batch.tryAdd(eventData)) {
-                log.info(("Sending Events: " + batch.getCount()).replaceAll("[\r\n]", ""));
-                producer.send(batch);
-                batch = producer.createBatch();
-                batch.tryAdd(eventData);
-            }
-        }
-        log.info(("Sending Events: " + batch.getCount()).replaceAll("[\r\n]", ""));
-        producer.send(batch);
+    public void sendEvent(String event) {
+        //will implement batching in next milestone
+        EventData eventData = new EventData(event);
+        producer.send(Collections.singleton(eventData));
+        log.debug("Published a single message to Analytics cluster. " + event.replaceAll("[\r\n]", ""));
     }
 }
