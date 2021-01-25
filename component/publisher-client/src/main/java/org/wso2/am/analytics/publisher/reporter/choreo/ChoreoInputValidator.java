@@ -49,7 +49,6 @@ import static org.wso2.am.analytics.publisher.util.Constants.REQUEST_MEDIATION_L
 import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_CACHE_HIT;
 import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_LATENCY;
 import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_MEDIATION_LATENCY;
-import static org.wso2.am.analytics.publisher.util.Constants.SAS_TOKEN;
 import static org.wso2.am.analytics.publisher.util.Constants.TARGET_RESPONSE_CODE;
 import static org.wso2.am.analytics.publisher.util.Constants.TOKEN_API_URL;
 import static org.wso2.am.analytics.publisher.util.Constants.USER_AGENT;
@@ -73,8 +72,7 @@ public class ChoreoInputValidator {
                                                  API_CREATOR_TENANT_DOMAIN, APPLICATION_ID, APPLICATION_NAME,
                                                  APPLICATION_CONSUMER_KEY, APPLICATION_OWNER, REGION_ID, GATEWAY_TYPE,
                                                  PROXY_RESPONSE_CODE, TARGET_RESPONSE_CODE, DEPLOYMENT_ID};
-    private static final String[] configProperties = {TOKEN_API_URL, CONSUMER_KEY, CONSUMER_SECRET, AUTH_API_URL,
-                                                      SAS_TOKEN};
+    private static final String[] configProperties = {TOKEN_API_URL, CONSUMER_KEY, CONSUMER_SECRET, AUTH_API_URL};
 
 
     private ChoreoInputValidator() {
