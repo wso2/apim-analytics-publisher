@@ -31,7 +31,6 @@
 
     <name>API Analytics Publisher Feature Aggregate</name>
     <artifactId>apim-analytics-publisher-features</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
