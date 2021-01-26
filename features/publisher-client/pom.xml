@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.wso2.am.analytics.publisher</groupId>
         <artifactId>apim-analytics-publisher-features</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
