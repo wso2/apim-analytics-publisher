@@ -26,6 +26,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>component</module>
+        <module>features</module>
     </modules>
     <groupId>org.wso2.am.analytics.publisher</groupId>
     <artifactId>apim-analytics-publisher-parent</artifactId>
@@ -93,6 +94,11 @@
                 <version>${testng.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.am.analytics.publisher</groupId>
+                <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -126,6 +132,7 @@
         <junit.version>4.13.1</junit.version>
         <testng.version>6.10</testng.version>
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
+        <carbon.feature.plugin.version>3.1.4</carbon.feature.plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <scm>
