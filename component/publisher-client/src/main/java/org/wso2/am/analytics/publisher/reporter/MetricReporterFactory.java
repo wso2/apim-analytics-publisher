@@ -23,6 +23,8 @@ import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.choreo.ChoreoAnalyticsMetricReporter;
 import org.wso2.am.analytics.publisher.util.Constants;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 /**
@@ -48,8 +50,18 @@ public class MetricReporterFactory {
                         reporterInstance = new ChoreoAnalyticsMetricReporter(properties);
                         return reporterInstance;
                     } else {
-                        throw new MetricCreationException("Provided class name " + fullyQualifiedClassName +
-                                                                  " is not supported.");
+                        try {
+                            Class<MetricReporter> clazz =
+                                    (Class<MetricReporter>) Class.forName(fullyQualifiedClassName);
+                            Constructor<MetricReporter> constructor =
+                                    clazz.getConstructor(Map.class);
+                            reporterInstance = constructor.newInstance(properties);
+                            return reporterInstance;
+                        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException
+                                | NoSuchMethodException | InvocationTargetException e) {
+                            throw new MetricCreationException("Provided class name " + fullyQualifiedClassName +
+                                                                      " is not supported.", e);
+                        }
                     }
                 } else {
                     return reporterInstance;
