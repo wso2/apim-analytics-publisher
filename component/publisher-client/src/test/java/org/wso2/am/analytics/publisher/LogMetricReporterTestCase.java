@@ -44,6 +44,7 @@ public class LogMetricReporterTestCase {
         event.put("attribute2", "value2");
         event.put("attribute3", "value3");
         event.put("attribute4", "value4");
+
         metric.incrementCount(event);
     }
 }

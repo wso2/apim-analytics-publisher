@@ -25,6 +25,7 @@ import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -34,44 +35,59 @@ import java.util.Map;
  */
 public class MetricReporterFactory {
     private static final Logger log = Logger.getLogger(MetricReporterFactory.class);
-    private static volatile MetricReporter reporterInstance;
     private static final MetricReporterFactory instance = new MetricReporterFactory();
+    private static Map<String, MetricReporter> reporterRegistry = new HashMap<>();
 
     private MetricReporterFactory() {
         //private constructor
     }
+
+    public MetricReporter createMetricReporter(Map<String, String> properties)
+            throws MetricCreationException {
+        if (reporterRegistry.get(Constants.DEFAULT_REPORTER) == null) {
+            synchronized (this) {
+                if (reporterRegistry.get("default") == null) {
+                        MetricReporter reporterInstance = new ChoreoAnalyticsMetricReporter(properties);
+                        reporterRegistry.put("default", reporterInstance);
+                        return reporterInstance;
+                }
+            }
+        }
+        MetricReporter reporterInstance = reporterRegistry.get("default");
+        log.info("Metric Reporter of type " + reporterInstance.getClass().toString().replaceAll("[\r\n]", "") +
+                         " is already created. Hence returning same instance");
+        return reporterInstance;
+    }
     public MetricReporter createMetricReporter(String fullyQualifiedClassName, Map<String, String> properties)
             throws MetricCreationException {
-        if (reporterInstance == null) {
+        if (reporterRegistry.get(fullyQualifiedClassName) == null) {
             synchronized (this) {
-                if (reporterInstance == null) {
-                    if (fullyQualifiedClassName == null || fullyQualifiedClassName.isEmpty() ||
-                            Constants.CHOREO_ANALYTICS_REPORTER_FQCN.equals(fullyQualifiedClassName)) {
-                        reporterInstance = new ChoreoAnalyticsMetricReporter(properties);
-                        return reporterInstance;
-                    } else {
+                if (reporterRegistry.get(fullyQualifiedClassName) == null) {
+                    if (fullyQualifiedClassName != null && !fullyQualifiedClassName.isEmpty()) {
                         try {
                             Class<MetricReporter> clazz =
                                     (Class<MetricReporter>) Class.forName(fullyQualifiedClassName);
                             Constructor<MetricReporter> constructor =
                                     clazz.getConstructor(Map.class);
-                            reporterInstance = constructor.newInstance(properties);
+                            MetricReporter reporterInstance = constructor.newInstance(properties);
+                            reporterRegistry.put(fullyQualifiedClassName, reporterInstance);
                             return reporterInstance;
                         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException
                                 | NoSuchMethodException | InvocationTargetException e) {
-                            throw new MetricCreationException("Provided class name " + fullyQualifiedClassName +
-                                                                      " is not supported.", e);
+                            throw new MetricCreationException("Error occurred while creating a Metric Reporter of type"
+                                                                      + " " + fullyQualifiedClassName, e);
                         }
+                    } else {
+                        throw new MetricCreationException("Provided class name is either empty or null. Hence cannot "
+                                                                  + "create the Reporter.");
                     }
-                } else {
-                    return reporterInstance;
                 }
             }
-        } else {
-            log.info("Metric Reporter of type " + reporterInstance.getClass().toString().replaceAll("[\r\n]", "") +
-                             " is already created. Hence returning same instance");
-            return reporterInstance;
         }
+        MetricReporter reporterInstance = reporterRegistry.get(fullyQualifiedClassName);
+        log.info("Metric Reporter of type " + reporterInstance.getClass().toString().replaceAll("[\r\n]", "") +
+                         " is already created. Hence returning same instance");
+        return reporterInstance;
     }
 
     public static MetricReporterFactory getInstance() {
