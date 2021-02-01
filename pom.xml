@@ -16,7 +16,8 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
@@ -99,6 +100,31 @@
                 <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.azure</groupId>
+                <artifactId>azure-core</artifactId>
+                <version>${azure-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.azure</groupId>
+                <artifactId>azure-core-amqp</artifactId>
+                <version>${azure-core-amqp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.azure</groupId>
+                <artifactId>azure-messaging-eventhubs</artifactId>
+                <version>${azure-messaging-eventhubs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.io.projectreactor</groupId>
+                <artifactId>reactor-core</artifactId>
+                <version>${reactor-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.qpid</groupId>
+                <artifactId>proton-j</artifactId>
+                <version>${proton-j.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -134,6 +160,13 @@
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
         <carbon.feature.plugin.version>3.1.4</carbon.feature.plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <azure-core.version>1.9.0.wso2v1</azure-core.version>
+        <azure-core-amqp.version>1.6.0.wso2v1</azure-core-amqp.version>
+        <azure-messaging-eventhubs.version>1.6.0.wso2v1</azure-messaging-eventhubs.version>
+        <reactor-core.version>3.3.9.wso2v1</reactor-core.version>
+        <proton-j.version>0.33.4</proton-j.version>
+
     </properties>
     <scm>
         <url>https://github.com/wso2/apim-analytics-publisher.git</url>
