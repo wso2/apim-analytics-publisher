@@ -68,6 +68,10 @@ public abstract class AbstractMetricReporter implements MetricReporter {
         } else if (!(metric instanceof CounterMetric)) {
             log.error("Timer Metric with the same name already exists. Please use a different name");
             return null;
+        } else if (metric.getSchema() != schema) {
+            log.error("Counter Metric with the same name but different schema already exists. Please use a different "
+                              + "name");
+            return null;
         }
         return (CounterMetric) metric;
     }
