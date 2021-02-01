@@ -22,17 +22,18 @@ import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 
 import java.util.Map;
 
-/**
- * Interface for Counter Metric
- */
-public interface CounterMetric extends Metric {
+public interface MetricEventBuilder {
     /**
-     * method to increment the count of the metric. Associated properties should be passed along with the method
-     * invocation.
-     *
-     * @param builder {@link MetricEventBuilder} of the this Metric
-     * @return current counter value
-     * @throws MetricReportingException Exception will be thrown if expected properties are not present
+     * Validates the provided attributes and build a flat {@link Map}. Any validation failures will cause
+     * {@link org.wso2.am.analytics.publisher.exception.MetricReportingException}.
+     * @return Map containing all attributes related to Metric Event
      */
-    public int incrementCount(MetricEventBuilder builder) throws MetricReportingException;
+    public Map<String, Object> build() throws MetricReportingException;
+
+    /**
+     * Checks the validity of the added attributes. If all required attributes are present true will be returned.
+     * Else {@link MetricReportingException} will be thrown.
+     * @return Validity state of the added data
+     */
+    public boolean validate() throws MetricReportingException;
 }

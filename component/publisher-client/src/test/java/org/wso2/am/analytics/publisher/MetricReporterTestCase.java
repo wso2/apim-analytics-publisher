@@ -23,9 +23,11 @@ import org.testng.annotations.Test;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
+import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricReporter;
 import org.wso2.am.analytics.publisher.reporter.MetricReporterFactory;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
+import org.wso2.am.analytics.publisher.reporter.choreo.ChoreoResponseMetricEventBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -92,10 +94,11 @@ public class MetricReporterTestCase {
      */
     private void createAndPublish(Map<String, String> configs, Map<String, String> event)
             throws MetricCreationException, MetricReportingException {
-        MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(null, configs);
+        MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
         CounterMetric counterMetric = metricReporter.createCounterMetric("apim.response", MetricSchema.RESPONSE);
+        ChoreoResponseMetricEventBuilder builder = (ChoreoResponseMetricEventBuilder) counterMetric.getEventBuilder();
+        builder.setApiCreator("creator1").setApiId("id1").build();
 
-
-        counterMetric.incrementCount(event);
+        counterMetric.incrementCount(builder);
     }
 }

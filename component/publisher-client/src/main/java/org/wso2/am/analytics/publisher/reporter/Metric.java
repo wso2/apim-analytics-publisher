@@ -28,4 +28,17 @@ public interface Metric {
      * @return Name of the metric
      */
     public String getName();
+
+    /**
+     * Returns the schema of the metric. For Metrics which does not need schema support return null
+     * @return Assigned schema of the Metric
+     */
+    public MetricSchema getSchema();
+
+    /**
+     * Returns the Event Builder which can produce an event conforming to the schema of the {@link Metric}. Users
+     * should get a builder instance though here, populate the relevant fields and return back to Metric class.
+     * @return MetricEventBuilder conforming to schema of Metric
+     */
+    public MetricEventBuilder getEventBuilder();
 }
