@@ -58,6 +58,26 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.azure</groupId>
+            <artifactId>azure-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.azure</groupId>
+            <artifactId>azure-core-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.azure</groupId>
+            <artifactId>azure-messaging-eventhubs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.qpid</groupId>
+            <artifactId>proton-j</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -101,6 +121,26 @@
                                 <bundle>
                                     <symbolicName>slf4j.api</symbolicName>
                                     <version>${slf4j.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>azure-core</symbolicName>
+                                    <version>${azure-core.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>azure-core-amqp</symbolicName>
+                                    <version>${azure-core-amqp.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>azure-messaging-eventhubs</symbolicName>
+                                    <version>${azure-messaging-eventhubs.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>reactor-core</symbolicName>
+                                    <version>${reactor-core.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.apache.qpid.proton-j</symbolicName>
+                                    <version>${proton-j.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>
