@@ -49,6 +49,8 @@ public class Constants {
     public static final String REQUEST_MEDIATION_LATENCY = "requestMediationLatency";
     public static final String RESPONSE_MEDIATION_LATENCY = "responseMediationLatency";
     public static final String DEPLOYMENT_ID = "deploymentId";
+    public static final String REQUEST_TIMESTAMP = "requestTimestamp";
+    public static final String EVENT_TYPE = "eventType";
 
     public static final String ERROR_TYPE = "errorType";
     public static final String ERROR_CODE = "errorCode";
