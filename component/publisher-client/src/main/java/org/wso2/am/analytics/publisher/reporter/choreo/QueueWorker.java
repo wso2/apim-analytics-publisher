@@ -55,8 +55,15 @@ public class QueueWorker implements Runnable {
                 } else {
                     //if we are done with consuming blocking queue flush the EventHub Client batch
                     client.flushEvents();
+                    break;
                 }
-            } while (threadPoolExecutor.getActiveCount() <= 3 && eventQueue.size() != 0);
+                if (eventQueue.size() == 0) {
+                    //if we are done with consuming blocking queue flush the EventHub Client batch
+                    client.flushEvents();
+                    break;
+                }
+            } while (threadPoolExecutor.getActiveCount() == 1 && eventQueue.size() != 0);
+            //while condition to handle possible task rejections
             if (log.isDebugEnabled()) {
                 log.debug(eventQueue.size() + " messages in queue after " +
                                   Thread.currentThread().getName().replaceAll("[\r\n]", "")
