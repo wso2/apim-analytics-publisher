@@ -16,8 +16,7 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
@@ -31,7 +30,7 @@
     </modules>
     <groupId>org.wso2.am.analytics.publisher</groupId>
     <artifactId>apim-analytics-publisher-parent</artifactId>
-    <version>0.1.3-SNAPSHOT</version>
+    <version>0.2.0</version>
     <name>APIM Analytics Publisher</name>
     <dependencyManagement>
         <dependencies>
@@ -195,6 +194,6 @@
         <url>https://github.com/wso2/apim-analytics-publisher.git</url>
         <developerConnection>scm:git:https://github.com/wso2/apim-analytics-publisher.git</developerConnection>
         <connection>scm:git:https://github.com/wso2/apim-analytics-publisher.git</connection>
-        <tag>HEAD</tag>
+        <tag>v0.2.0</tag>
     </scm>
 </project>
