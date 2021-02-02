@@ -19,6 +19,7 @@ package org.wso2.am.analytics.publisher.client;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.messaging.eventhubs.EventData;
+import com.azure.messaging.eventhubs.EventDataBatch;
 import com.azure.messaging.eventhubs.EventHubClientBuilder;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
 import com.azure.messaging.eventhubs.implementation.EventHubSharedKeyCredential;
@@ -26,7 +27,9 @@ import org.apache.log4j.Logger;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Collections;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Event Hub client is responsible for sending events to
@@ -35,6 +38,9 @@ import java.util.Collections;
 public class EventHubClient {
     private static final Logger log = Logger.getLogger(EventHubClient.class);
     private EventHubProducerClient producer;
+    private EventDataBatch batch;
+    private ReadWriteLock readWriteLock;
+    private Semaphore sendSemaphore;
 
     public EventHubClient(String sasToken) {
         if (null == sasToken || sasToken.isEmpty()) {
@@ -51,10 +57,14 @@ public class EventHubClient {
         producer = new EventHubClientBuilder()
                 .credential(fullyQualifiedNamespace, eventhubName, tokenCredential)
                 .buildProducerClient();
+        batch = producer.createBatch();
+        readWriteLock = new ReentrantReadWriteLock();
+        sendSemaphore = new Semaphore(1);
     }
 
     /**
      * Extracts the resource URI from the SAS Token
+     *
      * @param sasToken SAS token of the user
      * @return decoded resource URI from the token
      */
@@ -72,9 +82,41 @@ public class EventHubClient {
     }
 
     public void sendEvent(String event) {
-        //will implement batching in next milestone
         EventData eventData = new EventData(event);
-        producer.send(Collections.singleton(eventData));
-        log.debug("Published a single message to Analytics cluster. " + event.replaceAll("[\r\n]", ""));
+        readWriteLock.readLock().lock();
+        try {
+            if (!batch.tryAdd(eventData)) {
+                try {
+                    sendSemaphore.acquire();
+                    if (!batch.tryAdd(eventData)) {
+                        int size = batch.getCount();
+                        producer.send(batch);
+                        batch = producer.createBatch();
+                        batch.tryAdd(eventData);
+                        log.debug("Published " + size + "events to Analytics cluster.");
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    sendSemaphore.release();
+                }
+            }
+        } finally {
+            readWriteLock.readLock().unlock();
+        }
+    }
+
+    public void flushEvents() {
+        try {
+            sendSemaphore.acquire();
+            int size = batch.getCount();
+            producer.send(batch);
+            batch = producer.createBatch();
+            log.debug("Flushed " + size + "events to Analytics cluster.");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            sendSemaphore.release();
+        }
     }
 }

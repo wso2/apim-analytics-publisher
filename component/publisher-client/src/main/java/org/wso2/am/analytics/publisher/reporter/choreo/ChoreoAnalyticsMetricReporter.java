@@ -20,7 +20,6 @@ package org.wso2.am.analytics.publisher.reporter.choreo;
 
 import org.wso2.am.analytics.publisher.client.EventHubClient;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
-
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricReporter;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
@@ -34,9 +33,20 @@ import java.util.Map;
  * cloud in a secure and reliable way.
  */
 public class ChoreoAnalyticsMetricReporter extends AbstractMetricReporter {
+    private EventQueue eventQueue;
 
     public ChoreoAnalyticsMetricReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
+        int queueSize = 20000;
+        int workerThreads = 5;
+        if (properties.get("queue.size") != null) {
+            queueSize = Integer.parseInt(properties.get("queue.size"));
+        }
+        if (properties.get("worker.thread.count") != null) {
+            workerThreads = Integer.parseInt(properties.get("worker.thread.count"));
+        }
+        eventQueue = new EventQueue(queueSize, workerThreads,
+                                    new EventHubClient(getConfiguration().get(Constants.SAS_TOKEN)));
     }
 
     @Override
@@ -55,7 +65,7 @@ public class ChoreoAnalyticsMetricReporter extends AbstractMetricReporter {
 
     @Override
     protected CounterMetric createCounter(String name, MetricSchema schema) {
-        ChoreoCounterMetric counterMetric = new ChoreoCounterMetric(name, getEventHubClient(), schema);
+        ChoreoCounterMetric counterMetric = new ChoreoCounterMetric(name, eventQueue, schema);
         return counterMetric;
     }
 
@@ -64,7 +74,4 @@ public class ChoreoAnalyticsMetricReporter extends AbstractMetricReporter {
         return null;
     }
 
-    private EventHubClient getEventHubClient() {
-        return new EventHubClient(getConfiguration().get(Constants.SAS_TOKEN));
-    }
 }

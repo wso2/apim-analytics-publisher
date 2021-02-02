@@ -19,8 +19,6 @@
 package org.wso2.am.analytics.publisher.reporter.choreo;
 
 import com.google.gson.Gson;
-import org.apache.log4j.Logger;
-import org.wso2.am.analytics.publisher.client.EventHubClient;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
@@ -31,14 +29,15 @@ import java.util.Map;
  * Implementation of {@link CounterMetric} for Choroe Metric Reporter
  */
 public class ChoreoCounterMetric implements CounterMetric {
-    private static final Logger log = Logger.getLogger(ChoreoCounterMetric.class);
     private String name;
-    private EventHubClient client;
+    private EventQueue queue;
     private String[] requiredAttributes;
+    private MetricSchema schema;
 
-    protected ChoreoCounterMetric(String name, EventHubClient client, MetricSchema schema) {
+    protected ChoreoCounterMetric(String name, EventQueue queue, MetricSchema schema) {
         this.name = name;
-        this.client = client;
+        this.queue = queue;
+        this.schema = schema;
         requiredAttributes = ChoreoInputValidator.getInstance().getEventSchema(schema);
     }
 
@@ -47,12 +46,16 @@ public class ChoreoCounterMetric implements CounterMetric {
         return name;
     }
 
+    @Override public MetricSchema getSchema() {
+        return schema;
+    }
+
     @Override
     public int incrementCount(Map<String, String> attributes) throws MetricReportingException {
         if (attributes != null) {
             validateAttributes(attributes);
             String event = new Gson().toJson(attributes);
-            client.sendEvent(event);
+            queue.put(event);
             return 0;
         } else {
             throw new MetricReportingException("Event attributes cannot be null");

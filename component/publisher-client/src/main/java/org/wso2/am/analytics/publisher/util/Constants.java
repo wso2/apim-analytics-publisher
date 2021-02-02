@@ -61,4 +61,5 @@ public class Constants {
     public static final String CONSUMER_KEY = "consumer.key";
     public static final String CONSUMER_SECRET = "consumer.secret";
     public static final String SAS_TOKEN = "sas.token";
+    public static final String DEFAULT_REPORTER = "default";
 }
