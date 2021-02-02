@@ -36,17 +36,20 @@ public class LogCounterMetric implements CounterMetric {
         this.name = name;
     }
 
-    @Override public int incrementCount(Map<String, String> properties) throws MetricReportingException {
+    @Override
+    public int incrementCount(Map<String, String> properties) throws MetricReportingException {
         log.info("Metric Name: " + name.replaceAll("[\r\n]", "") + " Metric Value: "
                          + properties.toString().replaceAll("[\r\n]", ""));
         return 0;
     }
 
-    @Override public String getName() {
+    @Override
+    public String getName() {
         return name;
     }
 
-    @Override public MetricSchema getSchema() {
+    @Override
+    public MetricSchema getSchema() {
         return null;
     }
 }
