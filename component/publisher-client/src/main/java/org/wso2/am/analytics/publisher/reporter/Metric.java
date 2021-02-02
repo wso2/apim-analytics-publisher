@@ -28,4 +28,11 @@ public interface Metric {
      * @return Name of the metric
      */
     public String getName();
+
+    /**
+     * Method to get schema name
+     *
+     * @return Schema name of this Metric
+     */
+    public MetricSchema getSchema();
 }

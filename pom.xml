@@ -120,6 +120,28 @@
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>${maven.findbugsplugin.version}</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <xmlOutput>true</xmlOutput>
+                    <findbugsXmlOutputDirectory>${project.build.directory}/findbugs</findbugsXmlOutputDirectory>
+                    <!--Exclude sources-->
+                    <excludeFilterFile>${maven.findbugsplugin.exclude.file}</excludeFilterFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>analyze-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <properties>
@@ -132,6 +154,7 @@
         <junit.version>4.13.1</junit.version>
         <testng.version>6.10</testng.version>
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
+        <maven.findbugsplugin.exclude.file>findbugs-exclude.xml</maven.findbugsplugin.exclude.file>
         <carbon.feature.plugin.version>3.1.4</carbon.feature.plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
