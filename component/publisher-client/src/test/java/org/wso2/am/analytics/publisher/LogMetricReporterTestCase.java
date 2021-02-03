@@ -18,20 +18,14 @@
 
 package org.wso2.am.analytics.publisher;
 
-import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.LogMetricEventBuilder;
-import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricReporter;
 import org.wso2.am.analytics.publisher.reporter.MetricReporterFactory;
-import org.wso2.am.analytics.publisher.reporter.choreo.ChoreoResponseMetricEventBuilder;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class LogMetricReporterTestCase {
     private static final Logger log = Logger.getLogger(LogMetricReporterTestCase.class);
@@ -43,13 +37,10 @@ public class LogMetricReporterTestCase {
         MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(
                 "org.wso2.am.analytics.publisher.reporter.log.LogMetricReporter", null);
         CounterMetric metric = metricReporter.createCounterMetric("testCounter", null);
-
-//        MetricEventBuilder builder = metric.getEventBuilder();
         LogMetricEventBuilder builder = (LogMetricEventBuilder) metric.getEventBuilder();
 
         builder.addProperty("attribute1", "value1").addProperty("attribute2", "value2").addProperty("attribute3",
                                                                                                     "value3");
-
         metric.incrementCount(builder);
     }
 }

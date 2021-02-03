@@ -18,13 +18,12 @@
 
 package org.wso2.am.analytics.publisher.reporter.choreo;
 
-import com.google.gson.Gson;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * Implementation of {@link CounterMetric} for Choroe Metric Reporter
@@ -32,14 +31,14 @@ import java.util.Map;
 public class ChoreoCounterMetric implements CounterMetric {
     private String name;
     private EventQueue queue;
-    private String[] requiredAttributes;
+    private List<String> requiredAttributes;
     private MetricSchema schema;
 
-    protected ChoreoCounterMetric(String name, EventQueue queue, MetricSchema schema) {
+    public ChoreoCounterMetric(String name, EventQueue queue, MetricSchema schema) {
         this.name = name;
         this.queue = queue;
         this.schema = schema;
-        requiredAttributes = ChoreoInputValidator.getInstance().getEventSchema(schema);
+        requiredAttributes = ChoreoInputValidator.getInstance().getEventProperties(schema);
     }
 
     @Override
@@ -52,35 +51,26 @@ public class ChoreoCounterMetric implements CounterMetric {
     }
 
     @Override
-    public int incrementCount(Map<String, String> attributes) throws MetricReportingException {
-        if (attributes != null) {
-            validateAttributes(attributes);
-            String event = new Gson().toJson(attributes);
-            queue.put(event);
+    public int incrementCount(MetricEventBuilder builder) throws MetricReportingException {
+        if (builder != null) {
+            queue.put(builder);
             return 0;
         } else {
-            throw new MetricReportingException("Event attributes cannot be null");
+            throw new MetricReportingException("MetricEventBuilder cannot be null");
         }
+    }
+
+    /**
+     * Returns Event Builder used for this CounterMetric. Depending on the schema different types of builders will be
+     * returned.
+     *
+     * @return
+     */
+    @Override
     public MetricEventBuilder getEventBuilder() {
         if (schema == MetricSchema.RESPONSE) {
-            return new ChoreoResponseMetricEventBuilder();
+            return new DefaultResponseMetricEventBuilder();
         }
         return null;
-    }
-
-    @Override
-    public int incrementCount(MetricEventBuilder builder) throws MetricReportingException {
-        String event = new Gson().toJson(builder.build());
-        client.sendEvent(event);
-        return 0;
-    }
-
-    private void validateAttributes(Map<String, String> attributes) throws MetricReportingException {
-        for (String attributeKey : requiredAttributes) {
-            String attribute = attributes.get(attributeKey);
-            if (attribute == null || attribute.isEmpty()) {
-                throw new MetricReportingException(attributeKey + " is missing in metric data");
-            }
-        }
     }
 }

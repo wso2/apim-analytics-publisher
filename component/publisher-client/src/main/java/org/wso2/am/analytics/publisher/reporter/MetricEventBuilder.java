@@ -26,6 +26,7 @@ public interface MetricEventBuilder {
     /**
      * Validates the provided attributes and build a flat {@link Map}. Any validation failures will cause
      * {@link org.wso2.am.analytics.publisher.exception.MetricReportingException}.
+     *
      * @return Map containing all attributes related to Metric Event
      */
     public Map<String, Object> build() throws MetricReportingException;
@@ -33,7 +34,18 @@ public interface MetricEventBuilder {
     /**
      * Checks the validity of the added attributes. If all required attributes are present true will be returned.
      * Else {@link MetricReportingException} will be thrown.
+     *
      * @return Validity state of the added data
      */
     public boolean validate() throws MetricReportingException;
+
+    /**
+     * Method to add any attribute to the builder. Each concrete implementation can implement validations
+     * based on the key.
+     *
+     * @param key    Key of the attribute
+     * @param number Value of the attribute
+     * @return Returns itself to support chaining
+     */
+    public MetricEventBuilder addAttribute(String key, Object number) throws MetricReportingException;
 }

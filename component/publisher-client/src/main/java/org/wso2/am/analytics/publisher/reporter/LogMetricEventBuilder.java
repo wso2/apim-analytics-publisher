@@ -23,7 +23,7 @@ import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LogMetricEventBuilder extends AbstractMetricEventBuilder{
+public class LogMetricEventBuilder extends AbstractMetricEventBuilder {
     private Map<String, Object> eventMap = new HashMap<>();
 
     public LogMetricEventBuilder addProperty(String key, Object value) {
@@ -34,6 +34,16 @@ public class LogMetricEventBuilder extends AbstractMetricEventBuilder{
     @Override
     protected Map<String, Object> buildEvent() {
         return eventMap;
+    }
+
+    @Override protected MetricEventBuilder addVerifiedAttribute(String key, Object value) {
+        eventMap.put(key, value);
+        return this;
+    }
+
+    @Override
+    protected boolean isKeyPresent(String key) {
+        return true;
     }
 
     @Override

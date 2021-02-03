@@ -26,6 +26,7 @@ import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import org.wso2.am.analytics.publisher.reporter.TimerMetric;
 import org.wso2.am.analytics.publisher.util.Constants;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -52,7 +53,7 @@ public class ChoreoAnalyticsMetricReporter extends AbstractMetricReporter {
     @Override
     protected void validateConfigProperties(Map<String, String> properties) throws MetricCreationException {
         if (properties != null) {
-            String[] requiredProperties = ChoreoInputValidator.getInstance().getConfigProperties();
+            List<String> requiredProperties = ChoreoInputValidator.getInstance().getConfigProperties();
             for (String property : requiredProperties) {
                 if (properties.get(property) == null || properties.get(property).isEmpty()) {
                     throw new MetricCreationException(property + " is missing in config data");

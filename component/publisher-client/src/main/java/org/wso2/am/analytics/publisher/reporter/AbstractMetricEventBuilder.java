@@ -22,7 +22,7 @@ import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 
 import java.util.Map;
 
-public abstract class AbstractMetricEventBuilder implements MetricEventBuilder{
+public abstract class AbstractMetricEventBuilder implements MetricEventBuilder {
     @Override
     public Map<String, Object> build() throws MetricReportingException {
         if (validate()) {
@@ -34,7 +34,21 @@ public abstract class AbstractMetricEventBuilder implements MetricEventBuilder{
 
     /**
      * Process the added data and return as a flat {@link Map}
+     *
      * @return Map representing attributes of Metric Event
      */
     protected abstract Map<String, Object> buildEvent();
+
+    @Override
+    public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
+        if (isKeyPresent(key)) {
+            return addVerifiedAttribute(key, value);
+        } else {
+            throw new MetricReportingException("Provided property " + key + " does not present in the schema");
+        }
+    }
+
+    protected abstract MetricEventBuilder addVerifiedAttribute(String key, Object value);
+
+    protected abstract boolean isKeyPresent(String key);
 }

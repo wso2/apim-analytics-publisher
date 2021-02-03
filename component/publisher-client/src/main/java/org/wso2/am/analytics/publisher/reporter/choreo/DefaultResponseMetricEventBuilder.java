@@ -20,137 +20,139 @@ package org.wso2.am.analytics.publisher.reporter.choreo;
 
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricEventBuilder;
+import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class ChoreoResponseMetricEventBuilder extends AbstractMetricEventBuilder {
-    private final String[] requiredAttributes;
+public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilder {
+    private final List<String> requiredAttributes;
     private Map<String, Object> eventMap;
 
-    protected ChoreoResponseMetricEventBuilder() {
-        requiredAttributes = ChoreoInputValidator.getInstance().getEventSchema(MetricSchema.RESPONSE);
+    protected DefaultResponseMetricEventBuilder() {
+        requiredAttributes = ChoreoInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
         eventMap = new HashMap<>();
     }
 
-    public ChoreoResponseMetricEventBuilder setCorrelationId(String correlationId) {
+    public DefaultResponseMetricEventBuilder setCorrelationId(String correlationId) {
         eventMap.put(Constants.CORRELATION_ID, correlationId);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setKeyType(String keyType) {
+    public DefaultResponseMetricEventBuilder setKeyType(String keyType) {
         eventMap.put(Constants.KEY_TYPE, keyType);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setApiId(String apiId) {
+    public DefaultResponseMetricEventBuilder setApiId(String apiId) {
         eventMap.put(Constants.API_ID, apiId);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setApiName(String apiName) {
+    public DefaultResponseMetricEventBuilder setApiName(String apiName) {
         eventMap.put(Constants.API_NAME, apiName);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setApiVersion(String apiVersion) {
+    public DefaultResponseMetricEventBuilder setApiVersion(String apiVersion) {
         eventMap.put(Constants.API_VERSION, apiVersion);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setApiCreator(String apiCreator) {
+    public DefaultResponseMetricEventBuilder setApiCreator(String apiCreator) {
         eventMap.put(Constants.API_CREATION, apiCreator);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setApiMethod(String apiMethod) {
+    public DefaultResponseMetricEventBuilder setApiMethod(String apiMethod) {
         eventMap.put(Constants.API_METHOD, apiMethod);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setApiResourceTemplate(String apiResourceTemplate) {
+    public DefaultResponseMetricEventBuilder setApiResourceTemplate(String apiResourceTemplate) {
         eventMap.put(Constants.API_RESOURCE_TEMPLATE, apiResourceTemplate);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setApiCreatorTenantDomain(String apiCreatorTenantDomain) {
+    public DefaultResponseMetricEventBuilder setApiCreatorTenantDomain(String apiCreatorTenantDomain) {
         eventMap.put(Constants.API_CREATOR_TENANT_DOMAIN, apiCreatorTenantDomain);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setDestination(String destination) {
+    public DefaultResponseMetricEventBuilder setDestination(String destination) {
         eventMap.put(Constants.DESTINATION, destination);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setApplicationId(String applicationId) {
+    public DefaultResponseMetricEventBuilder setApplicationId(String applicationId) {
         eventMap.put(Constants.APPLICATION_ID, applicationId);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setApplicationName(String applicationName) {
+    public DefaultResponseMetricEventBuilder setApplicationName(String applicationName) {
         eventMap.put(Constants.APPLICATION_NAME, applicationName);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setApplicationOwner(String applicationOwner) {
+    public DefaultResponseMetricEventBuilder setApplicationOwner(String applicationOwner) {
         eventMap.put(Constants.APPLICATION_OWNER, applicationOwner);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setRegionId(String regionId) {
+    public DefaultResponseMetricEventBuilder setRegionId(String regionId) {
         eventMap.put(Constants.REGION_ID, regionId);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setGatewayType(String gatewayType) {
+    public DefaultResponseMetricEventBuilder setGatewayType(String gatewayType) {
         eventMap.put(Constants.GATEWAY_TYPE, gatewayType);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setUserAgent(String userAgent) {
+    public DefaultResponseMetricEventBuilder setUserAgent(String userAgent) {
         eventMap.put(Constants.USER_AGENT, userAgent);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setProxyResponseCode(int proxyResponseCode) {
+    public DefaultResponseMetricEventBuilder setProxyResponseCode(int proxyResponseCode) {
         eventMap.put(Constants.PROXY_RESPONSE_CODE, proxyResponseCode);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setTargetResponseCode(int targetResponseCode) {
+    public DefaultResponseMetricEventBuilder setTargetResponseCode(int targetResponseCode) {
         eventMap.put(Constants.TARGET_RESPONSE_CODE, targetResponseCode);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setResponseCacheHit(boolean responseCacheHit) {
+    public DefaultResponseMetricEventBuilder setResponseCacheHit(boolean responseCacheHit) {
         eventMap.put(Constants.RESPONSE_CACHE_HIT, responseCacheHit);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setResponseLatency(int responseLatency) {
+    public DefaultResponseMetricEventBuilder setResponseLatency(int responseLatency) {
         eventMap.put(Constants.RESPONSE_LATENCY, responseLatency);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setBackendLatency(int backendLatency) {
+    public DefaultResponseMetricEventBuilder setBackendLatency(int backendLatency) {
         eventMap.put(Constants.BACKEND_LATENCY, backendLatency);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setRequestMediationLatency(int requestMediationLatency) {
+    public DefaultResponseMetricEventBuilder setRequestMediationLatency(int requestMediationLatency) {
         eventMap.put(Constants.REQUEST_MEDIATION_LATENCY, requestMediationLatency);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setResponseMediationLatency(int responseMediationLatency) {
+    public DefaultResponseMetricEventBuilder setResponseMediationLatency(int responseMediationLatency) {
         eventMap.put(Constants.RESPONSE_MEDIATION_LATENCY, responseMediationLatency);
         return this;
     }
 
-    public ChoreoResponseMetricEventBuilder setDeploymentId(String deploymentId) {
+    public DefaultResponseMetricEventBuilder setDeploymentId(String deploymentId) {
         eventMap.put(Constants.DEPLOYMENT_ID, deploymentId);
         return this;
     }
@@ -171,7 +173,17 @@ public class ChoreoResponseMetricEventBuilder extends AbstractMetricEventBuilder
     }
 
     @Override
+    protected boolean isKeyPresent(String key) {
+        return requiredAttributes.contains(key);
+    }
+
+    @Override
     protected Map<String, Object> buildEvent() {
         return eventMap;
+    }
+
+    @Override protected MetricEventBuilder addVerifiedAttribute(String key, Object value) {
+        eventMap.put(key, value);
+        return this;
     }
 }

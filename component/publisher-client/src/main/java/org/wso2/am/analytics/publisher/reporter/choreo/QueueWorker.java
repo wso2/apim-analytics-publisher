@@ -17,9 +17,13 @@
  */
 package org.wso2.am.analytics.publisher.reporter.choreo;
 
+import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 import org.wso2.am.analytics.publisher.client.EventHubClient;
+import org.wso2.am.analytics.publisher.exception.MetricReportingException;
+import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -30,11 +34,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class QueueWorker implements Runnable {
 
     private static final Logger log = Logger.getLogger(QueueWorker.class);
-    private BlockingQueue<String> eventQueue;
+    private BlockingQueue<MetricEventBuilder> eventQueue;
     private ExecutorService executorService;
     private EventHubClient client;
 
-    public QueueWorker(BlockingQueue<String> queue, EventHubClient client, ExecutorService executorService) {
+    public QueueWorker(BlockingQueue<MetricEventBuilder> queue, EventHubClient client,
+                       ExecutorService executorService) {
         this.client = client;
         this.eventQueue = queue;
         this.executorService = executorService;
@@ -49,8 +54,15 @@ public class QueueWorker implements Runnable {
             }
             ThreadPoolExecutor threadPoolExecutor = ((ThreadPoolExecutor) executorService);
             do {
-                String event = eventQueue.poll();
-                if (event != null) {
+                MetricEventBuilder eventBuilder = eventQueue.poll();
+                if (eventBuilder != null) {
+                    String event = null;
+                    try {
+                        Map<String, Object> eventMap = eventBuilder.build();
+                        event = new Gson().toJson(eventMap);
+                    } catch (MetricReportingException e) {
+                        log.error("Builder instance is not duly filled. Event building failed", e);
+                    }
                     client.sendEvent(event);
                 } else {
                     //if we are done with consuming blocking queue flush the EventHub Client batch
