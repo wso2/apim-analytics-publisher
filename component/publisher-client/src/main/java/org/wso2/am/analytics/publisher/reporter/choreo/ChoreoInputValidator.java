@@ -27,30 +27,27 @@ import static org.wso2.am.analytics.publisher.util.Constants.API_METHOD;
 import static org.wso2.am.analytics.publisher.util.Constants.API_NAME;
 import static org.wso2.am.analytics.publisher.util.Constants.API_RESOURCE_TEMPLATE;
 import static org.wso2.am.analytics.publisher.util.Constants.API_VERSION;
-import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_CONSUMER_KEY;
 import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_NAME;
 import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_OWNER;
-import static org.wso2.am.analytics.publisher.util.Constants.AUTH_API_URL;
 import static org.wso2.am.analytics.publisher.util.Constants.BACKEND_LATENCY;
-import static org.wso2.am.analytics.publisher.util.Constants.CONSUMER_KEY;
-import static org.wso2.am.analytics.publisher.util.Constants.CONSUMER_SECRET;
 import static org.wso2.am.analytics.publisher.util.Constants.CORRELATION_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.DEPLOYMENT_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.DESTINATION;
 import static org.wso2.am.analytics.publisher.util.Constants.ERROR_CODE;
 import static org.wso2.am.analytics.publisher.util.Constants.ERROR_MESSAGE;
 import static org.wso2.am.analytics.publisher.util.Constants.ERROR_TYPE;
+import static org.wso2.am.analytics.publisher.util.Constants.EVENT_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.GATEWAY_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.KEY_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.PROXY_RESPONSE_CODE;
 import static org.wso2.am.analytics.publisher.util.Constants.REGION_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.REQUEST_MEDIATION_LATENCY;
+import static org.wso2.am.analytics.publisher.util.Constants.REQUEST_TIMESTAMP;
 import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_CACHE_HIT;
 import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_LATENCY;
 import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_MEDIATION_LATENCY;
 import static org.wso2.am.analytics.publisher.util.Constants.TARGET_RESPONSE_CODE;
-import static org.wso2.am.analytics.publisher.util.Constants.TOKEN_API_URL;
 import static org.wso2.am.analytics.publisher.util.Constants.USER_AGENT;
 
 /**
@@ -67,12 +64,11 @@ public class ChoreoInputValidator {
                                                     TARGET_RESPONSE_CODE, RESPONSE_CACHE_HIT, RESPONSE_LATENCY,
                                                     BACKEND_LATENCY, REQUEST_MEDIATION_LATENCY,
                                                     RESPONSE_MEDIATION_LATENCY, DEPLOYMENT_ID};
-    private static final String[] faultSchema = {CORRELATION_ID, ERROR_TYPE, ERROR_CODE, ERROR_MESSAGE, API_ID,
-                                                 API_NAME, API_VERSION, API_CREATION, API_METHOD,
-                                                 API_CREATOR_TENANT_DOMAIN, APPLICATION_ID, APPLICATION_NAME,
-                                                 APPLICATION_CONSUMER_KEY, APPLICATION_OWNER, REGION_ID, GATEWAY_TYPE,
-                                                 PROXY_RESPONSE_CODE, TARGET_RESPONSE_CODE, DEPLOYMENT_ID};
-    private static final String[] configProperties = {TOKEN_API_URL, CONSUMER_KEY, CONSUMER_SECRET, AUTH_API_URL};
+    private static final String[] faultSchema = { REQUEST_TIMESTAMP, CORRELATION_ID, KEY_TYPE, ERROR_TYPE, ERROR_CODE,
+            ERROR_MESSAGE, API_ID, API_NAME, API_VERSION, API_CREATION, API_CREATOR_TENANT_DOMAIN, APPLICATION_ID,
+            APPLICATION_NAME, APPLICATION_OWNER, REGION_ID, GATEWAY_TYPE, PROXY_RESPONSE_CODE, TARGET_RESPONSE_CODE,
+            DEPLOYMENT_ID, EVENT_TYPE };
+    private static final String[] configProperties = {};
 
 
     private ChoreoInputValidator() {

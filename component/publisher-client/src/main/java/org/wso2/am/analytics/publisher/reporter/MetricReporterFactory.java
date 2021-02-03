@@ -46,7 +46,7 @@ public class MetricReporterFactory {
             throws MetricCreationException {
         if (reporterRegistry.get(Constants.DEFAULT_REPORTER) == null) {
             synchronized (this) {
-                if (reporterRegistry.get("default") == null) {
+                if (reporterRegistry.get(Constants.DEFAULT_REPORTER) == null) {
                         MetricReporter reporterInstance = new ChoreoAnalyticsMetricReporter(properties);
                         reporterRegistry.put("default", reporterInstance);
                         return reporterInstance;

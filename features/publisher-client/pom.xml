@@ -17,13 +17,11 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2.am.analytics.publisher</groupId>
         <artifactId>apim-analytics-publisher-features</artifactId>
-        <version>0.1.1-SNAPSHOT</version>
+        <version>0.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -59,6 +57,26 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.azure</groupId>
+            <artifactId>azure-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.azure</groupId>
+            <artifactId>azure-core-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.azure</groupId>
+            <artifactId>azure-messaging-eventhubs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.qpid</groupId>
+            <artifactId>proton-j</artifactId>
         </dependency>
     </dependencies>
 
@@ -103,6 +121,26 @@
                                 <bundle>
                                     <symbolicName>slf4j.api</symbolicName>
                                     <version>${slf4j.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>azure-core</symbolicName>
+                                    <version>${azure-core.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>azure-core-amqp</symbolicName>
+                                    <version>${azure-core-amqp.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>azure-messaging-eventhubs</symbolicName>
+                                    <version>${azure-messaging-eventhubs.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>reactor-core</symbolicName>
+                                    <version>${reactor-core.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.apache.qpid.proton-j</symbolicName>
+                                    <version>${proton-j.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>

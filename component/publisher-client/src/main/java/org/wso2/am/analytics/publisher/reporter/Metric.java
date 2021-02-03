@@ -30,8 +30,9 @@ public interface Metric {
     public String getName();
 
     /**
-     * Returns the schema of the metric. For Metrics which does not need schema support return null
-     * @return Assigned schema of the Metric
+     * Method to get schema name
+     *
+     * @return Schema name of this Metric
      */
     public MetricSchema getSchema();
 

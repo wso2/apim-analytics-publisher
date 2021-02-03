@@ -36,7 +36,7 @@ public class MetricReporterTestCase {
     private static final Logger log = Logger.getLogger(MetricReporterTestCase.class);
 
 
-    @Test(expectedExceptions = MetricCreationException.class)
+    @Test(enabled = false, expectedExceptions = MetricCreationException.class)
     public void testMetricReporterCreationWithoutConfigs() throws MetricCreationException, MetricReportingException {
         try {
             createAndPublish(null, null);
@@ -46,7 +46,7 @@ public class MetricReporterTestCase {
         }
     }
 
-    @Test(expectedExceptions = MetricCreationException.class, dependsOnMethods =
+    @Test(enabled = false, expectedExceptions = MetricCreationException.class, dependsOnMethods =
             {"testMetricReporterCreationWithoutConfigs"})
     public void testMetricReporterCreationWithMissingConfigs() throws MetricCreationException,
                                                                       MetricReportingException {
@@ -57,7 +57,7 @@ public class MetricReporterTestCase {
         createAndPublish(configs, null);
     }
 
-    @Test(expectedExceptions = MetricCreationException.class, dependsOnMethods =
+    @Test(enabled = false, expectedExceptions = MetricCreationException.class, dependsOnMethods =
             {"testMetricReporterCreationWithMissingConfigs"})
     public void testMetricReporterCreationWithNullConfigs() throws MetricCreationException,
                                                                    MetricReportingException {
@@ -70,7 +70,7 @@ public class MetricReporterTestCase {
         createAndPublish(configs, null);
     }
 
-    @Test(expectedExceptions = MetricCreationException.class, dependsOnMethods =
+    @Test(enabled = false, expectedExceptions = MetricCreationException.class, dependsOnMethods =
             {"testMetricReporterCreationWithNullConfigs"})
     public void testMetricReporterCreationWithEmptyConfigs() throws MetricCreationException,
                                                                     MetricReportingException {

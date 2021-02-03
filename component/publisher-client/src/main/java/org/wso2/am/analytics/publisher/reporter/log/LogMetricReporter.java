@@ -26,6 +26,9 @@ import org.wso2.am.analytics.publisher.reporter.TimerMetric;
 
 import java.util.Map;
 
+/**
+ * Log Metric Reporter class. Intended for testing only.
+ */
 public class LogMetricReporter extends AbstractMetricReporter {
 
     public LogMetricReporter(Map<String, String> properties) throws MetricCreationException {

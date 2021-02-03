@@ -34,11 +34,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LogMetricReporterTestCase {
-    private static final Logger log = Logger.getLogger(MetricReporterTestCase.class);
+    private static final Logger log = Logger.getLogger(LogMetricReporterTestCase.class);
 
 
     @Test
     public void testMetricReporterCreationWithoutConfigs() throws MetricCreationException, MetricReportingException {
+        log.info("Running log metric test case");
         MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(
                 "org.wso2.am.analytics.publisher.reporter.log.LogMetricReporter", null);
         CounterMetric metric = metricReporter.createCounterMetric("testCounter", null);
