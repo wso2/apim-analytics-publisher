@@ -57,6 +57,6 @@ public class LogCounterMetric implements CounterMetric {
 
     @Override
     public MetricEventBuilder getEventBuilder() {
-        return null;
+        return new LogMetricEventBuilder();
     }
 }

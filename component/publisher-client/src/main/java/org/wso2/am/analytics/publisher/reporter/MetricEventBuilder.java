@@ -22,6 +22,11 @@ import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 
 import java.util.Map;
 
+/**
+ * Main interface class for Metric Event Builders. Metric Event Builders are responsible of collecting metrics,
+ * validating them and later returning them as a Map<String, Object>. Default builders will be implemented and for any
+ * custom message building new builders have to be introduced
+ */
 public interface MetricEventBuilder {
     /**
      * Validates the provided attributes and build a flat {@link Map}. Any validation failures will cause

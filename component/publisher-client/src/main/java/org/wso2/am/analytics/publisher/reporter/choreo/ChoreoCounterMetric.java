@@ -23,22 +23,18 @@ import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 
-import java.util.List;
-
 /**
  * Implementation of {@link CounterMetric} for Choroe Metric Reporter
  */
 public class ChoreoCounterMetric implements CounterMetric {
     private String name;
     private EventQueue queue;
-    private List<String> requiredAttributes;
     private MetricSchema schema;
 
     public ChoreoCounterMetric(String name, EventQueue queue, MetricSchema schema) {
         this.name = name;
         this.queue = queue;
         this.schema = schema;
-        requiredAttributes = ChoreoInputValidator.getInstance().getEventProperties(schema);
     }
 
     @Override

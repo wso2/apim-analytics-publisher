@@ -22,14 +22,17 @@ import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 
 import java.util.Map;
 
+/**
+ * Abstract implementation of {@link MetricEventBuilder}. Ensures that subclasses perform validations when adding
+ * elements.
+ */
 public abstract class AbstractMetricEventBuilder implements MetricEventBuilder {
     @Override
     public Map<String, Object> build() throws MetricReportingException {
         if (validate()) {
             return buildEvent();
         }
-        //will not happen
-        return null;
+        throw new MetricReportingException("Validation failure occurred when building the event");
     }
 
     /**

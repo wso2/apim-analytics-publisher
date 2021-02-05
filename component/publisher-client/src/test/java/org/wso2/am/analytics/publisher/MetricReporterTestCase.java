@@ -96,7 +96,6 @@ public class MetricReporterTestCase {
         MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
         CounterMetric counterMetric = metricReporter.createCounterMetric("apim.response", MetricSchema.RESPONSE);
         MetricEventBuilder builder = counterMetric.getEventBuilder();
-        builder.addNumberAttribute("timestamp", System.currentTimeMillis()).build();
 
         counterMetric.incrementCount(builder);
     }
