@@ -21,6 +21,7 @@ package org.wso2.am.analytics.publisher.reporter.log;
 import org.apache.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
+import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 
 import java.util.Map;
@@ -37,7 +38,8 @@ public class LogCounterMetric implements CounterMetric {
     }
 
     @Override
-    public int incrementCount(Map<String, String> properties) throws MetricReportingException {
+    public int incrementCount(MetricEventBuilder builder) throws MetricReportingException {
+        Map<String, Object> properties = builder.build();
         log.info("Metric Name: " + name.replaceAll("[\r\n]", "") + " Metric Value: "
                          + properties.toString().replaceAll("[\r\n]", ""));
         return 0;
@@ -51,5 +53,10 @@ public class LogCounterMetric implements CounterMetric {
     @Override
     public MetricSchema getSchema() {
         return null;
+    }
+
+    @Override
+    public MetricEventBuilder getEventBuilder() {
+        return new LogMetricEventBuilder();
     }
 }

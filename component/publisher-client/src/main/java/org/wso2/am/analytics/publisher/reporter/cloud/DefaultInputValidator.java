@@ -16,9 +16,14 @@
  * under the License.
  */
 
-package org.wso2.am.analytics.publisher.reporter.choreo;
+package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.wso2.am.analytics.publisher.util.Constants.API_CREATION;
 import static org.wso2.am.analytics.publisher.util.Constants.API_CREATOR_TENANT_DOMAIN;
@@ -51,45 +56,51 @@ import static org.wso2.am.analytics.publisher.util.Constants.TARGET_RESPONSE_COD
 import static org.wso2.am.analytics.publisher.util.Constants.USER_AGENT;
 
 /**
- * Input Validator for {@link ChoreoAnalyticsMetricReporter}. Validator holds all required attributes against which
+ * Input Validator for {@link DefaultAnalyticsMetricReporter}. Validator holds all required attributes against which
  * inputs will be validated.
  */
-public class ChoreoInputValidator {
-    private static final ChoreoInputValidator INSTANCE = new ChoreoInputValidator();
-    private static final String[] responseSchema = {CORRELATION_ID, KEY_TYPE, API_ID, API_NAME,
-                                                    API_VERSION, API_CREATION, API_METHOD, API_RESOURCE_TEMPLATE,
-                                                    API_CREATOR_TENANT_DOMAIN, DESTINATION, APPLICATION_ID,
-                                                    APPLICATION_NAME, APPLICATION_OWNER,
-                                                    REGION_ID, GATEWAY_TYPE, USER_AGENT, PROXY_RESPONSE_CODE,
-                                                    TARGET_RESPONSE_CODE, RESPONSE_CACHE_HIT, RESPONSE_LATENCY,
-                                                    BACKEND_LATENCY, REQUEST_MEDIATION_LATENCY,
-                                                    RESPONSE_MEDIATION_LATENCY, DEPLOYMENT_ID};
-    private static final String[] faultSchema = { REQUEST_TIMESTAMP, CORRELATION_ID, KEY_TYPE, ERROR_TYPE, ERROR_CODE,
-            ERROR_MESSAGE, API_ID, API_NAME, API_VERSION, API_CREATION, API_CREATOR_TENANT_DOMAIN, APPLICATION_ID,
-            APPLICATION_NAME, APPLICATION_OWNER, REGION_ID, GATEWAY_TYPE, PROXY_RESPONSE_CODE, TARGET_RESPONSE_CODE,
-            DEPLOYMENT_ID, EVENT_TYPE };
-    private static final String[] configProperties = {};
+public class DefaultInputValidator {
+    private static final DefaultInputValidator INSTANCE = new DefaultInputValidator();
+    private static final List<String> responseSchema = Stream.of(CORRELATION_ID, KEY_TYPE, API_ID, API_NAME,
+                                                                 API_VERSION, API_CREATION, API_METHOD,
+                                                                 API_RESOURCE_TEMPLATE,
+                                                                 API_CREATOR_TENANT_DOMAIN, DESTINATION, APPLICATION_ID,
+                                                                 APPLICATION_NAME, APPLICATION_OWNER,
+                                                                 REGION_ID, GATEWAY_TYPE, USER_AGENT,
+                                                                 PROXY_RESPONSE_CODE,
+                                                                 TARGET_RESPONSE_CODE, RESPONSE_CACHE_HIT,
+                                                                 RESPONSE_LATENCY,
+                                                                 BACKEND_LATENCY, REQUEST_MEDIATION_LATENCY,
+                                                                 RESPONSE_MEDIATION_LATENCY, DEPLOYMENT_ID).collect(
+            Collectors.toList());
+    private static final List<String> faultSchema = Stream.of(REQUEST_TIMESTAMP, CORRELATION_ID, KEY_TYPE, ERROR_TYPE,
+                                                              ERROR_CODE, ERROR_MESSAGE, API_ID, API_NAME, API_VERSION,
+                                                              API_CREATION, API_CREATOR_TENANT_DOMAIN, APPLICATION_ID,
+                                                              APPLICATION_NAME, APPLICATION_OWNER, REGION_ID,
+                                                              GATEWAY_TYPE, PROXY_RESPONSE_CODE, TARGET_RESPONSE_CODE,
+                                                              DEPLOYMENT_ID, EVENT_TYPE).collect(Collectors.toList());
+    private static final List<String> configProperties = new ArrayList<>();
 
 
-    private ChoreoInputValidator() {
+    private DefaultInputValidator() {
         //private constructor
     }
 
-    public static ChoreoInputValidator getInstance() {
+    public static DefaultInputValidator getInstance() {
         return INSTANCE;
     }
 
-    public String[] getEventSchema(MetricSchema schema) {
+    public List<String> getEventProperties(MetricSchema schema) {
         if (MetricSchema.RESPONSE == schema) {
-            return responseSchema.clone();
+            return responseSchema;
         } else if (MetricSchema.ERROR == schema) {
-            return faultSchema.clone();
+            return faultSchema;
         } else {
-            return new String[0];
+            return new ArrayList<>();
         }
     }
 
-    public String[] getConfigProperties() {
-        return configProperties.clone();
+    public List<String> getConfigProperties() {
+        return configProperties;
     }
 }

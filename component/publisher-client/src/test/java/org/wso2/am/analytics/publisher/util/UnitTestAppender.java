@@ -16,21 +16,28 @@
  * under the License.
  */
 
-package org.wso2.am.analytics.publisher.reporter;
+package org.wso2.am.analytics.publisher.util;
+import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.spi.LoggingEvent;
 
-import org.wso2.am.analytics.publisher.exception.MetricReportingException;
+public class UnitTestAppender extends AppenderSkeleton {
+    private String messages;
 
-/**
- * Interface for Counter Metric
- */
-public interface CounterMetric extends Metric {
-    /**
-     * method to increment the count of the metric. Associated properties should be passed along with the method
-     * invocation.
-     *
-     * @param builder {@link MetricEventBuilder} of the this Metric
-     * @return current counter value
-     * @throws MetricReportingException Exception will be thrown if expected properties are not present
-     */
-    public int incrementCount(MetricEventBuilder builder) throws MetricReportingException;
+    @Override
+    protected void append(LoggingEvent loggingEvent) {
+        messages = loggingEvent.getRenderedMessage();
+    }
+
+    @Override
+    public void close() {
+    }
+
+    @Override
+    public boolean requiresLayout() {
+        return false;
+    }
+
+    public String getMessages() {
+        return messages;
+    }
 }

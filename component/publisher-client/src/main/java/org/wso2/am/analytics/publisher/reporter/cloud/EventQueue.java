@@ -15,10 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.am.analytics.publisher.reporter.choreo;
+package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import org.apache.log4j.Logger;
 import org.wso2.am.analytics.publisher.client.EventHubClient;
+import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -32,7 +33,7 @@ import java.util.concurrent.RejectedExecutionException;
 public class EventQueue {
 
     private static final Logger log = Logger.getLogger(EventQueue.class);
-    private BlockingQueue<String> eventQueue;
+    private BlockingQueue<MetricEventBuilder> eventQueue;
     private ExecutorService executorService;
     private EventHubClient client;
 
@@ -40,13 +41,13 @@ public class EventQueue {
         this.client = client;
         // Note : Using a fixed worker thread pool and a bounded queue to control the load on the server
         executorService = Executors.newFixedThreadPool(workerThreadCount,
-                                                       new ChoreoAnalyticsThreadFactory("Queue-Worker"));
+                                                       new DefaultAnalyticsThreadFactory("Queue-Worker"));
         eventQueue = new ArrayBlockingQueue<>(queueSize);
     }
 
-    public void put(String event) {
+    public void put(MetricEventBuilder builder) {
         try {
-            eventQueue.put(event);
+            eventQueue.put(builder);
             executorService.submit(new QueueWorker(eventQueue, client, executorService));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
