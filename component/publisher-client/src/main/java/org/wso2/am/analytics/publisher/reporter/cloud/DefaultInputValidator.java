@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.am.analytics.publisher.reporter.choreo;
+package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 
@@ -56,11 +56,11 @@ import static org.wso2.am.analytics.publisher.util.Constants.TARGET_RESPONSE_COD
 import static org.wso2.am.analytics.publisher.util.Constants.USER_AGENT;
 
 /**
- * Input Validator for {@link ChoreoAnalyticsMetricReporter}. Validator holds all required attributes against which
+ * Input Validator for {@link DefaultAnalyticsMetricReporter}. Validator holds all required attributes against which
  * inputs will be validated.
  */
-public class ChoreoInputValidator {
-    private static final ChoreoInputValidator INSTANCE = new ChoreoInputValidator();
+public class DefaultInputValidator {
+    private static final DefaultInputValidator INSTANCE = new DefaultInputValidator();
     private static final List<String> responseSchema = Stream.of(CORRELATION_ID, KEY_TYPE, API_ID, API_NAME,
                                                                  API_VERSION, API_CREATION, API_METHOD,
                                                                  API_RESOURCE_TEMPLATE,
@@ -82,11 +82,11 @@ public class ChoreoInputValidator {
     private static final List<String> configProperties = new ArrayList<>();
 
 
-    private ChoreoInputValidator() {
+    private DefaultInputValidator() {
         //private constructor
     }
 
-    public static ChoreoInputValidator getInstance() {
+    public static DefaultInputValidator getInstance() {
         return INSTANCE;
     }
 

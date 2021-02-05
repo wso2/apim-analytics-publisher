@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.am.analytics.publisher.reporter.choreo;
+package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import org.apache.log4j.Logger;
 import org.wso2.am.analytics.publisher.client.EventHubClient;
@@ -41,7 +41,7 @@ public class EventQueue {
         this.client = client;
         // Note : Using a fixed worker thread pool and a bounded queue to control the load on the server
         executorService = Executors.newFixedThreadPool(workerThreadCount,
-                                                       new ChoreoAnalyticsThreadFactory("Queue-Worker"));
+                                                       new DefaultAnalyticsThreadFactory("Queue-Worker"));
         eventQueue = new ArrayBlockingQueue<>(queueSize);
     }
 

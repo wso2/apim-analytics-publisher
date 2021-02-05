@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.am.analytics.publisher.reporter.choreo;
+package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricEventBuilder;
@@ -37,7 +37,7 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
     private Map<String, Object> eventMap;
 
     protected DefaultResponseMetricEventBuilder() {
-        requiredAttributes = ChoreoInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
+        requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
         eventMap = new HashMap<>();
     }
 

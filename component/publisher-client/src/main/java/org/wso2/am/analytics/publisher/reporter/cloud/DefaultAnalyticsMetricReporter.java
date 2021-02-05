@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.am.analytics.publisher.reporter.choreo;
+package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import org.wso2.am.analytics.publisher.client.EventHubClient;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
@@ -33,10 +33,10 @@ import java.util.Map;
  * Choreo Metric Reporter Implementation. This implementation is responsible for sending analytics data into Choreo
  * cloud in a secure and reliable way.
  */
-public class ChoreoAnalyticsMetricReporter extends AbstractMetricReporter {
+public class DefaultAnalyticsMetricReporter extends AbstractMetricReporter {
     private EventQueue eventQueue;
 
-    public ChoreoAnalyticsMetricReporter(Map<String, String> properties) throws MetricCreationException {
+    public DefaultAnalyticsMetricReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
         int queueSize = 20000;
         int workerThreads = 5;
@@ -53,7 +53,7 @@ public class ChoreoAnalyticsMetricReporter extends AbstractMetricReporter {
     @Override
     protected void validateConfigProperties(Map<String, String> properties) throws MetricCreationException {
         if (properties != null) {
-            List<String> requiredProperties = ChoreoInputValidator.getInstance().getConfigProperties();
+            List<String> requiredProperties = DefaultInputValidator.getInstance().getConfigProperties();
             for (String property : requiredProperties) {
                 if (properties.get(property) == null || properties.get(property).isEmpty()) {
                     throw new MetricCreationException(property + " is missing in config data");
@@ -66,7 +66,7 @@ public class ChoreoAnalyticsMetricReporter extends AbstractMetricReporter {
 
     @Override
     protected CounterMetric createCounter(String name, MetricSchema schema) {
-        ChoreoCounterMetric counterMetric = new ChoreoCounterMetric(name, eventQueue, schema);
+        DefaultCounterMetric counterMetric = new DefaultCounterMetric(name, eventQueue, schema);
         return counterMetric;
     }
 

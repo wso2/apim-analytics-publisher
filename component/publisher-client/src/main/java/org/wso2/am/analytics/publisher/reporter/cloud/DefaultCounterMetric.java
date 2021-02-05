@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.am.analytics.publisher.reporter.choreo;
+package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
@@ -26,12 +26,12 @@ import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 /**
  * Implementation of {@link CounterMetric} for Choroe Metric Reporter
  */
-public class ChoreoCounterMetric implements CounterMetric {
+public class DefaultCounterMetric implements CounterMetric {
     private String name;
     private EventQueue queue;
     private MetricSchema schema;
 
-    public ChoreoCounterMetric(String name, EventQueue queue, MetricSchema schema) {
+    public DefaultCounterMetric(String name, EventQueue queue, MetricSchema schema) {
         this.name = name;
         this.queue = queue;
         this.schema = schema;

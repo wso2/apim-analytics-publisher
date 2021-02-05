@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wso2.am.analytics.publisher.reporter.choreo;
+package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,13 +21,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Custom Thread Factory for Analytics publisher impl
  */
-public class ChoreoAnalyticsThreadFactory implements ThreadFactory {
+public class DefaultAnalyticsThreadFactory implements ThreadFactory {
     private static final AtomicInteger poolNumber = new AtomicInteger(1);
     final ThreadGroup group;
     final AtomicInteger threadNumber = new AtomicInteger(1);
     final String namePrefix;
 
-    public ChoreoAnalyticsThreadFactory(String threadPoolExecutorName) {
+    public DefaultAnalyticsThreadFactory(String threadPoolExecutorName) {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
         namePrefix = "Choreo-Analytics-" + threadPoolExecutorName + "-pool-" + poolNumber.getAndIncrement() +

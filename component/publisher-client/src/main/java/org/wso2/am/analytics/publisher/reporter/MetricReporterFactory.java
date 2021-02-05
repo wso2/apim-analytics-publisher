@@ -20,7 +20,7 @@ package org.wso2.am.analytics.publisher.reporter;
 
 import org.apache.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
-import org.wso2.am.analytics.publisher.reporter.choreo.ChoreoAnalyticsMetricReporter;
+import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsMetricReporter;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.lang.reflect.Constructor;
@@ -47,7 +47,7 @@ public class MetricReporterFactory {
         if (reporterRegistry.get(Constants.DEFAULT_REPORTER) == null) {
             synchronized (this) {
                 if (reporterRegistry.get(Constants.DEFAULT_REPORTER) == null) {
-                        MetricReporter reporterInstance = new ChoreoAnalyticsMetricReporter(properties);
+                        MetricReporter reporterInstance = new DefaultAnalyticsMetricReporter(properties);
                         reporterRegistry.put("default", reporterInstance);
                         return reporterInstance;
                 }
