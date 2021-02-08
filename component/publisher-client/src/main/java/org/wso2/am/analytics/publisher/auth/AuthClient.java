@@ -1,0 +1,48 @@
+/*
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package org.wso2.am.analytics.publisher.auth;
+
+import feign.Feign;
+import feign.gson.GsonDecoder;
+import feign.gson.GsonEncoder;
+import feign.slf4j.Slf4jLogger;
+import org.wso2.am.analytics.publisher.exception.AuthenticationException;
+
+/**
+ * Auth client to generate SAS token that can use to authenticate with event hub
+ */
+public class AuthClient {
+    public static final String AUTH_HEADER = "Authorization";
+
+    public static String getSASToken(String authEndpoint, String token) throws AuthenticationException {
+
+        DefaultApi defaultApi = Feign.builder()
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(requestTemplate -> requestTemplate.header(AUTH_HEADER, "Bearer " + token))
+                .target(DefaultApi.class, authEndpoint);
+        try {
+            TokenDetailsDTO dto = defaultApi.tokenGet();
+            return dto.getToken();
+        } catch (Exception e) {
+            throw new AuthenticationException("Error getting SAS token", e);
+        }
+    }
+}

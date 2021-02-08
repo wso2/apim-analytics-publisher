@@ -124,6 +124,21 @@
                 <artifactId>proton-j</artifactId>
                 <version>${proton-j.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-core</artifactId>
+                <version>${openfeign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-slf4j</artifactId>
+                <version>${openfeign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-gson</artifactId>
+                <version>${openfeign.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -170,6 +185,7 @@
         </plugins>
     </build>
     <properties>
+<!--        <checkstyle.skip>true</checkstyle.skip>-->
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <gson.import.version.range>[2.0.0, 3.0.0)</gson.import.version.range>
         <azure.messaging.evenhub.version>5.3.1</azure.messaging.evenhub.version>
@@ -188,7 +204,12 @@
         <azure-messaging-eventhubs.version>1.6.0.wso2v1</azure-messaging-eventhubs.version>
         <reactor-core.version>3.3.9.wso2v1</reactor-core.version>
         <proton-j.version>0.33.4</proton-j.version>
-
+        <openfeign.version>11.0</openfeign.version>
+        <azure.core.import.version.range>[1.9.0, 2.0.0)</azure.core.import.version.range>
+        <azure.messaging.import.version.range>[5.3.1, 6.0.0)</azure.messaging.import.version.range>
+        <google.gson.import.version.range>[2.8.0, 3.0.0)</google.gson.import.version.range>
+        <feign.import.version.range>[11.0.0, 12.0.0)</feign.import.version.range>
+        <apache.log4j.import.version.range>[1.2.0, 2.0.0)</apache.log4j.import.version.range>
     </properties>
     <scm>
         <url>https://github.com/wso2/apim-analytics-publisher.git</url>
