@@ -49,7 +49,8 @@ class WSO2TokenCredential implements TokenCredential {
         try {
             String sasToken = AuthClient.getSASToken(this.authEndpoint, this.authToken);
             log.debug("New SAS token retrieved.");
-            OffsetDateTime time = OffsetDateTime.now(ZoneOffset.UTC).plus(Duration.ofMinutes(1));
+            // Using lower duration than actual.
+            OffsetDateTime time = OffsetDateTime.now(ZoneOffset.UTC).plus(Duration.ofHours(20));
             return Mono.fromCallable(() -> new AccessToken(sasToken, time));
         } catch (AuthenticationException e) {
             log.error("Error occurred when retrieving SAS token.", e);
