@@ -52,6 +52,18 @@
             <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-slf4j</artifactId>
+        </dependency>
     </dependencies>
     
     <build>
@@ -76,13 +88,22 @@
                             org.wso2.am.analytics.publisher.client.*;version="${project.version}",
                             org.wso2.am.analytics.publisher.reporter.*;version="${project.version}",
                             org.wso2.am.analytics.publisher.exception.*;version="${project.version}"
+                            org.wso2.am.analytics.publisher.auth.*;version="${project.version}"
                         </Export-Package>
                         <Private-Package>
                             org.wso2.am.analytics.publisher.reporter.cloud.*;version="${project.version}",
+                            org.wso2.am.analytics.publisher.auth.*;version="${project.version}",
                         </Private-Package>
                         <Import-Package>
                             com.google.gson.*;version="${gson.import.version.range}",
-                            *;resolution:=optional
+                            com.google.gson.annotations.*;version="${google.gson.import.version.range}",
+                            com.azure.core.credential.*;version="${azure.core.import.version.range}",
+                            com.azure.messaging.eventhubs.*;version="${azure.messaging.import.version.range}",
+                            feign.*;version="${feign.import.version.range}",
+                            feign.codec.*;version="${feign.import.version.range}",
+                            feign.gson.*;version="${feign.import.version.range}",
+                            feign.slf4j.*;version="${feign.import.version.range}",
+                            org.apache.log4j.*;version="${apache.log4j.import.version.range}",
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>

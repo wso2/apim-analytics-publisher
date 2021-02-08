@@ -17,16 +17,11 @@
  */
 package org.wso2.am.analytics.publisher.client;
 
-import com.azure.core.credential.TokenCredential;
 import com.azure.messaging.eventhubs.EventData;
 import com.azure.messaging.eventhubs.EventDataBatch;
-import com.azure.messaging.eventhubs.EventHubClientBuilder;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
-import com.azure.messaging.eventhubs.implementation.EventHubSharedKeyCredential;
 import org.apache.log4j.Logger;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -42,46 +37,22 @@ public class EventHubClient {
     private ReadWriteLock readWriteLock;
     private Semaphore sendSemaphore;
 
-    public EventHubClient(String sasToken) {
-        if (null == sasToken || sasToken.isEmpty()) {
-            sasToken = System.getenv("API_ANL_SAS_TOKEN");
-            if (sasToken == null || sasToken.isEmpty()) {
-                log.error("SAS Token is not provided. Publisher can not be initialized");
-                return;
-            }
+    public EventHubClient(String authEndpoint, String authToken) {
+        producer = EventHubProducerClientFactory.create(authEndpoint, authToken);
+        if(producer == null) {
+            log.error("EventHubClient initialization failed.");
+            return;
         }
-        TokenCredential tokenCredential = new EventHubSharedKeyCredential(sasToken);
-        String resourceURI = getResourceURI(sasToken);
-        String fullyQualifiedNamespace = resourceURI.split("/")[0];
-        String eventhubName = resourceURI.split("/", 2)[1];
-        producer = new EventHubClientBuilder()
-                .credential(fullyQualifiedNamespace, eventhubName, tokenCredential)
-                .buildProducerClient();
         batch = producer.createBatch();
         readWriteLock = new ReentrantReadWriteLock();
         sendSemaphore = new Semaphore(1);
     }
 
-    /**
-     * Extracts the resource URI from the SAS Token
-     *
-     * @param sasToken SAS token of the user
-     * @return decoded resource URI from the token
-     */
-    private String getResourceURI(String sasToken) {
-        String[] sasAttributes = sasToken.split("&");
-        String[] resource = sasAttributes[0].split("=");
-        String resourceURI = "";
-        try {
-            resourceURI = URLDecoder.decode(resource[1], "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            //never happens
-        }
-        //remove protocol append
-        return resourceURI.replace("sb://", "");
-    }
-
     public void sendEvent(String event) {
+        if(producer == null) {
+            log.error("EventHubClient has failed. Hence ignoring.");
+            return;
+        }
         EventData eventData = new EventData(event);
         readWriteLock.readLock().lock();
         try {
@@ -93,7 +64,7 @@ public class EventHubClient {
                         producer.send(batch);
                         batch = producer.createBatch();
                         batch.tryAdd(eventData);
-                        log.debug("Published " + size + "events to Analytics cluster.");
+                        log.debug("Published " + size + " events to Analytics cluster.");
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -107,12 +78,16 @@ public class EventHubClient {
     }
 
     public void flushEvents() {
+        if(producer == null) {
+            log.error("EventHubClient has failed. Hence ignoring.");
+            return;
+        }
         try {
             sendSemaphore.acquire();
             int size = batch.getCount();
             producer.send(batch);
             batch = producer.createBatch();
-            log.debug("Flushed " + size + "events to Analytics cluster.");
+            log.debug("Flushed " + size + " events to Analytics cluster.");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } finally {
