@@ -54,7 +54,7 @@ public abstract class AbstractMetricReporter implements MetricReporter {
     }
 
     @Override
-    public CounterMetric createCounterMetric(String name, MetricSchema schema) {
+    public CounterMetric createCounterMetric(String name, MetricSchema schema) throws MetricCreationException {
         Metric metric = metricRegistry.get(name);
         if (metric == null) {
             synchronized (this) {
@@ -66,17 +66,16 @@ public abstract class AbstractMetricReporter implements MetricReporter {
                 }
             }
         } else if (!(metric instanceof CounterMetric)) {
-            log.error("Timer Metric with the same name already exists. Please use a different name");
-            return null;
+            throw new MetricCreationException("Timer Metric with the same name already exists. Please use a different"
+                                                      + " name");
         } else if (metric.getSchema() != schema) {
-            log.error("Counter Metric with the same name but different schema already exists. Please use a different "
-                              + "name");
-            return null;
+            throw new MetricCreationException("Counter Metric with the same name but different schema already exists."
+                                                      + " Please use a different name");
         }
         return (CounterMetric) metric;
     }
 
-    protected abstract CounterMetric createCounter(String name, MetricSchema schema);
+    protected abstract CounterMetric createCounter(String name, MetricSchema schema) throws MetricCreationException;
 
     @Override
     public TimerMetric createTimerMetric(String name) {

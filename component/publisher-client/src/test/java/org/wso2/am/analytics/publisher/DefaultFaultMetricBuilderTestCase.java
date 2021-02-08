@@ -1,0 +1,106 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package org.wso2.am.analytics.publisher;
+
+import org.apache.log4j.Logger;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.wso2.am.analytics.publisher.exception.MetricCreationException;
+import org.wso2.am.analytics.publisher.exception.MetricReportingException;
+import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
+import org.wso2.am.analytics.publisher.reporter.MetricSchema;
+import org.wso2.am.analytics.publisher.reporter.cloud.DefaultCounterMetric;
+import org.wso2.am.analytics.publisher.reporter.cloud.EventQueue;
+import org.wso2.am.analytics.publisher.util.Constants;
+
+import java.util.Map;
+
+public class DefaultFaultMetricBuilderTestCase {
+    private static final Logger log = Logger.getLogger(DefaultFaultMetricBuilderTestCase.class);
+
+    @Test(expectedExceptions = MetricReportingException.class)
+    public void testMissingAttributes() throws MetricCreationException, MetricReportingException {
+        EventQueue queue = new EventQueue(100, 1, null);
+        DefaultCounterMetric metric = new DefaultCounterMetric("test.metric", queue, MetricSchema.ERROR);
+        MetricEventBuilder builder = metric.getEventBuilder();
+        builder.addAttribute("apiName", "PizzaShack");
+        builder.build();
+    }
+
+    @Test(expectedExceptions = MetricReportingException.class)
+    public void testAttributesWithInvalidTypes() throws MetricCreationException, MetricReportingException {
+        EventQueue queue = new EventQueue(100, 1, null);
+        DefaultCounterMetric metric = new DefaultCounterMetric("test.metric", queue, MetricSchema.ERROR);
+        MetricEventBuilder builder = metric.getEventBuilder();
+        builder.addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
+                .addAttribute(Constants.CORRELATION_ID, "1234-4567")
+                .addAttribute(Constants.KEY_TYPE, "prod")
+                .addAttribute(Constants.ERROR_TYPE, "backend")
+                .addAttribute(Constants.ERROR_CODE, 401)
+                .addAttribute(Constants.ERROR_MESSAGE, "Authentication Error")
+                .addAttribute(Constants.API_ID, "9876-54f1")
+                .addAttribute(Constants.API_NAME, "PizzaShack")
+                .addAttribute(Constants.API_VERSION, "1.0.0")
+                .addAttribute(Constants.API_CREATION, "admin")
+                .addAttribute(Constants.API_METHOD, "POST")
+                .addAttribute(Constants.API_CREATOR_TENANT_DOMAIN, "carbon.super")
+                .addAttribute(Constants.APPLICATION_ID, "3445-6778")
+                .addAttribute(Constants.APPLICATION_NAME, "default")
+                .addAttribute(Constants.APPLICATION_OWNER, "admin")
+                .addAttribute(Constants.REGION_ID, "NA")
+                .addAttribute(Constants.GATEWAY_TYPE, "Synapse")
+                .addAttribute(Constants.PROXY_RESPONSE_CODE, 401)
+                .addAttribute(Constants.TARGET_RESPONSE_CODE, "someString")
+                .addAttribute(Constants.DEPLOYMENT_ID, "prod")
+                .build();
+    }
+
+    @Test
+    public void testMetricBuilder() throws MetricCreationException, MetricReportingException {
+        EventQueue queue = new EventQueue(100, 1, null);
+        DefaultCounterMetric metric = new DefaultCounterMetric("test.metric", queue, MetricSchema.ERROR);
+        MetricEventBuilder builder = metric.getEventBuilder();
+        Map<String, Object> eventMap = builder
+                .addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
+                .addAttribute(Constants.CORRELATION_ID, "1234-4567")
+                .addAttribute(Constants.KEY_TYPE, "prod")
+                .addAttribute(Constants.ERROR_TYPE, "backend")
+                .addAttribute(Constants.ERROR_CODE, 401)
+                .addAttribute(Constants.ERROR_MESSAGE, "Authentication Error")
+                .addAttribute(Constants.API_ID, "9876-54f1")
+                .addAttribute(Constants.API_NAME, "PizzaShack")
+                .addAttribute(Constants.API_VERSION, "1.0.0")
+                .addAttribute(Constants.API_CREATION, "admin")
+                .addAttribute(Constants.API_METHOD, "POST")
+                .addAttribute(Constants.API_CREATOR_TENANT_DOMAIN, "carbon.super")
+                .addAttribute(Constants.APPLICATION_ID, "3445-6778")
+                .addAttribute(Constants.APPLICATION_NAME, "default")
+                .addAttribute(Constants.APPLICATION_OWNER, "admin")
+                .addAttribute(Constants.REGION_ID, "NA")
+                .addAttribute(Constants.GATEWAY_TYPE, "Synapse")
+                .addAttribute(Constants.PROXY_RESPONSE_CODE, 401)
+                .addAttribute(Constants.TARGET_RESPONSE_CODE, 401)
+                .addAttribute(Constants.DEPLOYMENT_ID, "prod")
+                .build();
+
+        Assert.assertFalse(eventMap.isEmpty());
+        Assert.assertEquals(eventMap.size(), 21, "Some attributes are missing from the resulting event map");
+        Assert.assertEquals(eventMap.get(Constants.EVENT_TYPE), "fault", "Event type should be set to fault");
+    }
+}

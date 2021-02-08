@@ -24,5 +24,8 @@ package org.wso2.am.analytics.publisher.reporter;
 public enum MetricSchema {
     RESPONSE,
     ERROR,
-    CUSTOM
+    LATENCY,
+    PAYLOAD,
+    CUSTOM1,
+    CUSTOM2
 }

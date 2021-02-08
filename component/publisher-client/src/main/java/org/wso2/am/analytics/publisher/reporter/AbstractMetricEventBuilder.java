@@ -41,17 +41,4 @@ public abstract class AbstractMetricEventBuilder implements MetricEventBuilder {
      * @return Map representing attributes of Metric Event
      */
     protected abstract Map<String, Object> buildEvent();
-
-    @Override
-    public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
-        if (isKeyPresent(key)) {
-            return addVerifiedAttribute(key, value);
-        } else {
-            throw new MetricReportingException("Provided property " + key + " does not present in the schema");
-        }
-    }
-
-    protected abstract MetricEventBuilder addVerifiedAttribute(String key, Object value);
-
-    protected abstract boolean isKeyPresent(String key);
 }

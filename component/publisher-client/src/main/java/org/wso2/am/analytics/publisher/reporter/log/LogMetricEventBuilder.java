@@ -36,16 +36,6 @@ public class LogMetricEventBuilder extends AbstractMetricEventBuilder {
         return eventMap;
     }
 
-    @Override protected MetricEventBuilder addVerifiedAttribute(String key, Object value) {
-        eventMap.put(key, value);
-        return this;
-    }
-
-    @Override
-    protected boolean isKeyPresent(String key) {
-        return true;
-    }
-
     @Override
     public boolean validate() throws MetricReportingException {
         for (Object value : eventMap.values()) {
@@ -54,5 +44,10 @@ public class LogMetricEventBuilder extends AbstractMetricEventBuilder {
             }
         }
         return true;
+    }
+
+    @Override public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
+        eventMap.put(key, value);
+        return this;
     }
 }

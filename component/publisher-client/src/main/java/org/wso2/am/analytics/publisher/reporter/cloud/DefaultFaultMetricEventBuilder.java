@@ -28,16 +28,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Default builder for response metric type. Restrictions are set on the key names that uses can set to the builder.
- * Allows keys and their validity will be checked when populating and availability of all required properties will be
- * checked when building.
+ * Builder class for fault events
  */
-public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilder {
+public class DefaultFaultMetricEventBuilder extends AbstractMetricEventBuilder {
     private final Map<String, Class> requiredAttributes;
     private Map<String, Object> eventMap;
 
-    protected DefaultResponseMetricEventBuilder() {
-        requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
+    protected DefaultFaultMetricEventBuilder() {
+        requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.ERROR);
         eventMap = new HashMap<>();
     }
 
@@ -49,22 +47,24 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
                 throw new MetricReportingException(entry.getKey() + " is missing in metric data. This metric event "
                                                            + "will not be processed further.");
             } else if (!attribute.getClass().equals(entry.getValue())) {
-                throw new MetricReportingException(entry.getKey() + " is expecting a " + entry.getValue() + " "
-                                                           + "type attribute while attribute of type "
-                                                           + attribute.getClass() + " is present.");
+                    throw new MetricReportingException(entry.getKey() + " is expecting a " + entry.getValue() + " "
+                                                               + "type attribute while attribute of type "
+                                                               + attribute.getClass() + " is present.");
             }
         }
         return true;
     }
 
-    @Override public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
+    @Override
+    public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
+        //all validation is moved to validate method to reduce analytics data processing latency
         eventMap.put(key, value);
         return this;
     }
 
     @Override
     protected Map<String, Object> buildEvent() {
-        eventMap.put(Constants.EVENT_TYPE, "response");
+        eventMap.put(Constants.EVENT_TYPE, "fault");
         return eventMap;
     }
 }

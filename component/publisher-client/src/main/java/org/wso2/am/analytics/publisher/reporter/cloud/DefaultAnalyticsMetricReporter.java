@@ -65,7 +65,7 @@ public class DefaultAnalyticsMetricReporter extends AbstractMetricReporter {
     }
 
     @Override
-    protected CounterMetric createCounter(String name, MetricSchema schema) {
+    protected CounterMetric createCounter(String name, MetricSchema schema) throws MetricCreationException {
         DefaultCounterMetric counterMetric = new DefaultCounterMetric(name, eventQueue, schema);
         return counterMetric;
     }

@@ -34,7 +34,6 @@ import java.util.Map;
 public class MetricReporterTestCase {
     private static final Logger log = Logger.getLogger(MetricReporterTestCase.class);
 
-
     @Test(enabled = false, expectedExceptions = MetricCreationException.class)
     public void testMetricReporterCreationWithoutConfigs() throws MetricCreationException, MetricReportingException {
         try {
