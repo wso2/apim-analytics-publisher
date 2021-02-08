@@ -17,6 +17,8 @@
  */
 package org.wso2.am.analytics.publisher.reporter;
 
+import org.wso2.am.analytics.publisher.exception.MetricCreationException;
+
 import java.util.Map;
 
 /**
@@ -31,7 +33,7 @@ public interface MetricReporter {
      * @param name Name of the metric
      * @return {@link CounterMetric}
      */
-    CounterMetric createCounterMetric(String name, MetricSchema schema);
+    CounterMetric createCounterMetric(String name, MetricSchema schema) throws MetricCreationException;
 
     /**
      * Create and return {@link TimerMetric} to instrument collected metrics

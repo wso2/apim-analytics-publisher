@@ -20,8 +20,11 @@ package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,7 +45,6 @@ import static org.wso2.am.analytics.publisher.util.Constants.DESTINATION;
 import static org.wso2.am.analytics.publisher.util.Constants.ERROR_CODE;
 import static org.wso2.am.analytics.publisher.util.Constants.ERROR_MESSAGE;
 import static org.wso2.am.analytics.publisher.util.Constants.ERROR_TYPE;
-import static org.wso2.am.analytics.publisher.util.Constants.EVENT_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.GATEWAY_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.KEY_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.PROXY_RESPONSE_CODE;
@@ -61,24 +63,57 @@ import static org.wso2.am.analytics.publisher.util.Constants.USER_AGENT;
  */
 public class DefaultInputValidator {
     private static final DefaultInputValidator INSTANCE = new DefaultInputValidator();
-    private static final List<String> responseSchema = Stream.of(CORRELATION_ID, KEY_TYPE, API_ID, API_NAME,
-                                                                 API_VERSION, API_CREATION, API_METHOD,
-                                                                 API_RESOURCE_TEMPLATE,
-                                                                 API_CREATOR_TENANT_DOMAIN, DESTINATION, APPLICATION_ID,
-                                                                 APPLICATION_NAME, APPLICATION_OWNER,
-                                                                 REGION_ID, GATEWAY_TYPE, USER_AGENT,
-                                                                 PROXY_RESPONSE_CODE,
-                                                                 TARGET_RESPONSE_CODE, RESPONSE_CACHE_HIT,
-                                                                 RESPONSE_LATENCY,
-                                                                 BACKEND_LATENCY, REQUEST_MEDIATION_LATENCY,
-                                                                 RESPONSE_MEDIATION_LATENCY, DEPLOYMENT_ID).collect(
-            Collectors.toList());
-    private static final List<String> faultSchema = Stream.of(REQUEST_TIMESTAMP, CORRELATION_ID, KEY_TYPE, ERROR_TYPE,
-                                                              ERROR_CODE, ERROR_MESSAGE, API_ID, API_NAME, API_VERSION,
-                                                              API_CREATION, API_CREATOR_TENANT_DOMAIN, APPLICATION_ID,
-                                                              APPLICATION_NAME, APPLICATION_OWNER, REGION_ID,
-                                                              GATEWAY_TYPE, PROXY_RESPONSE_CODE, TARGET_RESPONSE_CODE,
-                                                              DEPLOYMENT_ID, EVENT_TYPE).collect(Collectors.toList());
+    private static final Map<String, Class> responseSchema = Stream.of(
+            new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, Long.class),
+            new AbstractMap.SimpleImmutableEntry<>(CORRELATION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(KEY_TYPE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_NAME, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_VERSION, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_CREATION, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_METHOD, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_RESOURCE_TEMPLATE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_CREATOR_TENANT_DOMAIN, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(DESTINATION, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(APPLICATION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(APPLICATION_NAME, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(APPLICATION_OWNER, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(REGION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(GATEWAY_TYPE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(USER_AGENT, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(PROXY_RESPONSE_CODE, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(RESPONSE_CACHE_HIT, Boolean.class),
+            new AbstractMap.SimpleImmutableEntry<>(RESPONSE_LATENCY, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(BACKEND_LATENCY, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(REQUEST_MEDIATION_LATENCY, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(RESPONSE_MEDIATION_LATENCY, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(DEPLOYMENT_ID, String.class))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+    private static final Map<String, Class> faultSchema = Stream.of(
+            new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, Long.class),
+            new AbstractMap.SimpleImmutableEntry<>(CORRELATION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(KEY_TYPE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(ERROR_TYPE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(ERROR_CODE, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(ERROR_MESSAGE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_NAME, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_VERSION, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_CREATION, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_METHOD, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_CREATOR_TENANT_DOMAIN, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(APPLICATION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(APPLICATION_NAME, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(APPLICATION_OWNER, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(REGION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(GATEWAY_TYPE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(PROXY_RESPONSE_CODE, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(DEPLOYMENT_ID, String.class))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
     private static final List<String> configProperties = new ArrayList<>();
 
 
@@ -90,13 +125,13 @@ public class DefaultInputValidator {
         return INSTANCE;
     }
 
-    public List<String> getEventProperties(MetricSchema schema) {
+    public Map<String, Class> getEventProperties(MetricSchema schema) {
         if (MetricSchema.RESPONSE == schema) {
             return responseSchema;
         } else if (MetricSchema.ERROR == schema) {
             return faultSchema;
         } else {
-            return new ArrayList<>();
+            return new HashMap<>();
         }
     }
 

@@ -18,6 +18,7 @@
 
 package org.wso2.am.analytics.publisher.reporter.cloud;
 
+import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
@@ -31,10 +32,17 @@ public class DefaultCounterMetric implements CounterMetric {
     private EventQueue queue;
     private MetricSchema schema;
 
-    public DefaultCounterMetric(String name, EventQueue queue, MetricSchema schema) {
+    public DefaultCounterMetric(String name, EventQueue queue, MetricSchema schema) throws MetricCreationException {
+        //Constructor should be made protected. Keeping public till testing plan is finalized
         this.name = name;
         this.queue = queue;
-        this.schema = schema;
+        if (schema == MetricSchema.ERROR || schema == MetricSchema.RESPONSE) {
+            this.schema = schema;
+        } else {
+            throw new MetricCreationException("Default Counter Metric only supports " + MetricSchema.RESPONSE + " and"
+                                                      + " " + MetricSchema.ERROR + " types.");
+        }
+
     }
 
     @Override
@@ -66,7 +74,10 @@ public class DefaultCounterMetric implements CounterMetric {
     public MetricEventBuilder getEventBuilder() {
         if (schema == MetricSchema.RESPONSE) {
             return new DefaultResponseMetricEventBuilder();
+        } else if (schema == MetricSchema.ERROR) {
+            return new DefaultFaultMetricEventBuilder();
         }
+        //will not happen
         return null;
     }
 }
