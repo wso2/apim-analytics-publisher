@@ -39,12 +39,20 @@ public class EventHubClient {
 
     public EventHubClient(String authEndpoint, String authToken) {
         producer = EventHubProducerClientFactory.create(authEndpoint, authToken);
+        if(producer == null) {
+            log.error("EventHubClient initialization failed.");
+            return;
+        }
         batch = producer.createBatch();
         readWriteLock = new ReentrantReadWriteLock();
         sendSemaphore = new Semaphore(1);
     }
 
     public void sendEvent(String event) {
+        if(producer == null) {
+            log.error("EventHubClient has failed. Hence ignoring.");
+            return;
+        }
         EventData eventData = new EventData(event);
         readWriteLock.readLock().lock();
         try {
@@ -70,6 +78,10 @@ public class EventHubClient {
     }
 
     public void flushEvents() {
+        if(producer == null) {
+            log.error("EventHubClient has failed. Hence ignoring.");
+            return;
+        }
         try {
             sendSemaphore.acquire();
             int size = batch.getCount();

@@ -41,7 +41,8 @@ public class EventHubProducerClientFactory {
             // generate SAS token to get eventhub meta data
             tempSASToken = getSASToken(authEndpoint, authToken);
         } catch (AuthenticationException e) {
-            throw new RuntimeException("SAS token generation failed.");
+            log.error("SAS token generation failed.", e);
+            return null;
         }
 
         String resourceURI = getResourceURI(tempSASToken);
