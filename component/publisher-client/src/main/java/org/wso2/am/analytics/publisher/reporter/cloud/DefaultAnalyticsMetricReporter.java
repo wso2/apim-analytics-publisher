@@ -46,7 +46,7 @@ public class DefaultAnalyticsMetricReporter extends AbstractMetricReporter {
         if (properties.get("worker.thread.count") != null) {
             workerThreads = Integer.parseInt(properties.get("worker.thread.count"));
         }
-        String authToken = System.getenv(Constants.AUTH_TOKEN_ENV_VAR);
+        String authToken = properties.get(Constants.AUTH_API_TOKEN);
         String authEndpoint = properties.get(Constants.AUTH_API_URL);
         EventHubClient client = new EventHubClient(authEndpoint, authToken);
         eventQueue = new EventQueue(queueSize, workerThreads, client);
