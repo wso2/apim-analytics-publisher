@@ -25,7 +25,5 @@ public enum MetricSchema {
     RESPONSE,
     ERROR,
     LATENCY,
-    PAYLOAD,
-    CUSTOM1,
-    CUSTOM2
+    PAYLOAD
 }
