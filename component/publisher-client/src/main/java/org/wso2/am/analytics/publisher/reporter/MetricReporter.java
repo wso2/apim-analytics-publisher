@@ -32,7 +32,7 @@ public interface MetricReporter {
      *
      * @param name Name of the metric
      * @param schema Metric schema
-     * @return
+     * @return {@link CounterMetric}
      * @throws MetricCreationException if error occurred when creating CounterMetric
      */
     CounterMetric createCounterMetric(String name, MetricSchema schema) throws MetricCreationException;
