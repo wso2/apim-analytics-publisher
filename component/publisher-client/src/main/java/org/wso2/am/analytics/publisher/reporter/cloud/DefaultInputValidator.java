@@ -64,7 +64,7 @@ import static org.wso2.am.analytics.publisher.util.Constants.USER_AGENT;
 public class DefaultInputValidator {
     private static final DefaultInputValidator INSTANCE = new DefaultInputValidator();
     private static final Map<String, Class> responseSchema = Stream.of(
-            new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, Long.class),
+            new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, String.class),
             new AbstractMap.SimpleImmutableEntry<>(CORRELATION_ID, String.class),
             new AbstractMap.SimpleImmutableEntry<>(KEY_TYPE, String.class),
             new AbstractMap.SimpleImmutableEntry<>(API_ID, String.class),
@@ -84,15 +84,15 @@ public class DefaultInputValidator {
             new AbstractMap.SimpleImmutableEntry<>(PROXY_RESPONSE_CODE, Integer.class),
             new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class),
             new AbstractMap.SimpleImmutableEntry<>(RESPONSE_CACHE_HIT, Boolean.class),
-            new AbstractMap.SimpleImmutableEntry<>(RESPONSE_LATENCY, Integer.class),
-            new AbstractMap.SimpleImmutableEntry<>(BACKEND_LATENCY, Integer.class),
-            new AbstractMap.SimpleImmutableEntry<>(REQUEST_MEDIATION_LATENCY, Integer.class),
-            new AbstractMap.SimpleImmutableEntry<>(RESPONSE_MEDIATION_LATENCY, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(RESPONSE_LATENCY, Long.class),
+            new AbstractMap.SimpleImmutableEntry<>(BACKEND_LATENCY, Long.class),
+            new AbstractMap.SimpleImmutableEntry<>(REQUEST_MEDIATION_LATENCY, Long.class),
+            new AbstractMap.SimpleImmutableEntry<>(RESPONSE_MEDIATION_LATENCY, Long.class),
             new AbstractMap.SimpleImmutableEntry<>(DEPLOYMENT_ID, String.class))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     private static final Map<String, Class> faultSchema = Stream.of(
-            new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, Long.class),
+            new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, String.class),
             new AbstractMap.SimpleImmutableEntry<>(CORRELATION_ID, String.class),
             new AbstractMap.SimpleImmutableEntry<>(KEY_TYPE, String.class),
             new AbstractMap.SimpleImmutableEntry<>(ERROR_TYPE, String.class),
@@ -102,7 +102,6 @@ public class DefaultInputValidator {
             new AbstractMap.SimpleImmutableEntry<>(API_NAME, String.class),
             new AbstractMap.SimpleImmutableEntry<>(API_VERSION, String.class),
             new AbstractMap.SimpleImmutableEntry<>(API_CREATION, String.class),
-            new AbstractMap.SimpleImmutableEntry<>(API_METHOD, String.class),
             new AbstractMap.SimpleImmutableEntry<>(API_CREATOR_TENANT_DOMAIN, String.class),
             new AbstractMap.SimpleImmutableEntry<>(APPLICATION_ID, String.class),
             new AbstractMap.SimpleImmutableEntry<>(APPLICATION_NAME, String.class),

@@ -29,6 +29,8 @@ import org.wso2.am.analytics.publisher.reporter.cloud.DefaultCounterMetric;
 import org.wso2.am.analytics.publisher.reporter.cloud.EventQueue;
 import org.wso2.am.analytics.publisher.util.Constants;
 
+import java.time.Clock;
+import java.time.OffsetDateTime;
 import java.util.Map;
 
 public class DefaultResponseMetricBuilderTestCase {
@@ -83,7 +85,7 @@ public class DefaultResponseMetricBuilderTestCase {
         DefaultCounterMetric metric = new DefaultCounterMetric("test.metric", queue, MetricSchema.RESPONSE);
         MetricEventBuilder builder = metric.getEventBuilder();
         Map<String, Object> eventMap = builder
-                .addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
+                .addAttribute(Constants.REQUEST_TIMESTAMP, OffsetDateTime.now(Clock.systemUTC()).toString())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.KEY_TYPE, "prod")
                 .addAttribute(Constants.API_ID, "9876-54f1")
@@ -103,10 +105,10 @@ public class DefaultResponseMetricBuilderTestCase {
                 .addAttribute(Constants.PROXY_RESPONSE_CODE, 401)
                 .addAttribute(Constants.TARGET_RESPONSE_CODE, 401)
                 .addAttribute(Constants.RESPONSE_CACHE_HIT, true)
-                .addAttribute(Constants.RESPONSE_LATENCY, 2000)
-                .addAttribute(Constants.BACKEND_LATENCY, 3000)
-                .addAttribute(Constants.REQUEST_MEDIATION_LATENCY, 1000)
-                .addAttribute(Constants.RESPONSE_MEDIATION_LATENCY, 1000)
+                .addAttribute(Constants.RESPONSE_LATENCY, 2000L)
+                .addAttribute(Constants.BACKEND_LATENCY, 3000L)
+                .addAttribute(Constants.REQUEST_MEDIATION_LATENCY, 1000L)
+                .addAttribute(Constants.RESPONSE_MEDIATION_LATENCY, 1000L)
                 .addAttribute(Constants.DEPLOYMENT_ID, "prod")
                 .build();
 
