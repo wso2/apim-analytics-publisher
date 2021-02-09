@@ -39,7 +39,7 @@ public class EventHubClient {
 
     public EventHubClient(String authEndpoint, String authToken) {
         producer = EventHubProducerClientFactory.create(authEndpoint, authToken);
-        if(producer == null) {
+        if (producer == null) {
             log.error("EventHubClient initialization failed.");
             return;
         }
@@ -49,7 +49,7 @@ public class EventHubClient {
     }
 
     public void sendEvent(String event) {
-        if(producer == null) {
+        if (producer == null) {
             log.error("EventHubClient has failed. Hence ignoring.");
             return;
         }
@@ -78,7 +78,7 @@ public class EventHubClient {
     }
 
     public void flushEvents() {
-        if(producer == null) {
+        if (producer == null) {
             log.error("EventHubClient has failed. Hence ignoring.");
             return;
         }
