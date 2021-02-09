@@ -56,14 +56,16 @@ public class EventHubClient {
         EventData eventData = new EventData(event);
         readWriteLock.readLock().lock();
         try {
-            if (!batch.tryAdd(eventData)) {
+            boolean isAdded = batch.tryAdd(eventData);
+            if (!isAdded) {
                 try {
                     sendSemaphore.acquire();
-                    if (!batch.tryAdd(eventData)) {
+                    isAdded = batch.tryAdd(eventData);
+                    if (!isAdded) {
                         int size = batch.getCount();
                         producer.send(batch);
                         batch = producer.createBatch();
-                        batch.tryAdd(eventData);
+                        isAdded = batch.tryAdd(eventData);
                         log.debug("Published " + size + " events to Analytics cluster.");
                     }
                 } catch (InterruptedException e) {
@@ -71,6 +73,12 @@ public class EventHubClient {
                 } finally {
                     sendSemaphore.release();
                 }
+            }
+
+            if (isAdded) {
+                log.debug("Adding event: " + event.replaceAll("[\r\n]", ""));
+            } else {
+                log.debug("Failed to add event: " + event.replaceAll("[\r\n]", ""));
             }
         } finally {
             readWriteLock.readLock().unlock();

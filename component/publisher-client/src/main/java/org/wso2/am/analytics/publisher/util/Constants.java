@@ -57,6 +57,7 @@ public class Constants {
     public static final String ERROR_MESSAGE = "errorMessage";
 
     public static final String AUTH_API_URL = "auth.api.url";
+    public static final String AUTH_API_TOKEN = "auth.api.token";
     public static final String TOKEN_API_URL = "token.api.url";
     public static final String CONSUMER_KEY = "consumer.key";
     public static final String CONSUMER_SECRET = "consumer.secret";
