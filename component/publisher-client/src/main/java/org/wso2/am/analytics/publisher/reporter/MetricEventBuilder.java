@@ -24,8 +24,8 @@ import java.util.Map;
 
 /**
  * Main interface class for Metric Event Builders. Metric Event Builders are responsible of collecting metrics,
- * validating them and later returning them as a Map&lt;String, Object&gt;. Default builders will be implemented and for any
- * custom message building new builders have to be introduced
+ * validating them and later returning them as a Map&lt;String, Object&gt;. Default builders will be implemented and
+ * for any custom message building new builders have to be introduced
  */
 public interface MetricEventBuilder {
 
