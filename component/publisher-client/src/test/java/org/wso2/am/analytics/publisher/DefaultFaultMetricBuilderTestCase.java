@@ -29,6 +29,8 @@ import org.wso2.am.analytics.publisher.reporter.cloud.DefaultCounterMetric;
 import org.wso2.am.analytics.publisher.reporter.cloud.EventQueue;
 import org.wso2.am.analytics.publisher.util.Constants;
 
+import java.time.Clock;
+import java.time.OffsetDateTime;
 import java.util.Map;
 
 public class DefaultFaultMetricBuilderTestCase {
@@ -77,7 +79,7 @@ public class DefaultFaultMetricBuilderTestCase {
         DefaultCounterMetric metric = new DefaultCounterMetric("test.metric", queue, MetricSchema.ERROR);
         MetricEventBuilder builder = metric.getEventBuilder();
         Map<String, Object> eventMap = builder
-                .addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
+                .addAttribute(Constants.REQUEST_TIMESTAMP, OffsetDateTime.now(Clock.systemUTC()).toString())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.KEY_TYPE, "prod")
                 .addAttribute(Constants.ERROR_TYPE, "backend")

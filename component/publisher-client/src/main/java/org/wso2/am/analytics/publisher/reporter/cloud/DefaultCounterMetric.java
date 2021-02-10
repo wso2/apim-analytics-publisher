@@ -68,7 +68,7 @@ public class DefaultCounterMetric implements CounterMetric {
      * Returns Event Builder used for this CounterMetric. Depending on the schema different types of builders will be
      * returned.
      *
-     * @return
+     * @return {@link MetricEventBuilder} for this {@link CounterMetric}
      */
     @Override
     public MetricEventBuilder getEventBuilder() {

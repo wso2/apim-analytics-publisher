@@ -57,9 +57,12 @@ public class Constants {
     public static final String ERROR_MESSAGE = "errorMessage";
 
     public static final String AUTH_API_URL = "auth.api.url";
+    public static final String AUTH_API_TOKEN = "auth.api.token";
     public static final String TOKEN_API_URL = "token.api.url";
     public static final String CONSUMER_KEY = "consumer.key";
     public static final String CONSUMER_SECRET = "consumer.secret";
     public static final String SAS_TOKEN = "sas.token";
     public static final String DEFAULT_REPORTER = "default";
+
+    public static final String AUTH_TOKEN_ENV_VAR = "API_ANL_AUTH_TOKEN";
 }

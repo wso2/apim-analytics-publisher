@@ -24,15 +24,17 @@ import java.util.Map;
 
 /**
  * Main interface class for Metric Event Builders. Metric Event Builders are responsible of collecting metrics,
- * validating them and later returning them as a Map<String, Object>. Default builders will be implemented and for any
- * custom message building new builders have to be introduced
+ * validating them and later returning them as a Map&lt;String, Object&gt;. Default builders will be implemented and
+ * for any custom message building new builders have to be introduced
  */
 public interface MetricEventBuilder {
+
     /**
      * Validates the provided attributes and build a flat {@link Map}. Any validation failures will cause
      * {@link org.wso2.am.analytics.publisher.exception.MetricReportingException}.
      *
      * @return Map containing all attributes related to Metric Event
+     * @throws MetricReportingException if validation failed
      */
     public Map<String, Object> build() throws MetricReportingException;
 
@@ -41,6 +43,7 @@ public interface MetricEventBuilder {
      * Else {@link MetricReportingException} will be thrown.
      *
      * @return Validity state of the added data
+     * @throws MetricReportingException if validation failed
      */
     public boolean validate() throws MetricReportingException;
 
@@ -51,6 +54,7 @@ public interface MetricEventBuilder {
      * @param key    Key of the attribute
      * @param number Value of the attribute
      * @return Returns itself to support chaining
+     * @throws MetricReportingException if validation failed
      */
     public MetricEventBuilder addAttribute(String key, Object number) throws MetricReportingException;
 }
