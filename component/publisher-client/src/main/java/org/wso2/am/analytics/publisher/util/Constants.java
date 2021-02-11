@@ -41,6 +41,7 @@ public class Constants {
     public static final String REGION_ID = "regionId";
     public static final String GATEWAY_TYPE = "gatewayType";
     public static final String USER_AGENT = "userAgent";
+    public static final String PLATFORM = "platform";
     public static final String PROXY_RESPONSE_CODE = "proxyResponseCode";
     public static final String TARGET_RESPONSE_CODE = "targetResponseCode";
     public static final String RESPONSE_CACHE_HIT = "responseCacheHit";
@@ -51,6 +52,7 @@ public class Constants {
     public static final String DEPLOYMENT_ID = "deploymentId";
     public static final String REQUEST_TIMESTAMP = "requestTimestamp";
     public static final String EVENT_TYPE = "eventType";
+    public static final String API_TYPE = "apiType";
 
     public static final String ERROR_TYPE = "errorType";
     public static final String ERROR_CODE = "errorCode";

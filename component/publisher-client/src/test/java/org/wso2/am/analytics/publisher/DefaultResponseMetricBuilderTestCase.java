@@ -89,6 +89,7 @@ public class DefaultResponseMetricBuilderTestCase {
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.KEY_TYPE, "prod")
                 .addAttribute(Constants.API_ID, "9876-54f1")
+                .addAttribute(Constants.API_TYPE, "HTTP")
                 .addAttribute(Constants.API_NAME, "PizzaShack")
                 .addAttribute(Constants.API_VERSION, "1.0.0")
                 .addAttribute(Constants.API_CREATION, "admin")
@@ -102,6 +103,7 @@ public class DefaultResponseMetricBuilderTestCase {
                 .addAttribute(Constants.REGION_ID, "NA")
                 .addAttribute(Constants.GATEWAY_TYPE, "Synapse")
                 .addAttribute(Constants.USER_AGENT, "Mozilla")
+                .addAttribute(Constants.PLATFORM, "Linux")
                 .addAttribute(Constants.PROXY_RESPONSE_CODE, 401)
                 .addAttribute(Constants.TARGET_RESPONSE_CODE, 401)
                 .addAttribute(Constants.RESPONSE_CACHE_HIT, true)
@@ -113,7 +115,7 @@ public class DefaultResponseMetricBuilderTestCase {
                 .build();
 
         Assert.assertFalse(eventMap.isEmpty());
-        Assert.assertEquals(eventMap.size(), 26, "Some attributes are missing from the resulting event map");
+        Assert.assertEquals(eventMap.size(), 28, "Some attributes are missing from the resulting event map");
         Assert.assertEquals(eventMap.get(Constants.EVENT_TYPE), "response", "Event type should be set to fault");
     }
 }
