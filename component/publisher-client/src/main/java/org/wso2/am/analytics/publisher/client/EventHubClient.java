@@ -21,6 +21,8 @@ import com.azure.messaging.eventhubs.EventData;
 import com.azure.messaging.eventhubs.EventDataBatch;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
 import org.apache.log4j.Logger;
+import org.wso2.am.analytics.publisher.exception.ConnectionRecoverableException;
+import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
 
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -36,13 +38,30 @@ public class EventHubClient {
     private EventDataBatch batch;
     private ReadWriteLock readWriteLock;
     private Semaphore sendSemaphore;
+    private ClientStatus clientStatus;
 
     public EventHubClient(String authEndpoint, String authToken) {
-        producer = EventHubProducerClientFactory.create(authEndpoint, authToken);
-        if (producer == null) {
-            log.error("EventHubClient initialization failed.");
+        try {
+            producer = EventHubProducerClientFactory.create(authEndpoint, authToken);
+        } catch (ConnectionRecoverableException e) {
+            clientStatus = ClientStatus.RETRYING;
+            log.error("Recoverable error occurred when creating Eventhub Client. Retry attempts will be made. Reason :"
+                              + e.getMessage().replaceAll("[\r\n]", ""));
+            log.debug("Recoverable error occurred when creating Eventhub Client using following attributes. Auth "
+                              + "endpoint: " + authEndpoint.replaceAll("[\r\n]", "") + ". Retry attempts will be made. "
+                              + "Reason : " + e.getMessage().replaceAll("[\r\n]", ""), e);
+        } catch (ConnectionUnrecoverableException e) {
+            clientStatus = ClientStatus.NOT_CONNECTED;
+            log.error("Unrecoverable error occurred when creating Eventhub Client. Analytics event publishing will be"
+                              + " disabled until issue is rectified. Reason: "
+                              + e.getMessage().replaceAll("[\r\n]", ""));
+            log.debug("Unrecoverable error occurred when creating Eventhub Client using following attributes. Auth "
+                              + "endpoint: " + authEndpoint.replaceAll("[\r\n]", "") + ". Analytics event publishing "
+                              + "will be disabled until issue is rectified. Reason: "
+                              + e.getMessage().replaceAll("[\r\n]", ""), e);
             return;
         }
+        clientStatus = ClientStatus.CONNECTED;
         batch = producer.createBatch();
         readWriteLock = new ReentrantReadWriteLock();
         sendSemaphore = new Semaphore(1);
@@ -101,5 +120,9 @@ public class EventHubClient {
         } finally {
             sendSemaphore.release();
         }
+    }
+
+    public ClientStatus getStatus() {
+        return clientStatus;
     }
 }

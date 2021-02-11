@@ -23,7 +23,8 @@ import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
 import org.apache.log4j.Logger;
 import org.wso2.am.analytics.publisher.auth.AuthClient;
-import org.wso2.am.analytics.publisher.exception.AuthenticationException;
+import org.wso2.am.analytics.publisher.exception.ConnectionRecoverableException;
+import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -52,9 +53,12 @@ class WSO2TokenCredential implements TokenCredential {
             // Using lower duration than actual.
             OffsetDateTime time = OffsetDateTime.now(ZoneOffset.UTC).plus(Duration.ofHours(20));
             return Mono.fromCallable(() -> new AccessToken(sasToken, time));
-        } catch (AuthenticationException e) {
+        } catch (ConnectionRecoverableException e) {
+            log.error("Error occurred when retrieving SAS token. Connection will be retried", e);
+            throw new RuntimeException("Error occurred when retrieving SAS token. Connection will be retried");
+        } catch (ConnectionUnrecoverableException e) {
             log.error("Error occurred when retrieving SAS token.", e);
-            throw new RuntimeException("Error occurred when retrieving SAS token.", e);
+            throw new RuntimeException("Error occurred when retrieving SAS token.");
         }
     }
 }

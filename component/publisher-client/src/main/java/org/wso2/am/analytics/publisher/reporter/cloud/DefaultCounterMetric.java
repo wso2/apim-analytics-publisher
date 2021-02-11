@@ -18,6 +18,7 @@
 
 package org.wso2.am.analytics.publisher.reporter.cloud;
 
+import org.wso2.am.analytics.publisher.client.ClientStatus;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
@@ -31,6 +32,7 @@ public class DefaultCounterMetric implements CounterMetric {
     private String name;
     private EventQueue queue;
     private MetricSchema schema;
+    private ClientStatus status;
 
     public DefaultCounterMetric(String name, EventQueue queue, MetricSchema schema) throws MetricCreationException {
         //Constructor should be made protected. Keeping public till testing plan is finalized
@@ -42,7 +44,7 @@ public class DefaultCounterMetric implements CounterMetric {
             throw new MetricCreationException("Default Counter Metric only supports " + MetricSchema.RESPONSE + " and"
                                                       + " " + MetricSchema.ERROR + " types.");
         }
-
+        this.status = queue.getClient().getStatus();
     }
 
     @Override
@@ -56,11 +58,15 @@ public class DefaultCounterMetric implements CounterMetric {
 
     @Override
     public int incrementCount(MetricEventBuilder builder) throws MetricReportingException {
-        if (builder != null) {
-            queue.put(builder);
-            return 0;
+        if (!(status == ClientStatus.NOT_CONNECTED)) {
+            if (builder != null) {
+                queue.put(builder);
+                return 0;
+            } else {
+                throw new MetricReportingException("MetricEventBuilder cannot be null");
+            }
         } else {
-            throw new MetricReportingException("MetricEventBuilder cannot be null");
+            throw new MetricReportingException("Eventhub Client is not connected.");
         }
     }
 

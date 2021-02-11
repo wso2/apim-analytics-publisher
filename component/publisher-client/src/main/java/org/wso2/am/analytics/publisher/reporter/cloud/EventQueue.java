@@ -66,4 +66,8 @@ public class EventQueue {
         executorService.shutdown();
         super.finalize();
     }
+
+    protected EventHubClient getClient() {
+        return this.client;
+    }
 }

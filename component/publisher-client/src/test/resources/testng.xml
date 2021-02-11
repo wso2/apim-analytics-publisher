@@ -26,6 +26,7 @@
             <class name="org.wso2.am.analytics.publisher.LogMetricReporterTestCase"/>
             <class name="org.wso2.am.analytics.publisher.DefaultResponseMetricBuilderTestCase"/>
             <class name="org.wso2.am.analytics.publisher.DefaultFaultMetricBuilderTestCase"/>
+            <class name="org.wso2.am.analytics.publisher.ErrorHandlingTestCase"/>
         </classes>
     </test>
 </suite>

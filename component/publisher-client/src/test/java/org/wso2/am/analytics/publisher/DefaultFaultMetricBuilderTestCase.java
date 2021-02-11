@@ -20,7 +20,9 @@ package org.wso2.am.analytics.publisher;
 
 import org.apache.log4j.Logger;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.wso2.am.analytics.publisher.client.EventHubClient;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
@@ -35,21 +37,23 @@ import java.util.Map;
 
 public class DefaultFaultMetricBuilderTestCase {
     private static final Logger log = Logger.getLogger(DefaultFaultMetricBuilderTestCase.class);
+    private MetricEventBuilder builder;
+    @BeforeMethod
+    public void createBuilder() throws MetricCreationException {
+        EventHubClient client = new EventHubClient("some_endpoint", "some_token");
+        EventQueue queue = new EventQueue(100, 1, client);
+        DefaultCounterMetric metric = new DefaultCounterMetric("test.builder.metric", queue, MetricSchema.ERROR);
+        builder = metric.getEventBuilder();
+    }
 
     @Test(expectedExceptions = MetricReportingException.class)
     public void testMissingAttributes() throws MetricCreationException, MetricReportingException {
-        EventQueue queue = new EventQueue(100, 1, null);
-        DefaultCounterMetric metric = new DefaultCounterMetric("test.metric", queue, MetricSchema.ERROR);
-        MetricEventBuilder builder = metric.getEventBuilder();
         builder.addAttribute("apiName", "PizzaShack");
         builder.build();
     }
 
     @Test(expectedExceptions = MetricReportingException.class)
     public void testAttributesWithInvalidTypes() throws MetricCreationException, MetricReportingException {
-        EventQueue queue = new EventQueue(100, 1, null);
-        DefaultCounterMetric metric = new DefaultCounterMetric("test.metric", queue, MetricSchema.ERROR);
-        MetricEventBuilder builder = metric.getEventBuilder();
         builder.addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.KEY_TYPE, "prod")
@@ -75,9 +79,6 @@ public class DefaultFaultMetricBuilderTestCase {
 
     @Test
     public void testMetricBuilder() throws MetricCreationException, MetricReportingException {
-        EventQueue queue = new EventQueue(100, 1, null);
-        DefaultCounterMetric metric = new DefaultCounterMetric("test.metric", queue, MetricSchema.ERROR);
-        MetricEventBuilder builder = metric.getEventBuilder();
         Map<String, Object> eventMap = builder
                 .addAttribute(Constants.REQUEST_TIMESTAMP, OffsetDateTime.now(Clock.systemUTC()).toString())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")

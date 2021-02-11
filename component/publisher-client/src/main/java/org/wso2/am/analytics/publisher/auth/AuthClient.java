@@ -47,14 +47,13 @@ public class AuthClient {
             return dto.getToken();
         } catch (FeignException.Unauthorized e) {
             throw new ConnectionUnrecoverableException(
-                    "Invalid user token. Analytics data publishing will be disabled. Please update apim.analytics"
+                    "Invalid/expired user token. Please update apim.analytics"
                             + ".auth_token in configuration and restart the instance", e);
         } catch (RetryableException e) {
             throw new ConnectionRecoverableException("Provided authentication endpoint " + authEndpoint + " is not "
                                                              + "reachable.");
         } catch (IllegalArgumentException e) {
-            throw new ConnectionUnrecoverableException("Invalid apim.analytics configurations provided. Analytics "
-                                                               + "data publishing will be disabled. Please update "
+            throw new ConnectionUnrecoverableException("Invalid apim.analytics configurations provided. Please update "
                                                                + "configurations and restart the instance.");
         } catch (Exception e) {
             //we will retry for any other exception
