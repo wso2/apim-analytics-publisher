@@ -19,10 +19,13 @@
 package org.wso2.am.analytics.publisher.auth;
 
 import feign.Feign;
+import feign.FeignException;
+import feign.RetryableException;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
 import feign.slf4j.Slf4jLogger;
-import org.wso2.am.analytics.publisher.exception.AuthenticationException;
+import org.wso2.am.analytics.publisher.exception.ConnectionRecoverableException;
+import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
 
 /**
  * Auth client to generate SAS token that can use to authenticate with event hub
@@ -30,7 +33,8 @@ import org.wso2.am.analytics.publisher.exception.AuthenticationException;
 public class AuthClient {
     public static final String AUTH_HEADER = "Authorization";
 
-    public static String getSASToken(String authEndpoint, String token) throws AuthenticationException {
+    public static String getSASToken(String authEndpoint, String token) throws ConnectionRecoverableException,
+                                                                               ConnectionUnrecoverableException {
 
         DefaultApi defaultApi = Feign.builder()
                 .encoder(new GsonEncoder())
@@ -41,8 +45,20 @@ public class AuthClient {
         try {
             TokenDetailsDTO dto = defaultApi.tokenGet();
             return dto.getToken();
+        } catch (FeignException.Unauthorized e) {
+            throw new ConnectionUnrecoverableException(
+                    "Invalid user token. Analytics data publishing will be disabled. Please update apim.analytics"
+                            + ".auth_token in configuration and restart the instance", e);
+        } catch (RetryableException e) {
+            throw new ConnectionRecoverableException("Provided authentication endpoint " + authEndpoint + " is not "
+                                                             + "reachable.");
+        } catch (IllegalArgumentException e) {
+            throw new ConnectionUnrecoverableException("Invalid apim.analytics configurations provided. Analytics "
+                                                               + "data publishing will be disabled. Please update "
+                                                               + "configurations and restart the instance.");
         } catch (Exception e) {
-            throw new AuthenticationException("Error getting SAS token", e);
+            //we will retry for any other exception
+            throw new ConnectionRecoverableException("Exception " + e.getClass() + " occurred.");
         }
     }
 }
