@@ -84,20 +84,20 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
     }
 
     private void setUserAgentProperties(String userAgentHeader) {
-        if (uaParser == null) {
-            // if ua parser is not initialised, skip setting properties
-            return;
+        String browser = null;
+        String platform = null;
+        if (uaParser != null) {
+            Client client = uaParser.parse(userAgentHeader);
+            browser = client.userAgent.family;
+            platform = client.os.family;
         }
-        Client client = uaParser.parse(userAgentHeader);
-        String browser = client.userAgent.family;
+
         if (browser == null || browser.isEmpty()) {
             browser = Constants.UNKNOWN_VALUE;
         }
-        String platform = client.os.family;
         if (platform == null || platform.isEmpty()) {
             platform = Constants.UNKNOWN_VALUE;
         }
-
         eventMap.put(Constants.USER_AGENT, browser);
         eventMap.put(Constants.PLATFORM, platform);
     }

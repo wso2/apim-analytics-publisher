@@ -105,5 +105,6 @@ public class DefaultFaultMetricBuilderTestCase {
         Assert.assertFalse(eventMap.isEmpty());
         Assert.assertEquals(eventMap.size(), 22, "Some attributes are missing from the resulting event map");
         Assert.assertEquals(eventMap.get(Constants.EVENT_TYPE), "fault", "Event type should be set to fault");
+        Assert.assertEquals(eventMap.get(Constants.API_TYPE), "HTTP", "API type should be set to HTTP");
     }
 }

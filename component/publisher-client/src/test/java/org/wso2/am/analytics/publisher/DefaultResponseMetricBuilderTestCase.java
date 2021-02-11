@@ -119,5 +119,9 @@ public class DefaultResponseMetricBuilderTestCase {
         Assert.assertFalse(eventMap.isEmpty());
         Assert.assertEquals(eventMap.size(), 28, "Some attributes are missing from the resulting event map");
         Assert.assertEquals(eventMap.get(Constants.EVENT_TYPE), "response", "Event type should be set to fault");
+        Assert.assertEquals(eventMap.get(Constants.USER_AGENT), "Mobile Safari",
+                "User agent should be set to Mobile Safari");
+        Assert.assertEquals(eventMap.get(Constants.PLATFORM), "iOS", "Platform should be set to iOS");
+        Assert.assertEquals(eventMap.get(Constants.API_TYPE), "HTTP", "API type should be set to HTTP");
     }
 }
