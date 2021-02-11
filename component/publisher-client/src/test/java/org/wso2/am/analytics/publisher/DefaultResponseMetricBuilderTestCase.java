@@ -84,6 +84,9 @@ public class DefaultResponseMetricBuilderTestCase {
         EventQueue queue = new EventQueue(100, 1, null);
         DefaultCounterMetric metric = new DefaultCounterMetric("test.metric", queue, MetricSchema.RESPONSE);
         MetricEventBuilder builder = metric.getEventBuilder();
+        String uaString = "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, "
+                + "like Gecko) Version/5.1 Mobile/9B206 Safari/7534.48.3";
+
         Map<String, Object> eventMap = builder
                 .addAttribute(Constants.REQUEST_TIMESTAMP, OffsetDateTime.now(Clock.systemUTC()).toString())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
@@ -102,8 +105,7 @@ public class DefaultResponseMetricBuilderTestCase {
                 .addAttribute(Constants.APPLICATION_OWNER, "admin")
                 .addAttribute(Constants.REGION_ID, "NA")
                 .addAttribute(Constants.GATEWAY_TYPE, "Synapse")
-                .addAttribute(Constants.USER_AGENT, "Mozilla")
-                .addAttribute(Constants.PLATFORM, "Linux")
+                .addAttribute(Constants.USER_AGENT_HEADER, uaString)
                 .addAttribute(Constants.PROXY_RESPONSE_CODE, 401)
                 .addAttribute(Constants.TARGET_RESPONSE_CODE, 401)
                 .addAttribute(Constants.RESPONSE_CACHE_HIT, true)

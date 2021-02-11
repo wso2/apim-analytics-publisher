@@ -18,12 +18,16 @@
 
 package org.wso2.am.analytics.publisher.reporter.cloud;
 
+import org.apache.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import org.wso2.am.analytics.publisher.util.Constants;
+import ua_parser.Client;
+import ua_parser.Parser;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,12 +37,19 @@ import java.util.Map;
  * checked when building.
  */
 public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilder {
+    private static final Logger log = Logger.getLogger(DefaultResponseMetricEventBuilder.class);
     private final Map<String, Class> requiredAttributes;
     private Map<String, Object> eventMap;
+    private Parser uaParser;
 
     protected DefaultResponseMetricEventBuilder() {
         requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
         eventMap = new HashMap<>();
+        try {
+            uaParser = new Parser();
+        } catch (IOException e) {
+            log.error("Error occurred when initializing uaParser", e);
+        }
     }
 
     @Override
@@ -64,7 +75,31 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
 
     @Override
     protected Map<String, Object> buildEvent() {
-        eventMap.put(Constants.EVENT_TYPE, "response");
+        eventMap.put(Constants.EVENT_TYPE, Constants.RESPONSE_EVENT_TYPE);
+        // userAgent raw string is not required and removing
+        String userAgentHeader = (String) eventMap.remove(Constants.USER_AGENT_HEADER);
+        // userAgentHeader will not null since it is already validated
+        setUserAgentProperties(userAgentHeader);
         return eventMap;
     }
+
+    private void setUserAgentProperties(String userAgentHeader) {
+        if (uaParser == null) {
+            // if ua parser is not initialised, skip setting properties
+            return;
+        }
+        Client client = uaParser.parse(userAgentHeader);
+        String browser = client.userAgent.family;
+        if (browser == null || browser.isEmpty()) {
+            browser = Constants.UNKNOWN_VALUE;
+        }
+        String platform = client.os.family;
+        if (platform == null || platform.isEmpty()) {
+            platform = Constants.UNKNOWN_VALUE;
+        }
+
+        eventMap.put(Constants.USER_AGENT, browser);
+        eventMap.put(Constants.PLATFORM, platform);
+    }
+
 }

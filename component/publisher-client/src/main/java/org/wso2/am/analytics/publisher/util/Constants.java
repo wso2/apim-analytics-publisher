@@ -40,6 +40,7 @@ public class Constants {
     public static final String APPLICATION_OWNER = "applicationOwner";
     public static final String REGION_ID = "regionId";
     public static final String GATEWAY_TYPE = "gatewayType";
+    public static final String USER_AGENT_HEADER = "userAgentHeader";
     public static final String USER_AGENT = "userAgent";
     public static final String PLATFORM = "platform";
     public static final String PROXY_RESPONSE_CODE = "proxyResponseCode";
@@ -54,6 +55,9 @@ public class Constants {
     public static final String EVENT_TYPE = "eventType";
     public static final String API_TYPE = "apiType";
 
+    public static final String RESPONSE_EVENT_TYPE = "response";
+    public static final String FAULT_EVENT_TYPE = "fault";
+
     public static final String ERROR_TYPE = "errorType";
     public static final String ERROR_CODE = "errorCode";
     public static final String ERROR_MESSAGE = "errorMessage";
@@ -66,5 +70,5 @@ public class Constants {
     public static final String SAS_TOKEN = "sas.token";
     public static final String DEFAULT_REPORTER = "default";
 
-    public static final String AUTH_TOKEN_ENV_VAR = "API_ANL_AUTH_TOKEN";
+    public static final String UNKNOWN_VALUE = "UNKNOWN";
 }
