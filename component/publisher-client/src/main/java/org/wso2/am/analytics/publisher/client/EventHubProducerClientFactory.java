@@ -18,6 +18,7 @@
 
 package org.wso2.am.analytics.publisher.client;
 
+import com.azure.core.amqp.AmqpRetryOptions;
 import com.azure.core.credential.TokenCredential;
 import com.azure.messaging.eventhubs.EventHubClientBuilder;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
@@ -35,7 +36,8 @@ import java.net.URLDecoder;
 public class EventHubProducerClientFactory {
     private static final Logger log = Logger.getLogger(EventHubClient.class);
 
-    public static EventHubProducerClient create(String authEndpoint, String authToken)
+    public static EventHubProducerClient create(String authEndpoint, String authToken,
+                                                AmqpRetryOptions retryOptions)
             throws ConnectionRecoverableException, ConnectionUnrecoverableException {
         TokenCredential tokenCredential = new WSO2TokenCredential(authEndpoint, authToken);
         String tempSASToken = null;
@@ -47,6 +49,7 @@ public class EventHubProducerClientFactory {
         String eventhubName = getEventHubName(resourceURI);
         return new EventHubClientBuilder()
                 .credential(fullyQualifiedNamespace, eventhubName, tokenCredential)
+                .retry(retryOptions)
                 .buildProducerClient();
     }
 

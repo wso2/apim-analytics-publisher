@@ -18,6 +18,8 @@
 
 package org.wso2.am.analytics.publisher;
 
+import com.azure.core.amqp.AmqpRetryMode;
+import com.azure.core.amqp.AmqpRetryOptions;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -32,6 +34,7 @@ import org.wso2.am.analytics.publisher.reporter.cloud.EventQueue;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Map;
 
@@ -39,9 +42,16 @@ public class DefaultResponseMetricBuilderTestCase {
     private static final Logger log = Logger.getLogger(DefaultResponseMetricBuilderTestCase.class);
 
     private MetricEventBuilder builder;
+
     @BeforeMethod
     public void createBuilder() throws MetricCreationException {
-        EventHubClient client = new EventHubClient("some_endpoint", "some_token");
+        AmqpRetryOptions retryOptions = new AmqpRetryOptions()
+                .setDelay(Duration.ofSeconds(30))
+                .setMaxRetries(2)
+                .setMaxDelay(Duration.ofSeconds(120))
+                .setTryTimeout(Duration.ofSeconds(30))
+                .setMode(AmqpRetryMode.FIXED);
+        EventHubClient client = new EventHubClient("some_endpoint", "some_token", retryOptions);
         EventQueue queue = new EventQueue(100, 1, client);
         DefaultCounterMetric metric = new DefaultCounterMetric("test.builder.metric", queue, MetricSchema.RESPONSE);
         builder = metric.getEventBuilder();
