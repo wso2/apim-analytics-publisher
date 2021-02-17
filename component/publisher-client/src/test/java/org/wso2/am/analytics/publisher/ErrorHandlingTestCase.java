@@ -18,6 +18,7 @@
 
 package org.wso2.am.analytics.publisher;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -30,6 +31,7 @@ import org.wso2.am.analytics.publisher.reporter.MetricReporter;
 import org.wso2.am.analytics.publisher.reporter.MetricReporterFactory;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import org.wso2.am.analytics.publisher.util.Constants;
+import org.wso2.am.analytics.publisher.util.TestUtils;
 import org.wso2.am.analytics.publisher.util.UnitTestAppender;
 
 import java.util.HashMap;
@@ -38,7 +40,7 @@ import java.util.Map;
 public class ErrorHandlingTestCase {
 
     @Test
-    public void testConnectionUnavailability() throws MetricCreationException, MetricReportingException {
+    public void testConnectionInvalidURL() throws MetricCreationException, MetricReportingException {
         boolean errorOccurred = false;
         String message = "";
         UnitTestAppender appender = new UnitTestAppender();
@@ -60,8 +62,36 @@ public class ErrorHandlingTestCase {
         }
         Assert.assertTrue(errorOccurred, "MetricReportingException should be thrown");
         Assert.assertTrue(message.contains("Eventhub Client is not connected."), "Expected error hasn't thrown.");
-        Assert.assertTrue(appender.getMessages().contains("Unrecoverable error occurred when creating Eventhub "
-                                                                  + "Client"), "Expected error hasn't logged in the "
+        Assert.assertTrue(appender.checkContains("Unrecoverable error occurred when creating Eventhub "
+                                                         + "Client"), "Expected error hasn't logged in the "
                                   + "EventHubClientClass");
+    }
+
+    @Test(dependsOnMethods = {"testConnectionInvalidURL"})
+    public void testConnectionUnavailability() throws MetricCreationException, MetricReportingException,
+                                                      InterruptedException {
+        UnitTestAppender appender = new UnitTestAppender();
+        Logger log = Logger.getLogger(EventHubClient.class);
+        log.setLevel(Level.DEBUG);
+        log.addAppender(appender);
+
+        Map<String, String> configMap = new HashMap<>();
+        configMap.put(Constants.AUTH_API_URL, "https://localhost:1234/non-existance");
+        configMap.put(Constants.AUTH_API_TOKEN, "some_token");
+        MetricReporterFactory factory = MetricReporterFactory.getInstance();
+        factory.reset();
+        MetricReporter metricReporter = factory.createMetricReporter(configMap);
+        CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
+        Assert.assertTrue(appender.checkContains("Recoverable error occurred when creating Eventhub Client. "
+                                                         + "Retry attempts will be made"));
+        Assert.assertTrue(appender.checkContains("Provided authentication endpoint "
+                                                         + "https://localhost:1234/non-existance is not "
+                                                         + "reachable."));
+        MetricEventBuilder builder = metric.getEventBuilder();
+        TestUtils.populateBuilder(builder);
+        metric.incrementCount(builder);
+        Thread.sleep(1000);
+        Assert.assertTrue(appender.checkContains("will be parked as EventHub Client is inactive."), "Thread "
+                + "waiting log entry has not printed.");
     }
 }

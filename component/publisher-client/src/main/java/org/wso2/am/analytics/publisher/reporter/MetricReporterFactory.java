@@ -48,12 +48,12 @@ public class MetricReporterFactory {
             synchronized (this) {
                 if (reporterRegistry.get(Constants.DEFAULT_REPORTER) == null) {
                         MetricReporter reporterInstance = new DefaultAnalyticsMetricReporter(properties);
-                        reporterRegistry.put("default", reporterInstance);
+                        reporterRegistry.put(Constants.DEFAULT_REPORTER, reporterInstance);
                         return reporterInstance;
                 }
             }
         }
-        MetricReporter reporterInstance = reporterRegistry.get("default");
+        MetricReporter reporterInstance = reporterRegistry.get(Constants.DEFAULT_REPORTER);
         log.info("Metric Reporter of type " + reporterInstance.getClass().toString().replaceAll("[\r\n]", "") +
                          " is already created. Hence returning same instance");
         return reporterInstance;
@@ -88,6 +88,13 @@ public class MetricReporterFactory {
         log.info("Metric Reporter of type " + reporterInstance.getClass().toString().replaceAll("[\r\n]", "") +
                          " is already created. Hence returning same instance");
         return reporterInstance;
+    }
+
+    /**
+     * Reset the MetricReporterFactory registry. Only intended to be used in testing
+     */
+    public void reset() {
+        reporterRegistry.clear();
     }
 
     public static MetricReporterFactory getInstance() {

@@ -31,10 +31,12 @@ import org.wso2.am.analytics.publisher.util.BackoffRetryCounter;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -48,17 +50,18 @@ public class EventHubClient {
     private final ReadWriteLock readWriteLock;
     private final BackoffRetryCounter producerRetryCounter;
     private final BackoffRetryCounter eventBatchRetryCounter;
-    private final Object threadBarrier = new Object();
+    private final Lock threadBarrier;
     private final AmqpRetryOptions retryOptions;
+    private Condition waitCondition;
     private EventHubProducerClient producer;
     private EventDataBatch batch;
-    private Semaphore sendSemaphore;
     private ClientStatus clientStatus;
     private ScheduledExecutorService scheduledExecutorService;
 
     public EventHubClient(String authEndpoint, String authToken, AmqpRetryOptions retryOptions) {
+        threadBarrier = new ReentrantLock();
+        waitCondition = threadBarrier.newCondition();
         readWriteLock = new ReentrantReadWriteLock(true);
-        sendSemaphore = new Semaphore(1);
         scheduledExecutorService = Executors.newScheduledThreadPool(2, new DefaultAnalyticsThreadFactory(
                 "Reconnection-Service"));
         producerRetryCounter = new BackoffRetryCounter();
@@ -94,7 +97,12 @@ public class EventHubClient {
             }
             clientStatus = ClientStatus.CONNECTED;
             producerRetryCounter.reset();
-            threadBarrier.notifyAll();
+            try {
+                threadBarrier.lock();
+                waitCondition.signalAll();
+            } finally {
+                threadBarrier.unlock();
+            }
         } catch (ConnectionRecoverableException e) {
             clientStatus = ClientStatus.RETRYING;
             log.error("Recoverable error occurred when creating Eventhub Client. Retry attempts will be made. Reason :"
@@ -131,7 +139,7 @@ public class EventHubClient {
                             producer.send(batch);
                             batch = createBatchWithRetry();
                             isAdded = batch.tryAdd(eventData);
-                            log.debug("Published " + size + " events to Analytics cluster.");
+                            log.info("Published " + size + " events to Analytics cluster.");
                         }
                     } catch (Exception e) {
                         if (e.getCause() instanceof TimeoutException) {
@@ -192,15 +200,18 @@ public class EventHubClient {
             }
         } else {
             try {
+                threadBarrier.lock();
                 log.debug(Thread.currentThread().getName().replaceAll("[\r\n]", "") + " will be parked as EventHub "
                                   + "Client is inactive.");
-                threadBarrier.wait();
+                waitCondition.await();
                 log.debug(Thread.currentThread().getName().replaceAll("[\r\n]", "") + " will be resumes as EventHub "
                                   + "Client is active.");
-                sendEvent(event);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+            } finally {
+                threadBarrier.unlock();
             }
+            sendEvent(event);
         }
     }
 

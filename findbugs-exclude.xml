@@ -28,7 +28,7 @@
     </Match>
     <Match>
         <Class name="org.wso2.am.analytics.publisher.client.EventHubClient"/>
-        <Bug pattern="WA_NOT_IN_LOOP"/>
+        <Bug pattern="WA_AWAIT_NOT_IN_LOOP"/>
     </Match>
     <Match>
         <Class name="org.wso2.am.analytics.publisher.util.BackoffRetryCounter"/>
