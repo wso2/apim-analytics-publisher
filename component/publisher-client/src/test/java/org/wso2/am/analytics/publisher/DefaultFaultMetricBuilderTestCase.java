@@ -97,6 +97,7 @@ public class DefaultFaultMetricBuilderTestCase {
                 .addAttribute(Constants.ERROR_CODE, 401)
                 .addAttribute(Constants.ERROR_MESSAGE, "Authentication Error")
                 .addAttribute(Constants.API_ID, "9876-54f1")
+                .addAttribute(Constants.API_TYPE, "HTTP")
                 .addAttribute(Constants.API_NAME, "PizzaShack")
                 .addAttribute(Constants.API_VERSION, "1.0.0")
                 .addAttribute(Constants.API_CREATION, "admin")
@@ -113,7 +114,8 @@ public class DefaultFaultMetricBuilderTestCase {
                 .build();
 
         Assert.assertFalse(eventMap.isEmpty());
-        Assert.assertEquals(eventMap.size(), 21, "Some attributes are missing from the resulting event map");
+        Assert.assertEquals(eventMap.size(), 22, "Some attributes are missing from the resulting event map");
         Assert.assertEquals(eventMap.get(Constants.EVENT_TYPE), "fault", "Event type should be set to fault");
+        Assert.assertEquals(eventMap.get(Constants.API_TYPE), "HTTP", "API type should be set to HTTP");
     }
 }

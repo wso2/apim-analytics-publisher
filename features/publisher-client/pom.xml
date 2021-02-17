@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.am.analytics.publisher</groupId>
         <artifactId>apim-analytics-publisher-features</artifactId>
-        <version>0.3.1-SNAPSHOT</version>
+        <version>0.4.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -77,6 +77,10 @@
         <dependency>
             <groupId>org.apache.qpid</groupId>
             <artifactId>proton-j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ua.parser.wso2</groupId>
+            <artifactId>ua-parser</artifactId>
         </dependency>
     </dependencies>
 
@@ -141,6 +145,14 @@
                                 <bundle>
                                     <symbolicName>org.apache.qpid.proton-j</symbolicName>
                                     <version>${proton-j.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.apache.qpid.proton-j</symbolicName>
+                                    <version>${proton-j.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>ua-parser</symbolicName>
+                                    <version>${ua_parser.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>
