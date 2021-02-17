@@ -50,10 +50,10 @@ public class Constants {
     public static final String BACKEND_LATENCY = "backendLatency";
     public static final String REQUEST_MEDIATION_LATENCY = "requestMediationLatency";
     public static final String RESPONSE_MEDIATION_LATENCY = "responseMediationLatency";
-    public static final String DEPLOYMENT_ID = "deploymentId";
     public static final String REQUEST_TIMESTAMP = "requestTimestamp";
     public static final String EVENT_TYPE = "eventType";
     public static final String API_TYPE = "apiType";
+    public static final String USER_IP = "userIp";
 
     public static final String RESPONSE_EVENT_TYPE = "response";
     public static final String FAULT_EVENT_TYPE = "fault";
