@@ -55,6 +55,8 @@ public class AuthClient {
         } catch (IllegalArgumentException e) {
             throw new ConnectionUnrecoverableException("Invalid apim.analytics configurations provided. Please update "
                                                                + "configurations and restart the instance.");
+        } catch (FeignException.Forbidden e) {
+            throw new ConnectionRecoverableException("Publisher has been temporarily revoked.");
         } catch (Exception e) {
             //we will retry for any other exception
             throw new ConnectionRecoverableException("Exception " + e.getClass() + " occurred.");
