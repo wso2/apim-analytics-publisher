@@ -86,6 +86,9 @@ public class EventHubClient {
     private void createProducerWithRetry(String authEndpoint, String authToken,
                                          AmqpRetryOptions retryOptions, boolean createBatch) {
         try {
+            if (producer != null) {
+                producer.close();
+            }
             producer = EventHubProducerClientFactory.create(authEndpoint, authToken, retryOptions);
             try {
                 if (createBatch) {

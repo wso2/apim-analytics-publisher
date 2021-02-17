@@ -68,9 +68,11 @@ class WSO2TokenCredential implements TokenCredential {
             backoffRetryCounter.increment();
             return getToken(tokenRequestContext);
         } catch (ConnectionUnrecoverableException e) {
+            //Do not pass the exception. Publishing threads will encounter authentication issue and then try to
+            // reinitialize publisher.
             log.error("Error occurred when retrieving SAS token.", e);
             backoffRetryCounter.reset();
-            throw new RuntimeException("Error occurred when retrieving SAS token.");
+            return null;
         }
     }
 }
