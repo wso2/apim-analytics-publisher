@@ -41,7 +41,6 @@ import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_NAME;
 import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_OWNER;
 import static org.wso2.am.analytics.publisher.util.Constants.BACKEND_LATENCY;
 import static org.wso2.am.analytics.publisher.util.Constants.CORRELATION_ID;
-import static org.wso2.am.analytics.publisher.util.Constants.DEPLOYMENT_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.DESTINATION;
 import static org.wso2.am.analytics.publisher.util.Constants.ERROR_CODE;
 import static org.wso2.am.analytics.publisher.util.Constants.ERROR_MESSAGE;
@@ -57,6 +56,7 @@ import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_LATENCY;
 import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_MEDIATION_LATENCY;
 import static org.wso2.am.analytics.publisher.util.Constants.TARGET_RESPONSE_CODE;
 import static org.wso2.am.analytics.publisher.util.Constants.USER_AGENT_HEADER;
+import static org.wso2.am.analytics.publisher.util.Constants.USER_IP;
 
 /**
  * Input Validator for {@link DefaultAnalyticsMetricReporter}. Validator holds all required attributes against which
@@ -90,7 +90,7 @@ public class DefaultInputValidator {
             new AbstractMap.SimpleImmutableEntry<>(BACKEND_LATENCY, Long.class),
             new AbstractMap.SimpleImmutableEntry<>(REQUEST_MEDIATION_LATENCY, Long.class),
             new AbstractMap.SimpleImmutableEntry<>(RESPONSE_MEDIATION_LATENCY, Long.class),
-            new AbstractMap.SimpleImmutableEntry<>(DEPLOYMENT_ID, String.class))
+            new AbstractMap.SimpleImmutableEntry<>(USER_IP, String.class))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     private static final Map<String, Class> faultSchema = Stream.of(
@@ -112,8 +112,7 @@ public class DefaultInputValidator {
             new AbstractMap.SimpleImmutableEntry<>(REGION_ID, String.class),
             new AbstractMap.SimpleImmutableEntry<>(GATEWAY_TYPE, String.class),
             new AbstractMap.SimpleImmutableEntry<>(PROXY_RESPONSE_CODE, Integer.class),
-            new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class),
-            new AbstractMap.SimpleImmutableEntry<>(DEPLOYMENT_ID, String.class))
+            new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     private static final List<String> configProperties = new ArrayList<>();
