@@ -27,6 +27,8 @@ import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricReporter;
 import org.wso2.am.analytics.publisher.reporter.MetricReporterFactory;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
+import org.wso2.am.analytics.publisher.util.Constants;
+import org.wso2.am.analytics.publisher.util.TestUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,6 +81,28 @@ public class MetricReporterTestCase {
         configs.put("consumer.secret", "some_secret");
         configs.put("consumer.key", "");
         createAndPublish(configs, null);
+    }
+
+    @Test
+    public void testCompleteFlow() throws MetricCreationException, MetricReportingException, InterruptedException {
+        Map<String, String> configMap = new HashMap<>();
+        String authURL = System.getenv(Constants.AUTH_API_URL);
+        String authToken = System.getenv(Constants.AUTH_API_TOKEN);
+        if (authToken != null && authURL != null) {
+            configMap.put(Constants.AUTH_API_URL, authURL);
+            configMap.put(Constants.AUTH_API_TOKEN, authToken);
+        } else {
+            return;
+        }
+        MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configMap);
+        CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
+        for (int i = 0; i < 5; i++) {
+            MetricEventBuilder builder = metric.getEventBuilder();
+            TestUtils.populateBuilder(builder);
+            metric.incrementCount(builder);
+        }
+        Thread.sleep(2000);
+        //Assertions will be done after mocking eventhub client
     }
 
 

@@ -20,12 +20,15 @@ package org.wso2.am.analytics.publisher.util;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UnitTestAppender extends AppenderSkeleton {
-    private String messages;
+    private List<String> messages = new ArrayList<>();
 
     @Override
     protected void append(LoggingEvent loggingEvent) {
-        messages = loggingEvent.getRenderedMessage();
+        messages.add(loggingEvent.getRenderedMessage());
     }
 
     @Override
@@ -37,7 +40,16 @@ public class UnitTestAppender extends AppenderSkeleton {
         return false;
     }
 
-    public String getMessages() {
+    public List<String> getMessages() {
         return messages;
+    }
+
+    public boolean checkContains(String message) {
+        for (String log : messages) {
+            if (log.contains(message)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

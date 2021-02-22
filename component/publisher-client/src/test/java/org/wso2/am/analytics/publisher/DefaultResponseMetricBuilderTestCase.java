@@ -18,9 +18,13 @@
 
 package org.wso2.am.analytics.publisher;
 
+import com.azure.core.amqp.AmqpRetryMode;
+import com.azure.core.amqp.AmqpRetryOptions;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.wso2.am.analytics.publisher.client.EventHubClient;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
@@ -30,26 +34,37 @@ import org.wso2.am.analytics.publisher.reporter.cloud.EventQueue;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Map;
 
 public class DefaultResponseMetricBuilderTestCase {
     private static final Logger log = Logger.getLogger(DefaultResponseMetricBuilderTestCase.class);
 
+    private MetricEventBuilder builder;
+
+    @BeforeMethod
+    public void createBuilder() throws MetricCreationException {
+        AmqpRetryOptions retryOptions = new AmqpRetryOptions()
+                .setDelay(Duration.ofSeconds(30))
+                .setMaxRetries(2)
+                .setMaxDelay(Duration.ofSeconds(120))
+                .setTryTimeout(Duration.ofSeconds(30))
+                .setMode(AmqpRetryMode.FIXED);
+        EventHubClient client = new EventHubClient("some_endpoint", "some_token", retryOptions);
+        EventQueue queue = new EventQueue(100, 1, client);
+        DefaultCounterMetric metric = new DefaultCounterMetric("test.builder.metric", queue, MetricSchema.RESPONSE);
+        builder = metric.getEventBuilder();
+    }
+
     @Test(expectedExceptions = MetricReportingException.class)
     public void testMissingAttributes() throws MetricCreationException, MetricReportingException {
-        EventQueue queue = new EventQueue(100, 1, null);
-        DefaultCounterMetric metric = new DefaultCounterMetric("test.metric", queue, MetricSchema.RESPONSE);
-        MetricEventBuilder builder = metric.getEventBuilder();
         builder.addAttribute("apiName", "PizzaShack");
         builder.build();
     }
 
     @Test(expectedExceptions = MetricReportingException.class)
     public void testAttributesWithInvalidTypes() throws MetricCreationException, MetricReportingException {
-        EventQueue queue = new EventQueue(100, 1, null);
-        DefaultCounterMetric metric = new DefaultCounterMetric("test.metric", queue, MetricSchema.RESPONSE);
-        MetricEventBuilder builder = metric.getEventBuilder();
         builder.addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.KEY_TYPE, "prod")
@@ -81,9 +96,6 @@ public class DefaultResponseMetricBuilderTestCase {
 
     @Test
     public void testMetricBuilder() throws MetricCreationException, MetricReportingException {
-        EventQueue queue = new EventQueue(100, 1, null);
-        DefaultCounterMetric metric = new DefaultCounterMetric("test.metric", queue, MetricSchema.RESPONSE);
-        MetricEventBuilder builder = metric.getEventBuilder();
         String uaString = "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, "
                 + "like Gecko) Version/5.1 Mobile/9B206 Safari/7534.48.3";
 

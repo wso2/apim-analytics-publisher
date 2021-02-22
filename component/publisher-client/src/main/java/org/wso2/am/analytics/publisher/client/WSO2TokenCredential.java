@@ -23,7 +23,9 @@ import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
 import org.apache.log4j.Logger;
 import org.wso2.am.analytics.publisher.auth.AuthClient;
-import org.wso2.am.analytics.publisher.exception.AuthenticationException;
+import org.wso2.am.analytics.publisher.exception.ConnectionRecoverableException;
+import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
+import org.wso2.am.analytics.publisher.util.BackoffRetryCounter;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -36,12 +38,14 @@ import java.util.Arrays;
  */
 class WSO2TokenCredential implements TokenCredential {
     private static final Logger log = Logger.getLogger(WSO2TokenCredential.class);
-    private String authEndpoint;
-    private String authToken;
+    private final String authEndpoint;
+    private final String authToken;
+    private BackoffRetryCounter backoffRetryCounter;
 
     public WSO2TokenCredential(String authEndpoint, String authToken) {
         this.authEndpoint = authEndpoint;
         this.authToken = authToken;
+        backoffRetryCounter = new BackoffRetryCounter();
     }
 
     @Override
@@ -49,13 +53,27 @@ class WSO2TokenCredential implements TokenCredential {
         log.debug("Trying to retrieving a new SAS token.");
         try {
             String sasToken = AuthClient.getSASToken(this.authEndpoint, this.authToken);
+            backoffRetryCounter.reset();
             log.debug("New SAS token retrieved.");
             // Using lower duration than actual.
             OffsetDateTime time = getExpirationTime(sasToken);
             return Mono.fromCallable(() -> new AccessToken(sasToken, time));
-        } catch (AuthenticationException e) {
+        } catch (ConnectionRecoverableException e) {
+            log.error("Error occurred when retrieving SAS token. Connection will be retried in "
+                              + backoffRetryCounter.getTimeInterval().replaceAll("[\r\n]", ""), e);
+            try {
+                Thread.sleep(backoffRetryCounter.getTimeIntervalMillis());
+            } catch (InterruptedException interruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            backoffRetryCounter.increment();
+            return getToken(tokenRequestContext);
+        } catch (ConnectionUnrecoverableException e) {
+            //Do not pass the exception. Publishing threads will encounter authentication issue and then try to
+            // reinitialize publisher.
             log.error("Error occurred when retrieving SAS token.", e);
-            throw new RuntimeException("Error occurred when retrieving SAS token.", e);
+            backoffRetryCounter.reset();
+            return null;
         }
     }
 

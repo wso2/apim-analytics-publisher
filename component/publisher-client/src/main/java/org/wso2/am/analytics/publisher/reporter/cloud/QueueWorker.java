@@ -62,14 +62,13 @@ public class QueueWorker implements Runnable {
                         event = new Gson().toJson(eventMap);
                     } catch (MetricReportingException e) {
                         log.error("Builder instance is not duly filled. Event building failed", e);
+                        continue;
                     }
                     client.sendEvent(event);
                 } else {
-                    //if we are done with consuming blocking queue flush the EventHub Client batch
-                    client.flushEvents();
                     break;
                 }
-                if (eventQueue.size() == 0) {
+                if (eventQueue.size() == 0 && threadPoolExecutor.getActiveCount() == 1) {
                     //if we are done with consuming blocking queue flush the EventHub Client batch
                     client.flushEvents();
                     break;

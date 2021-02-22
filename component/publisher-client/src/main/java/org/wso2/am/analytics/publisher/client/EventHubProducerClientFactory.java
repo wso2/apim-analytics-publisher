@@ -18,12 +18,14 @@
 
 package org.wso2.am.analytics.publisher.client;
 
+import com.azure.core.amqp.AmqpRetryOptions;
 import com.azure.core.credential.TokenCredential;
 import com.azure.messaging.eventhubs.EventHubClientBuilder;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
 import org.apache.log4j.Logger;
 import org.wso2.am.analytics.publisher.auth.AuthClient;
-import org.wso2.am.analytics.publisher.exception.AuthenticationException;
+import org.wso2.am.analytics.publisher.exception.ConnectionRecoverableException;
+import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -34,26 +36,25 @@ import java.net.URLDecoder;
 public class EventHubProducerClientFactory {
     private static final Logger log = Logger.getLogger(EventHubClient.class);
 
-    public static EventHubProducerClient create(String authEndpoint, String authToken) {
+    public static EventHubProducerClient create(String authEndpoint, String authToken,
+                                                AmqpRetryOptions retryOptions)
+            throws ConnectionRecoverableException, ConnectionUnrecoverableException {
         TokenCredential tokenCredential = new WSO2TokenCredential(authEndpoint, authToken);
-        String tempSASToken;
-        try {
-            // generate SAS token to get eventhub meta data
-            tempSASToken = getSASToken(authEndpoint, authToken);
-        } catch (AuthenticationException e) {
-            log.error("SAS token generation failed.", e);
-            return null;
-        }
+        String tempSASToken = null;
+        // generate SAS token to get eventhub meta data
+        tempSASToken = getSASToken(authEndpoint, authToken);
 
         String resourceURI = getResourceURI(tempSASToken);
         String fullyQualifiedNamespace = getNamespace(resourceURI);
         String eventhubName = getEventHubName(resourceURI);
         return new EventHubClientBuilder()
                 .credential(fullyQualifiedNamespace, eventhubName, tokenCredential)
+                .retry(retryOptions)
                 .buildProducerClient();
     }
 
-    private static String getSASToken(String authEndpoint, String authToken) throws AuthenticationException {
+    private static String getSASToken(String authEndpoint, String authToken) throws ConnectionRecoverableException,
+                                                                                    ConnectionUnrecoverableException {
         return AuthClient.getSASToken(authEndpoint, authToken);
     }
 

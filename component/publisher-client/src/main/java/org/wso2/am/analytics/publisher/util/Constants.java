@@ -21,8 +21,7 @@ package org.wso2.am.analytics.publisher.util;
  * Class to hold String constants
  */
 public class Constants {
-    public static final String CHOREO_ANALYTICS_REPORTER_FQCN = "org.wso2.am.analytics.publisher.reporter"
-            + ".ChoreoAnalyticsMetricReporter";
+    //Event attribute names
     public static final String CORRELATION_ID = "correlationId";
     public static final String KEY_TYPE = "keyType";
     public static final String API_ID = "apiId";
@@ -36,7 +35,6 @@ public class Constants {
     public static final String DESTINATION = "destination";
     public static final String APPLICATION_ID = "applicationId";
     public static final String APPLICATION_NAME = "applicationName";
-    public static final String APPLICATION_CONSUMER_KEY = "applicationConsumerKey";
     public static final String APPLICATION_OWNER = "applicationOwner";
     public static final String REGION_ID = "regionId";
     public static final String GATEWAY_TYPE = "gatewayType";
@@ -54,21 +52,33 @@ public class Constants {
     public static final String EVENT_TYPE = "eventType";
     public static final String API_TYPE = "apiType";
     public static final String USER_IP = "userIp";
-
-    public static final String RESPONSE_EVENT_TYPE = "response";
-    public static final String FAULT_EVENT_TYPE = "fault";
-
     public static final String ERROR_TYPE = "errorType";
     public static final String ERROR_CODE = "errorCode";
     public static final String ERROR_MESSAGE = "errorMessage";
 
+    //Builder event types
+    public static final String RESPONSE_EVENT_TYPE = "response";
+    public static final String FAULT_EVENT_TYPE = "fault";
+
+    //Reporter config properties
     public static final String AUTH_API_URL = "auth.api.url";
     public static final String AUTH_API_TOKEN = "auth.api.token";
-    public static final String TOKEN_API_URL = "token.api.url";
-    public static final String CONSUMER_KEY = "consumer.key";
-    public static final String CONSUMER_SECRET = "consumer.secret";
-    public static final String SAS_TOKEN = "sas.token";
+
+    //Reporter constants
     public static final String DEFAULT_REPORTER = "default";
+
+    //EventHub Client retry options constants
+    public static final int DEFAULT_MAX_RETRIES = 2;
+    public static final int DEFAULT_DELAY = 30;
+    public static final int DEFAULT_MAX_DELAY = 120;
+    public static final int DEFAULT_TRY_TIMEOUT = 60;
+    public static final String EVENTHUB_CLIENT_MAX_RETRIES = "eventhub.client.max.retries";
+    public static final String EVENTHUB_CLIENT_DELAY = "eventhub.client.delay";
+    public static final String EVENTHUB_CLIENT_MAX_DELAY = "eventhub.client.max.delay";
+    public static final String EVENTHUB_CLIENT_TRY_TIMEOUT = "eventhub.client.try.timeout";
+    public static final String EVENTHUB_CLIENT_RETRY_MODE = "eventhub.client.retry.mode";
+    public static final String FIXED = "fixed";
+    public static final String EXPONENTIAL = "exponential";
 
     public static final String UNKNOWN_VALUE = "UNKNOWN";
 }

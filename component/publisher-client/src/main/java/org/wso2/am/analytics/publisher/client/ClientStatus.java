@@ -16,14 +16,13 @@
  * under the License.
  */
 
-package org.wso2.am.analytics.publisher.reporter;
+package org.wso2.am.analytics.publisher.client;
 
 /**
- * Enum to represent supported metric schema types by the reporting framework
+ * Enum to represent the status of Eventhub publisher
  */
-public enum MetricSchema {
-    RESPONSE,
-    ERROR,
-    LATENCY,
-    PAYLOAD
+public enum ClientStatus {
+    CONNECTED,
+    NOT_CONNECTED,
+    RETRYING
 }

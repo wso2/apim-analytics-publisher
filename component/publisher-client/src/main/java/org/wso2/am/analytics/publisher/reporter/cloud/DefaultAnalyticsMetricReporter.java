@@ -18,6 +18,9 @@
 
 package org.wso2.am.analytics.publisher.reporter.cloud;
 
+import com.azure.core.amqp.AmqpRetryMode;
+import com.azure.core.amqp.AmqpRetryOptions;
+import org.apache.log4j.Logger;
 import org.wso2.am.analytics.publisher.client.EventHubClient;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricReporter;
@@ -26,6 +29,7 @@ import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import org.wso2.am.analytics.publisher.reporter.TimerMetric;
 import org.wso2.am.analytics.publisher.util.Constants;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +38,7 @@ import java.util.Map;
  * cloud in a secure and reliable way.
  */
 public class DefaultAnalyticsMetricReporter extends AbstractMetricReporter {
+    private static final Logger log = Logger.getLogger(DefaultAnalyticsMetricReporter.class);
     private EventQueue eventQueue;
 
     public DefaultAnalyticsMetricReporter(Map<String, String> properties) throws MetricCreationException {
@@ -48,8 +53,71 @@ public class DefaultAnalyticsMetricReporter extends AbstractMetricReporter {
         }
         String authToken = properties.get(Constants.AUTH_API_TOKEN);
         String authEndpoint = properties.get(Constants.AUTH_API_URL);
-        EventHubClient client = new EventHubClient(authEndpoint, authToken);
+        AmqpRetryOptions retryOptions = createRetryOptions(properties);
+        EventHubClient client = new EventHubClient(authEndpoint, authToken, retryOptions);
         eventQueue = new EventQueue(queueSize, workerThreads, client);
+    }
+
+    private AmqpRetryOptions createRetryOptions(Map<String, String> properties) {
+        int maxRetries = Constants.DEFAULT_MAX_RETRIES;
+        int delay = Constants.DEFAULT_DELAY;
+        int maxDelay = Constants.DEFAULT_MAX_DELAY;
+        int tryTimeout = Constants.DEFAULT_TRY_TIMEOUT;
+        AmqpRetryMode retryMode = AmqpRetryMode.FIXED;
+        if (properties.get(Constants.EVENTHUB_CLIENT_MAX_RETRIES) != null) {
+            int tempMaxRetries = Integer.parseInt(properties.get(Constants.EVENTHUB_CLIENT_MAX_RETRIES));
+            if (tempMaxRetries > 0) {
+                maxRetries = tempMaxRetries;
+            } else {
+                log.warn("Provided " + Constants.EVENTHUB_CLIENT_MAX_RETRIES + "value is less than 0 and not "
+                                 + "acceptable. Hence using the default value.");
+            }
+        }
+        if (properties.get(Constants.EVENTHUB_CLIENT_DELAY) != null) {
+            int tempDelay = Integer.parseInt(properties.get(Constants.EVENTHUB_CLIENT_DELAY));
+            if (tempDelay > 0) {
+                delay = tempDelay;
+            } else {
+                log.warn("Provided " + Constants.EVENTHUB_CLIENT_DELAY + "value is less than 0 and not acceptable. "
+                                 + "Hence using the default value.");
+            }
+        }
+        if (properties.get(Constants.EVENTHUB_CLIENT_MAX_DELAY) != null) {
+            int tempMaxDelay = Integer.parseInt(properties.get(Constants.EVENTHUB_CLIENT_MAX_DELAY));
+            if (tempMaxDelay > 0) {
+                maxDelay = tempMaxDelay;
+            } else {
+                log.warn("Provided " + Constants.EVENTHUB_CLIENT_MAX_DELAY + "value is less than 0 and not acceptable. "
+                                 + "Hence using the default value.");
+            }
+        }
+        if (properties.get(Constants.EVENTHUB_CLIENT_TRY_TIMEOUT) != null) {
+            int tempTryTimeout = Integer.parseInt(properties.get(Constants.EVENTHUB_CLIENT_TRY_TIMEOUT));
+            if (tempTryTimeout > 0) {
+                tryTimeout = tempTryTimeout;
+            } else {
+                log.warn("Provided " + Constants.EVENTHUB_CLIENT_TRY_TIMEOUT + "value is less than 0 and not "
+                                 + "acceptable. Hence using the default value.");
+            }
+        }
+        if (properties.get(Constants.EVENTHUB_CLIENT_RETRY_MODE) != null) {
+            String tempRetryMode = properties.get(Constants.EVENTHUB_CLIENT_RETRY_MODE);
+            if (tempRetryMode.equals(Constants.FIXED)) {
+                //do nothing
+            } else if (tempRetryMode.equals(Constants.EXPONENTIAL)) {
+                retryMode = AmqpRetryMode.EXPONENTIAL;
+            } else {
+                log.warn("Provided " + Constants.EVENTHUB_CLIENT_RETRY_MODE + "value is not supported. Hence will "
+                                 + "using the default value.");
+            }
+        }
+        return new AmqpRetryOptions()
+                .setDelay(Duration.ofSeconds(delay))
+                .setMaxRetries(maxRetries)
+                .setMaxDelay(Duration.ofSeconds(maxDelay))
+                .setTryTimeout(Duration.ofSeconds(tryTimeout))
+                .setMode(retryMode);
+
     }
 
     @Override

@@ -16,14 +16,17 @@
  * under the License.
  */
 
-package org.wso2.am.analytics.publisher.reporter;
+package org.wso2.am.analytics.publisher.exception;
 
 /**
- * Enum to represent supported metric schema types by the reporting framework
+ * Exception to represent any unrecoverable errors event publishing client encounter
  */
-public enum MetricSchema {
-    RESPONSE,
-    ERROR,
-    LATENCY,
-    PAYLOAD
+public class ConnectionUnrecoverableException extends Exception {
+    public ConnectionUnrecoverableException(String msg) {
+        super(msg);
+    }
+
+    public ConnectionUnrecoverableException(String msg, Throwable e) {
+        super(msg, e);
+    }
 }

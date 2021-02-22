@@ -30,7 +30,7 @@ public class DefaultAnalyticsThreadFactory implements ThreadFactory {
     public DefaultAnalyticsThreadFactory(String threadPoolExecutorName) {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
-        namePrefix = "Choreo-Analytics-" + threadPoolExecutorName + "-pool-" + poolNumber.getAndIncrement() +
+        namePrefix = "Cloud-Analytics-" + threadPoolExecutorName + "-pool-" + poolNumber.getAndIncrement() +
                 "-thread-";
     }
 
