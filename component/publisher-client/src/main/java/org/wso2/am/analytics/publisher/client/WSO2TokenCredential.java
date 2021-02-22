@@ -26,9 +26,10 @@ import org.wso2.am.analytics.publisher.auth.AuthClient;
 import org.wso2.am.analytics.publisher.exception.AuthenticationException;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 
 /**
  * WSO2 SAS token refresh implementation for TokenCredential
@@ -50,11 +51,28 @@ class WSO2TokenCredential implements TokenCredential {
             String sasToken = AuthClient.getSASToken(this.authEndpoint, this.authToken);
             log.debug("New SAS token retrieved.");
             // Using lower duration than actual.
-            OffsetDateTime time = OffsetDateTime.now(ZoneOffset.UTC).plus(Duration.ofHours(20));
+            OffsetDateTime time = getExpirationTime(sasToken);
             return Mono.fromCallable(() -> new AccessToken(sasToken, time));
         } catch (AuthenticationException e) {
             log.error("Error occurred when retrieving SAS token.", e);
             throw new RuntimeException("Error occurred when retrieving SAS token.", e);
         }
+    }
+
+    private OffsetDateTime getExpirationTime(String sharedAccessSignature) {
+        String[] parts = sharedAccessSignature.split("&");
+        return Arrays.stream(parts).map(part -> part.split("="))
+                .filter(pair -> pair.length == 2 && pair[0].equalsIgnoreCase("se"))
+                .findFirst().map(pair -> pair[1])
+                .map((expirationTimeStr) -> {
+                    try {
+                        long epochSeconds = Long.parseLong(expirationTimeStr);
+                        return Instant.ofEpochSecond(epochSeconds).atOffset(ZoneOffset.UTC);
+                    } catch (NumberFormatException e) {
+                        log.error("Invalid expiration time format in the SAS token.", e);
+                        return OffsetDateTime.MAX;
+                    }
+                })
+                .orElse(OffsetDateTime.MAX);
     }
 }
