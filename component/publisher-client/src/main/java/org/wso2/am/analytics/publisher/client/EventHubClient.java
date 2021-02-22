@@ -110,19 +110,23 @@ public class EventHubClient {
             clientStatus = ClientStatus.RETRYING;
             log.error("Recoverable error occurred when creating Eventhub Client. Retry attempts will be made. Reason :"
                               + e.getMessage().replaceAll("[\r\n]", ""));
-            log.debug("Recoverable error occurred when creating Eventhub Client using following attributes. Auth "
-                              + "endpoint: " + authEndpoint.replaceAll("[\r\n]", "") + ". Retry attempts will be made. "
-                              + "Reason : " + e.getMessage().replaceAll("[\r\n]", ""), e);
+            if (log.isDebugEnabled()) {
+                log.debug("Recoverable error occurred when creating Eventhub Client using following attributes. Auth "
+                                  + "endpoint: " + authEndpoint.replaceAll("[\r\n]", "") + ". Retry attempts will be "
+                                  + "made. Reason : " + e.getMessage().replaceAll("[\r\n]", ""), e);
+            }
             retryWithBackoff(authEndpoint, authToken, retryOptions, createBatch);
         } catch (ConnectionUnrecoverableException e) {
             clientStatus = ClientStatus.NOT_CONNECTED;
             log.error("Unrecoverable error occurred when creating Eventhub Client. Analytics event publishing will be"
                               + " disabled until issue is rectified. Reason: "
                               + e.getMessage().replaceAll("[\r\n]", ""));
-            log.debug("Unrecoverable error occurred when creating Eventhub Client using following attributes. Auth "
-                              + "endpoint: " + authEndpoint.replaceAll("[\r\n]", "") + ". Analytics event publishing "
-                              + "will be disabled until issue is rectified. Reason: "
-                              + e.getMessage().replaceAll("[\r\n]", ""), e);
+            if (log.isDebugEnabled()) {
+                log.debug("Unrecoverable error occurred when creating Eventhub Client using following attributes. Auth "
+                                  + "endpoint: " + authEndpoint.replaceAll("[\r\n]", "") + ". Analytics event "
+                                  + "publishing will be disabled until issue is rectified. Reason: "
+                                  + e.getMessage().replaceAll("[\r\n]", ""), e);
+            }
         }
     }
 
@@ -144,15 +148,8 @@ public class EventHubClient {
                             isAdded = batch.tryAdd(eventData);
                             log.info("Published " + size + " events to Analytics cluster.");
                         }
-                    } catch (Exception e) {
-                        if (e.getCause() instanceof TimeoutException) {
-                            log.error("Timeout occurred after retrying " + retryOptions.getMaxRetries() + " "
-                                              + "times with an timeout of " + retryOptions.getTryTimeout() + " "
-                                              + "seconds while trying to publish EventDataBatch. Next retry cycle "
-                                              + "will begin shortly.");
-                            readWriteLock.writeLock().unlock();
-                            sendEvent(event);
-                        } else if (e instanceof AmqpException && isAuthenticationFailure((AmqpException) e)) {
+                    } catch (AmqpException e) {
+                        if (isAuthenticationFailure(e)) {
                             //if authentication error try to reinitialize publisher. Retrying will deal with any
                             // network or revocation failures.
                             log.error("Authentication issue happened. Producer client will be re-initialized "
@@ -161,8 +158,7 @@ public class EventHubClient {
                             createProducerWithRetry(authEndpoint, authToken, retryOptions, false);
                             readWriteLock.writeLock().unlock();
                             sendEvent(event);
-                        } else if (e instanceof AmqpException && ((AmqpException) e).getErrorCondition()
-                                == AmqpErrorCondition.RESOURCE_LIMIT_EXCEEDED) {
+                        } else if (e.getErrorCondition() == AmqpErrorCondition.RESOURCE_LIMIT_EXCEEDED) {
                             //If resource limit is exceeded we will retry after a constant delay
                             log.error("Resource limit exceeded when publishing EventDataBatch. Operation will be "
                                               + "retried after constant delay");
@@ -171,6 +167,22 @@ public class EventHubClient {
                             } catch (InterruptedException interruptedException) {
                                 Thread.currentThread().interrupt();
                             }
+                            readWriteLock.writeLock().unlock();
+                            sendEvent(event);
+                        } else {
+                            //For any other exception
+                            log.error("Unknown error occurred while publishing EventDataBatch. Producer client will "
+                                              + "be re-initialized. Events may be lost in the process.");
+                            this.clientStatus = ClientStatus.RETRYING;
+                            readWriteLock.writeLock().unlock();
+                            createProducerWithRetry(authEndpoint, authToken, retryOptions, true);
+                        }
+                    } catch (Exception e) {
+                        if (e.getCause() instanceof TimeoutException) {
+                            log.error("Timeout occurred after retrying " + retryOptions.getMaxRetries() + " "
+                                              + "times with an timeout of " + retryOptions.getTryTimeout() + " "
+                                              + "seconds while trying to publish EventDataBatch. Next retry cycle "
+                                              + "will begin shortly.");
                             readWriteLock.writeLock().unlock();
                             sendEvent(event);
                         } else {
@@ -190,9 +202,13 @@ public class EventHubClient {
                     }
                 }
                 if (isAdded) {
-                    log.debug("Adding event: " + event.replaceAll("[\r\n]", ""));
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding event: " + event.replaceAll("[\r\n]", ""));
+                    }
                 } else {
-                    log.debug("Failed to add event: " + event.replaceAll("[\r\n]", ""));
+                    if (log.isDebugEnabled()) {
+                        log.debug("Failed to add event: " + event.replaceAll("[\r\n]", ""));
+                    }
                 }
             } finally {
                 try {
@@ -204,11 +220,15 @@ public class EventHubClient {
         } else {
             try {
                 threadBarrier.lock();
-                log.debug(Thread.currentThread().getName().replaceAll("[\r\n]", "") + " will be parked as EventHub "
-                                  + "Client is inactive.");
+                if (log.isDebugEnabled()) {
+                    log.debug(Thread.currentThread().getName().replaceAll("[\r\n]", "") + " will be parked as EventHub "
+                                      + "Client is inactive.");
+                }
                 waitCondition.await();
-                log.debug(Thread.currentThread().getName().replaceAll("[\r\n]", "") + " will be resumes as EventHub "
-                                  + "Client is active.");
+                if (log.isDebugEnabled()) {
+                    log.debug(Thread.currentThread().getName().replaceAll("[\r\n]", "") + " will be resumes as "
+                                      + "EventHub Client is active.");
+                }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             } finally {
