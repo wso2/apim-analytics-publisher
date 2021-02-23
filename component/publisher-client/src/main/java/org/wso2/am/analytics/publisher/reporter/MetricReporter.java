@@ -52,10 +52,4 @@ public interface MetricReporter {
      */
     Map<String, String> getConfiguration();
 
-    /**
-     * Returns a {@link MetricReporter} instance representing the provided properties. This mandate every
-     * MetricReporter implementation to adhere to Singleton pattern.
-     * @param properties properties required by the MetricReporter
-     * @return {@link MetricReporter} instance
-     */
 }
