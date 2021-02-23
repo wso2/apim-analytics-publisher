@@ -52,11 +52,11 @@ public class EventHubClient {
     private final BackoffRetryCounter eventBatchRetryCounter;
     private final Lock threadBarrier;
     private final AmqpRetryOptions retryOptions;
-    private Condition waitCondition;
+    private final Condition waitCondition;
     private EventHubProducerClient producer;
     private EventDataBatch batch;
     private ClientStatus clientStatus;
-    private ScheduledExecutorService scheduledExecutorService;
+    private final ScheduledExecutorService scheduledExecutorService;
 
     public EventHubClient(String authEndpoint, String authToken, AmqpRetryOptions retryOptions) {
         threadBarrier = new ReentrantLock();
