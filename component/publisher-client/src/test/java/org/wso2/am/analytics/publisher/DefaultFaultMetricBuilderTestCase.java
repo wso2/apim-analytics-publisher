@@ -51,7 +51,7 @@ public class DefaultFaultMetricBuilderTestCase {
                 .setTryTimeout(Duration.ofSeconds(30))
                 .setMode(AmqpRetryMode.FIXED);
         EventHubClient client = new EventHubClient("some_endpoint", "some_token", retryOptions);
-        EventQueue queue = new EventQueue(100, 1, client);
+        EventQueue queue = new EventQueue(100, 1, client, 10);
         DefaultCounterMetric metric = new DefaultCounterMetric("test.builder.metric", queue, MetricSchema.ERROR);
         builder = metric.getEventBuilder();
     }

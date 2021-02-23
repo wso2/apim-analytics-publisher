@@ -56,7 +56,7 @@ public class QueueWorker implements Runnable {
             do {
                 MetricEventBuilder eventBuilder = eventQueue.poll();
                 if (eventBuilder != null) {
-                    String event = null;
+                    String event;
                     try {
                         Map<String, Object> eventMap = eventBuilder.build();
                         event = new Gson().toJson(eventMap);
@@ -66,11 +66,7 @@ public class QueueWorker implements Runnable {
                     }
                     client.sendEvent(event);
                 } else {
-                    break;
-                }
-                if (eventQueue.size() == 0 && threadPoolExecutor.getActiveCount() == 1) {
-                    //if we are done with consuming blocking queue flush the EventHub Client batch
-                    client.flushEvents();
+                    log.error("Builder instance is null");
                     break;
                 }
             } while (threadPoolExecutor.getActiveCount() == 1 && eventQueue.size() != 0);

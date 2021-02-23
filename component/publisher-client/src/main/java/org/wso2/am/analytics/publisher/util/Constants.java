@@ -81,4 +81,7 @@ public class Constants {
     public static final String EXPONENTIAL = "exponential";
 
     public static final String UNKNOWN_VALUE = "UNKNOWN";
+    public static final String WORKER_THREAD_COUNT = "worker.thread.count";
+    public static final String QUEUE_SIZE = "queue.size";
+    public static final String CLIENT_FLUSHING_DELAY = "client.flushing.delay";
 }

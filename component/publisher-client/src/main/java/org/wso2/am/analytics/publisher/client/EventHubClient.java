@@ -53,10 +53,10 @@ public class EventHubClient {
     private final Lock threadBarrier;
     private final AmqpRetryOptions retryOptions;
     private final Condition waitCondition;
+    private final ScheduledExecutorService scheduledExecutorService;
     private EventHubProducerClient producer;
     private EventDataBatch batch;
     private ClientStatus clientStatus;
-    private final ScheduledExecutorService scheduledExecutorService;
 
     public EventHubClient(String authEndpoint, String authToken, AmqpRetryOptions retryOptions) {
         threadBarrier = new ReentrantLock();
@@ -263,14 +263,20 @@ public class EventHubClient {
     }
 
     public void flushEvents() {
-        try {
-            readWriteLock.writeLock().lock();
-            int size = batch.getCount();
-            producer.send(batch);
-            batch = producer.createBatch();
-            log.debug("Flushed " + size + " events to Analytics cluster.");
-        } finally {
-            readWriteLock.writeLock().unlock();
+        if (this.clientStatus == ClientStatus.CONNECTED && batch.getCount() > 0) {
+            try {
+                //work on retrying
+                readWriteLock.writeLock().lock();
+                int size = batch.getCount();
+                producer.send(batch);
+                batch = createBatchWithRetry();
+                log.debug("Flushed " + size + " events to Analytics cluster.");
+            } catch (Exception e) {
+                //Dont do anything for any exception. If it is recoverable exception next run will succeed.
+                //If not recoverable then next run will be filtered by if condition
+            } finally {
+                readWriteLock.writeLock().unlock();
+            }
         }
     }
 

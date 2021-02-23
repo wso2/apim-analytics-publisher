@@ -59,12 +59,8 @@ public class DefaultCounterMetric implements CounterMetric {
     @Override
     public int incrementCount(MetricEventBuilder builder) throws MetricReportingException {
         if (!(status == ClientStatus.NOT_CONNECTED)) {
-            if (builder != null) {
-                queue.put(builder);
-                return 0;
-            } else {
-                throw new MetricReportingException("MetricEventBuilder cannot be null");
-            }
+            queue.put(builder);
+            return 0;
         } else {
             throw new MetricReportingException("Eventhub Client is not connected.");
         }

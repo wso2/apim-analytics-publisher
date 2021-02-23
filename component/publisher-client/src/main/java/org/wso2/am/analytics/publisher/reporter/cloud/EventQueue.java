@@ -26,6 +26,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Bounded concurrent queue wrapping {@link java.util.concurrent.ArrayBlockingQueue}
@@ -33,37 +36,45 @@ import java.util.concurrent.RejectedExecutionException;
 public class EventQueue {
 
     private static final Logger log = Logger.getLogger(EventQueue.class);
-    private BlockingQueue<MetricEventBuilder> eventQueue;
-    private ExecutorService executorService;
-    private EventHubClient client;
+    private final BlockingQueue<MetricEventBuilder> eventQueue;
+    private final ExecutorService publisherExecutorService;
+    private final EventHubClient client;
+    private final AtomicInteger failureCount;
+    private final ScheduledExecutorService flushingExecutorService;
 
-    public EventQueue(int queueSize, int workerThreadCount, EventHubClient client) {
+    public EventQueue(int queueSize, int workerThreadCount, EventHubClient client, int flushingDelay) {
         this.client = client;
         // Note : Using a fixed worker thread pool and a bounded queue to control the load on the server
-        executorService = Executors.newFixedThreadPool(workerThreadCount,
-                                                       new DefaultAnalyticsThreadFactory("Queue-Worker"));
+        publisherExecutorService = Executors.newFixedThreadPool(workerThreadCount,
+                                                                new DefaultAnalyticsThreadFactory("Queue-Worker"));
+        flushingExecutorService = Executors.newScheduledThreadPool(1,
+                                                                   new DefaultAnalyticsThreadFactory("Queue-Flusher"));
         eventQueue = new ArrayBlockingQueue<>(queueSize);
+        failureCount = new AtomicInteger(0);
+        flushingExecutorService.scheduleWithFixedDelay(new QueueFlusher(eventQueue, client), 10, 10, TimeUnit.SECONDS);
     }
 
     public void put(MetricEventBuilder builder) {
         try {
-            eventQueue.put(builder);
-            executorService.submit(new QueueWorker(eventQueue, client, executorService));
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            if (eventQueue.offer(builder)) {
+                publisherExecutorService.submit(new QueueWorker(eventQueue, client, publisherExecutorService));
+            } else {
+                int count = failureCount.incrementAndGet();
+                if (count == 1) {
+                    log.error("Event queue is full. Starting to drop analytics events.");
+                } else if (count % 1000 == 0) {
+                    log.error("Event queue is full. " + count + " events dropped so far");
+                }
+            }
         } catch (RejectedExecutionException e) {
             log.warn("Task submission failed. Task queue might be full", e);
         }
 
     }
 
-    public boolean isQueueEmpty() {
-        return eventQueue.peek() == null;
-    }
-
     @Override
     protected void finalize() throws Throwable {
-        executorService.shutdown();
+        publisherExecutorService.shutdown();
         super.finalize();
     }
 
