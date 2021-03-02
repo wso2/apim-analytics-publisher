@@ -43,9 +43,9 @@ public class DefaultAnalyticsMetricReporter extends AbstractMetricReporter {
 
     public DefaultAnalyticsMetricReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
-        int queueSize = 20000;
-        int workerThreads = 5;
-        int flushingDelay = 10;
+        int queueSize = Constants.DEFAULT_QUEUE_SIZE;
+        int workerThreads = Constants.DEFAULT_WORKER_THREADS;
+        int flushingDelay = Constants.DEFAULT_FLUSHING_DELAY;
         if (properties.get(Constants.QUEUE_SIZE) != null) {
             queueSize = Integer.parseInt(properties.get(Constants.QUEUE_SIZE));
         }

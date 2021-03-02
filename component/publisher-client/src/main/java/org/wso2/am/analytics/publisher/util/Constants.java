@@ -69,9 +69,9 @@ public class Constants {
 
     //EventHub Client retry options constants
     public static final int DEFAULT_MAX_RETRIES = 2;
-    public static final int DEFAULT_DELAY = 30;
-    public static final int DEFAULT_MAX_DELAY = 120;
-    public static final int DEFAULT_TRY_TIMEOUT = 60;
+    public static final int DEFAULT_DELAY = 15;
+    public static final int DEFAULT_MAX_DELAY = 30;
+    public static final int DEFAULT_TRY_TIMEOUT = 30;
     public static final String EVENTHUB_CLIENT_MAX_RETRIES = "eventhub.client.max.retries";
     public static final String EVENTHUB_CLIENT_DELAY = "eventhub.client.delay";
     public static final String EVENTHUB_CLIENT_MAX_DELAY = "eventhub.client.max.delay";
@@ -84,4 +84,8 @@ public class Constants {
     public static final String WORKER_THREAD_COUNT = "worker.thread.count";
     public static final String QUEUE_SIZE = "queue.size";
     public static final String CLIENT_FLUSHING_DELAY = "client.flushing.delay";
+    public static final int DEFAULT_QUEUE_SIZE = 20000;
+    public static final int DEFAULT_WORKER_THREADS = 5;
+    public static final int DEFAULT_FLUSHING_DELAY = 15;
+    public static final int DEFAULT_LOCK_TIMEOUT = 30;
 }
