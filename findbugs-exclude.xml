@@ -42,4 +42,8 @@
         <Class name="org.wso2.am.analytics.publisher.client.WSO2TokenCredential"/>
         <Bug pattern="IMPROPER_UNICODE"/>
     </Match>
+    <Match>
+        <Class name="org.wso2.am.analytics.publisher.util.UserAgentParser$1"/>
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
+    </Match>
 </FindBugsFilter>
