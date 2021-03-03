@@ -28,6 +28,7 @@ import org.wso2.am.analytics.publisher.exception.ConnectionRecoverableException;
 import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
 import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsThreadFactory;
 import org.wso2.am.analytics.publisher.util.BackoffRetryCounter;
+import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -52,11 +53,11 @@ public class EventHubClient {
     private final BackoffRetryCounter eventBatchRetryCounter;
     private final Lock threadBarrier;
     private final AmqpRetryOptions retryOptions;
-    private Condition waitCondition;
+    private final Condition waitCondition;
+    private final ScheduledExecutorService scheduledExecutorService;
     private EventHubProducerClient producer;
     private EventDataBatch batch;
     private ClientStatus clientStatus;
-    private ScheduledExecutorService scheduledExecutorService;
 
     public EventHubClient(String authEndpoint, String authToken, AmqpRetryOptions retryOptions) {
         threadBarrier = new ReentrantLock();
@@ -85,6 +86,7 @@ public class EventHubClient {
 
     private void createProducerWithRetry(String authEndpoint, String authToken,
                                          AmqpRetryOptions retryOptions, boolean createBatch) {
+        log.debug("Creating Eventhub client instance.");
         try {
             if (producer != null) {
                 producer.close();
@@ -99,6 +101,7 @@ public class EventHubClient {
                         .replaceAll("[\r\n]", ""));
             }
             clientStatus = ClientStatus.CONNECTED;
+            log.info("Eventhub client successfully connected.");
             producerRetryCounter.reset();
             try {
                 threadBarrier.lock();
@@ -108,7 +111,8 @@ public class EventHubClient {
             }
         } catch (ConnectionRecoverableException e) {
             clientStatus = ClientStatus.RETRYING;
-            log.error("Recoverable error occurred when creating Eventhub Client. Retry attempts will be made. Reason :"
+            log.error("Recoverable error occurred when creating Eventhub Client. Retry attempts will be made in "
+                              + producerRetryCounter.getTimeInterval().replaceAll("[\r\n]", "") + ". Reason :"
                               + e.getMessage().replaceAll("[\r\n]", ""));
             if (log.isDebugEnabled()) {
                 log.debug("Recoverable error occurred when creating Eventhub Client using following attributes. Auth "
@@ -143,24 +147,25 @@ public class EventHubClient {
                         isAdded = batch.tryAdd(eventData);
                         if (!isAdded) {
                             int size = batch.getCount();
+                            log.debug("Publishing " + size + " events to Analytics cluster.");
                             producer.send(batch);
                             batch = createBatchWithRetry();
                             isAdded = batch.tryAdd(eventData);
-                            log.info("Published " + size + " events to Analytics cluster.");
+                            log.debug("Published " + size + " events to Analytics cluster.");
                         }
                     } catch (AmqpException e) {
                         if (isAuthenticationFailure(e)) {
                             //if authentication error try to reinitialize publisher. Retrying will deal with any
                             // network or revocation failures.
                             log.error("Authentication issue happened. Producer client will be re-initialized "
-                                              + "retaining the EventDataBatch");
+                                              + "retaining the Event Data Batch");
                             this.clientStatus = ClientStatus.RETRYING;
                             createProducerWithRetry(authEndpoint, authToken, retryOptions, false);
                             readWriteLock.writeLock().unlock();
                             sendEvent(event);
                         } else if (e.getErrorCondition() == AmqpErrorCondition.RESOURCE_LIMIT_EXCEEDED) {
                             //If resource limit is exceeded we will retry after a constant delay
-                            log.error("Resource limit exceeded when publishing EventDataBatch. Operation will be "
+                            log.error("Resource limit exceeded when publishing Event Data Batch. Operation will be "
                                               + "retried after constant delay");
                             try {
                                 Thread.sleep(1000 * 60);
@@ -171,7 +176,7 @@ public class EventHubClient {
                             sendEvent(event);
                         } else {
                             //For any other exception
-                            log.error("Unknown error occurred while publishing EventDataBatch. Producer client will "
+                            log.error("Unknown error occurred while publishing Event Data Batch. Producer client will "
                                               + "be re-initialized. Events may be lost in the process.");
                             this.clientStatus = ClientStatus.RETRYING;
                             readWriteLock.writeLock().unlock();
@@ -180,14 +185,14 @@ public class EventHubClient {
                     } catch (Exception e) {
                         if (e.getCause() instanceof TimeoutException) {
                             log.error("Timeout occurred after retrying " + retryOptions.getMaxRetries() + " "
-                                              + "times with an timeout of " + retryOptions.getTryTimeout() + " "
-                                              + "seconds while trying to publish EventDataBatch. Next retry cycle "
+                                              + "times with an timeout of " + retryOptions.getTryTimeout().getSeconds()
+                                              + " seconds while trying to publish Event Data Batch. Next retry cycle "
                                               + "will begin shortly.");
                             readWriteLock.writeLock().unlock();
                             sendEvent(event);
                         } else {
                             //For any other exception
-                            log.error("Unknown error occurred while publishing EventDataBatch. Producer client will "
+                            log.error("Unknown error occurred while publishing Event Data Batch. Producer client will "
                                               + "be re-initialized. Events may be lost in the process.");
                             this.clientStatus = ClientStatus.RETRYING;
                             readWriteLock.writeLock().unlock();
@@ -202,12 +207,12 @@ public class EventHubClient {
                     }
                 }
                 if (isAdded) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Adding event: " + event.replaceAll("[\r\n]", ""));
+                    if (log.isTraceEnabled()) {
+                        log.trace("Adding event: " + event.replaceAll("[\r\n]", ""));
                     }
                 } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Failed to add event: " + event.replaceAll("[\r\n]", ""));
+                    if (log.isTraceEnabled()) {
+                        log.trace("Failed to add event: " + event.replaceAll("[\r\n]", ""));
                     }
                 }
             } finally {
@@ -245,12 +250,13 @@ public class EventHubClient {
     }
 
     private EventDataBatch createBatchWithRetry() {
+        log.debug("Creating Event Data Batch");
         try {
             EventDataBatch batch = producer.createBatch();
             eventBatchRetryCounter.reset();
             return batch;
         } catch (IllegalStateException e) {
-            log.error("Error in creating EventDataBatch. Will be retried in "
+            log.error("Error in creating Event Data Batch. Operation will be retried in "
                               + eventBatchRetryCounter.getTimeInterval().replaceAll("[\r\n]", ""));
             try {
                 Thread.sleep(eventBatchRetryCounter.getTimeIntervalMillis());
@@ -263,14 +269,29 @@ public class EventHubClient {
     }
 
     public void flushEvents() {
-        try {
-            readWriteLock.writeLock().lock();
-            int size = batch.getCount();
-            producer.send(batch);
-            batch = producer.createBatch();
-            log.debug("Flushed " + size + " events to Analytics cluster.");
-        } finally {
-            readWriteLock.writeLock().unlock();
+        if (this.clientStatus == ClientStatus.CONNECTED && batch.getCount() > 0) {
+            try {
+                log.debug("Starting to flush Event Data Batch");
+                //work on retrying
+                if (readWriteLock.writeLock().tryLock(Constants.DEFAULT_LOCK_TIMEOUT, TimeUnit.SECONDS)) {
+                    int size = batch.getCount();
+                    producer.send(batch);
+                    batch = createBatchWithRetry();
+                    log.debug("Flushed " + size + " events to Analytics cluster.");
+                } else {
+                    log.error("Event flushing operation aborted as publisher threads are trying to send events");
+                }
+            } catch (Exception e) {
+                log.error("Event flushing operation failed. Will be retried again according to the configured "
+                                  + "client.flushing.delay. Error will be handled by publishing threads once "
+                                  + "Event Data Batch is filled.");
+                //Dont do anything for any exception. If it is recoverable exception next run will succeed.
+                //If not recoverable then next run will be filtered by if condition
+            } finally {
+                readWriteLock.writeLock().unlock();
+            }
+        } else {
+            log.debug("Event flushing is aborted as Event Data Batch is empty or connection to Event Hub is not made");
         }
     }
 

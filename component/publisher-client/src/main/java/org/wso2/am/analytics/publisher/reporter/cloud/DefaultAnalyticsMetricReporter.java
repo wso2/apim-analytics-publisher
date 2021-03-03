@@ -43,19 +43,23 @@ public class DefaultAnalyticsMetricReporter extends AbstractMetricReporter {
 
     public DefaultAnalyticsMetricReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
-        int queueSize = 20000;
-        int workerThreads = 5;
-        if (properties.get("queue.size") != null) {
-            queueSize = Integer.parseInt(properties.get("queue.size"));
+        int queueSize = Constants.DEFAULT_QUEUE_SIZE;
+        int workerThreads = Constants.DEFAULT_WORKER_THREADS;
+        int flushingDelay = Constants.DEFAULT_FLUSHING_DELAY;
+        if (properties.get(Constants.QUEUE_SIZE) != null) {
+            queueSize = Integer.parseInt(properties.get(Constants.QUEUE_SIZE));
         }
-        if (properties.get("worker.thread.count") != null) {
-            workerThreads = Integer.parseInt(properties.get("worker.thread.count"));
+        if (properties.get(Constants.WORKER_THREAD_COUNT) != null) {
+            workerThreads = Integer.parseInt(properties.get(Constants.WORKER_THREAD_COUNT));
+        }
+        if (properties.get(Constants.CLIENT_FLUSHING_DELAY) != null) {
+            flushingDelay = Integer.parseInt(properties.get(Constants.CLIENT_FLUSHING_DELAY));
         }
         String authToken = properties.get(Constants.AUTH_API_TOKEN);
         String authEndpoint = properties.get(Constants.AUTH_API_URL);
         AmqpRetryOptions retryOptions = createRetryOptions(properties);
         EventHubClient client = new EventHubClient(authEndpoint, authToken, retryOptions);
-        eventQueue = new EventQueue(queueSize, workerThreads, client);
+        eventQueue = new EventQueue(queueSize, workerThreads, client, flushingDelay);
     }
 
     private AmqpRetryOptions createRetryOptions(Map<String, String> properties) {
