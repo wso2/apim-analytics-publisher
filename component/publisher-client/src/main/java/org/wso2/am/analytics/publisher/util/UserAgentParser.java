@@ -40,7 +40,8 @@ public class UserAgentParser {
         try {
             uaParser = new Parser();
             isInitialized = true;
-            clientCache = new LinkedHashMap<String, Client>() {
+            clientCache = new LinkedHashMap<String, Client>(Constants.USER_AGENT_DEFAULT_CACHE_SIZE
+                                                                    + Constants.DEFAULT_WORKER_THREADS) {
                 static final int MAX = Constants.USER_AGENT_DEFAULT_CACHE_SIZE;
                 @Override
                 protected boolean removeEldestEntry(Map.Entry eldest) {
