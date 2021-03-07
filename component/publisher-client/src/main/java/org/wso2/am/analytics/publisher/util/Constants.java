@@ -88,4 +88,5 @@ public class Constants {
     public static final int DEFAULT_WORKER_THREADS = 5;
     public static final int DEFAULT_FLUSHING_DELAY = 15;
     public static final int DEFAULT_LOCK_TIMEOUT = 30;
+    public static final int USER_AGENT_DEFAULT_CACHE_SIZE = 50;
 }

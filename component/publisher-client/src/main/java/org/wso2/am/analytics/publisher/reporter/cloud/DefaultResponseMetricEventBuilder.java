@@ -24,10 +24,9 @@ import org.wso2.am.analytics.publisher.reporter.AbstractMetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import org.wso2.am.analytics.publisher.util.Constants;
+import org.wso2.am.analytics.publisher.util.UserAgentParser;
 import ua_parser.Client;
-import ua_parser.Parser;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,16 +39,10 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
     private static final Logger log = Logger.getLogger(DefaultResponseMetricEventBuilder.class);
     private final Map<String, Class> requiredAttributes;
     private Map<String, Object> eventMap;
-    private Parser uaParser;
 
     protected DefaultResponseMetricEventBuilder() {
         requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
         eventMap = new HashMap<>();
-        try {
-            uaParser = new Parser();
-        } catch (IOException e) {
-            log.error("Error occurred when initializing uaParser", e);
-        }
     }
 
     @Override
@@ -86,8 +79,8 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
     private void setUserAgentProperties(String userAgentHeader) {
         String browser = null;
         String platform = null;
-        if (uaParser != null) {
-            Client client = uaParser.parse(userAgentHeader);
+        Client client = UserAgentParser.getInstance().parseUserAgent(userAgentHeader);
+        if (client != null) {
             browser = client.userAgent.family;
             platform = client.os.family;
         }
