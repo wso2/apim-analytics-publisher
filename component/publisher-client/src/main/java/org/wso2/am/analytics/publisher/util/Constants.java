@@ -85,8 +85,7 @@ public class Constants {
     public static final String QUEUE_SIZE = "queue.size";
     public static final String CLIENT_FLUSHING_DELAY = "client.flushing.delay";
     public static final int DEFAULT_QUEUE_SIZE = 20000;
-    public static final int DEFAULT_WORKER_THREADS = 5;
+    public static final int DEFAULT_WORKER_THREADS = 1;
     public static final int DEFAULT_FLUSHING_DELAY = 15;
-    public static final int DEFAULT_LOCK_TIMEOUT = 30;
     public static final int USER_AGENT_DEFAULT_CACHE_SIZE = 50;
 }

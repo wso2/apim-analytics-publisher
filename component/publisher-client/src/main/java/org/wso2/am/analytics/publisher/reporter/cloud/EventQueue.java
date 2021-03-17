@@ -21,10 +21,10 @@ import org.apache.log4j.Logger;
 import org.wso2.am.analytics.publisher.client.EventHubClient;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -47,18 +47,27 @@ public class EventQueue {
         // Note : Using a fixed worker thread pool and a bounded queue to control the load on the server
         publisherExecutorService = Executors.newFixedThreadPool(workerThreadCount,
                                                                 new DefaultAnalyticsThreadFactory("Queue-Worker"));
-        flushingExecutorService = Executors.newScheduledThreadPool(1,
+        flushingExecutorService = Executors.newScheduledThreadPool(workerThreadCount,
                                                                    new DefaultAnalyticsThreadFactory("Queue-Flusher"));
-        eventQueue = new ArrayBlockingQueue<>(queueSize);
+        eventQueue = new LinkedBlockingQueue<>(queueSize);
         failureCount = new AtomicInteger(0);
-        flushingExecutorService.scheduleWithFixedDelay(new QueueFlusher(eventQueue, client), 10, 10, TimeUnit.SECONDS);
+        for (int i = 0; i < workerThreadCount; i++) {
+            if (i == 0) {
+                publisherExecutorService.submit(new ParallelQueueWorker(eventQueue, client));
+                flushingExecutorService.scheduleWithFixedDelay(new QueueFlusher(eventQueue, client), flushingDelay,
+                                                               flushingDelay, TimeUnit.SECONDS);
+            } else {
+                EventHubClient clonedClient = client.clone();
+                publisherExecutorService.submit(new ParallelQueueWorker(eventQueue, clonedClient));
+                flushingExecutorService.scheduleWithFixedDelay(new QueueFlusher(eventQueue, clonedClient),
+                                                               flushingDelay, flushingDelay, TimeUnit.SECONDS);
+            }
+        }
     }
 
     public void put(MetricEventBuilder builder) {
         try {
-            if (eventQueue.offer(builder)) {
-                publisherExecutorService.submit(new QueueWorker(eventQueue, client, publisherExecutorService));
-            } else {
+            if (!eventQueue.offer(builder)) {
                 int count = failureCount.incrementAndGet();
                 if (count == 1) {
                     log.error("Event queue is full. Starting to drop analytics events.");

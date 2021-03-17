@@ -25,58 +25,51 @@ import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Will removes the events from queues and send then to the endpoints.
  */
-public class QueueWorker implements Runnable {
+public class ParallelQueueWorker implements Runnable {
 
-    private static final Logger log = Logger.getLogger(QueueWorker.class);
+    private static final Logger log = Logger.getLogger(ParallelQueueWorker.class);
     private BlockingQueue<MetricEventBuilder> eventQueue;
-    private ExecutorService executorService;
     private EventHubClient client;
 
-    public QueueWorker(BlockingQueue<MetricEventBuilder> queue, EventHubClient client,
-                       ExecutorService executorService) {
+    public ParallelQueueWorker(BlockingQueue<MetricEventBuilder> queue, EventHubClient client) {
         this.client = client;
         this.eventQueue = queue;
-        this.executorService = executorService;
     }
 
     public void run() {
-        try {
             if (log.isDebugEnabled()) {
                 log.debug(eventQueue.size() + " messages in queue before " +
                                   Thread.currentThread().getName().replaceAll("[\r\n]", "")
                                   + " worker has polled queue");
             }
-            ThreadPoolExecutor threadPoolExecutor = ((ThreadPoolExecutor) executorService);
-            do {
-                MetricEventBuilder eventBuilder = eventQueue.poll();
-                if (eventBuilder != null) {
-                    String event;
-                    try {
+            while (true) {
+                MetricEventBuilder eventBuilder;
+                String event;
+                try {
+                    eventBuilder = eventQueue.take();
+                    if (eventBuilder != null) {
                         Map<String, Object> eventMap = eventBuilder.build();
                         event = new Gson().toJson(eventMap);
-                    } catch (MetricReportingException e) {
-                        log.error("Builder instance is not duly filled. Event building failed", e);
-                        continue;
+                        client.sendEvent(event);
                     }
-                    client.sendEvent(event);
-                } else {
-                    break;
+                } catch (MetricReportingException e) {
+                    log.error("Builder instance is not duly filled. Event building failed", e);
+                    continue;
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    log.error("Analytics event sending failed. Event will be dropped", e);
                 }
-            } while (threadPoolExecutor.getActiveCount() == 1 && eventQueue.size() != 0);
-            //while condition to handle possible task rejections
-            if (log.isDebugEnabled()) {
-                log.debug(eventQueue.size() + " messages in queue after " +
-                                  Thread.currentThread().getName().replaceAll("[\r\n]", "")
-                                  + " worker has finished work");
+
+                if (log.isDebugEnabled()) {
+                    log.debug(eventQueue.size() + " messages in queue after " +
+                                      Thread.currentThread().getName().replaceAll("[\r\n]", "")
+                                      + " worker has finished work");
+                }
             }
-        } catch (Throwable e) {
-            log.error("Error in passing events to Event Hub client. Events dropped", e);
-        }
     }
 }
