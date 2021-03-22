@@ -295,8 +295,10 @@ public class EventHubClient implements Cloneable {
                                + "flushing operation aborted as publisher threads are trying to send events");
                 }
         } else {
-            log.debug("[{ " + Thread.currentThread().getName().replaceAll("[\r\n]", "") + " }] Event flushing "
-                              + "is aborted as Event Data Batch is empty or connection to Event Hub is not made");
+            if (log.isDebugEnabled()) {
+                log.debug("[{ " + Thread.currentThread().getName().replaceAll("[\r\n]", "") + " }] Event flushing "
+                                  + "is aborted as Event Data Batch is empty or connection to Event Hub is not made");
+            }
         }
     }
 
