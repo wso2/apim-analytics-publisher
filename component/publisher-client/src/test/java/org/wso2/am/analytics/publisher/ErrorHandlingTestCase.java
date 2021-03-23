@@ -41,8 +41,6 @@ public class ErrorHandlingTestCase {
 
     @Test
     public void testConnectionInvalidURL() throws MetricCreationException, MetricReportingException {
-        boolean errorOccurred = false;
-        String message = "";
         UnitTestAppender appender = new UnitTestAppender();
         Logger log = Logger.getLogger(EventHubClient.class);
         log.addAppender(appender);
@@ -52,16 +50,6 @@ public class ErrorHandlingTestCase {
         configMap.put(Constants.AUTH_API_TOKEN, "some_token");
         MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configMap);
         CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
-        MetricEventBuilder builder = metric.getEventBuilder();
-        builder.addAttribute("some_key", "some_value");
-        try {
-            metric.incrementCount(builder);
-        } catch (MetricReportingException e) {
-            errorOccurred = true;
-            message = e.getMessage();
-        }
-        Assert.assertTrue(errorOccurred, "MetricReportingException should be thrown");
-        Assert.assertTrue(message.contains("Eventhub Client is not connected."), "Expected error hasn't thrown.");
         Assert.assertTrue(appender.checkContains("Unrecoverable error occurred when creating Eventhub "
                                                          + "Client"), "Expected error hasn't logged in the "
                                   + "EventHubClientClass");

@@ -18,21 +18,25 @@
 
 package org.wso2.am.analytics.publisher.reporter.cloud;
 
+import org.apache.log4j.Logger;
 import org.wso2.am.analytics.publisher.client.ClientStatus;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
-import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Implementation of {@link CounterMetric} for Choroe Metric Reporter
  */
 public class DefaultCounterMetric implements CounterMetric {
+    private static final Logger log = Logger.getLogger(DefaultCounterMetric.class);
     private String name;
     private EventQueue queue;
     private MetricSchema schema;
     private ClientStatus status;
+    private final AtomicInteger failureCount;
 
     public DefaultCounterMetric(String name, EventQueue queue, MetricSchema schema) throws MetricCreationException {
         //Constructor should be made protected. Keeping public till testing plan is finalized
@@ -45,6 +49,7 @@ public class DefaultCounterMetric implements CounterMetric {
                                                       + " " + MetricSchema.ERROR + " types.");
         }
         this.status = queue.getClient().getStatus();
+        this.failureCount = new AtomicInteger(0);
     }
 
     @Override
@@ -57,13 +62,16 @@ public class DefaultCounterMetric implements CounterMetric {
     }
 
     @Override
-    public int incrementCount(MetricEventBuilder builder) throws MetricReportingException {
+    public int incrementCount(MetricEventBuilder builder) {
         if (!(status == ClientStatus.NOT_CONNECTED)) {
             queue.put(builder);
-            return 0;
         } else {
-            throw new MetricReportingException("Eventhub Client is not connected.");
+            if (failureCount.incrementAndGet() % 1000 == 0) {
+                log.error("Eventhub client is not connected. " + failureCount.incrementAndGet() + " events dropped so "
+                                  + "far. Please correct your configuration and restart the instance.");
+            }
         }
+        return 0;
     }
 
     /**
