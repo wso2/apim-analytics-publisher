@@ -37,8 +37,8 @@ import java.util.Map;
  */
 public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilder {
     private static final Logger log = Logger.getLogger(DefaultResponseMetricEventBuilder.class);
-    private final Map<String, Class> requiredAttributes;
-    private Map<String, Object> eventMap;
+    protected Map<String, Class> requiredAttributes;
+    protected Map<String, Object> eventMap;
 
     protected DefaultResponseMetricEventBuilder() {
         requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);

@@ -31,8 +31,8 @@ import java.util.Map;
  * Builder class for fault events
  */
 public class DefaultFaultMetricEventBuilder extends AbstractMetricEventBuilder {
-    private final Map<String, Class> requiredAttributes;
-    private Map<String, Object> eventMap;
+    protected Map<String, Class> requiredAttributes;
+    protected Map<String, Object> eventMap;
 
     protected DefaultFaultMetricEventBuilder() {
         requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.ERROR);
