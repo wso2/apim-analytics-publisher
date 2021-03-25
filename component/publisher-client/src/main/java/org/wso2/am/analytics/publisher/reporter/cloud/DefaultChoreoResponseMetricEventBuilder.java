@@ -20,8 +20,6 @@ package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 
-import java.util.HashMap;
-
 /**
  * Default builder for response metric type. Restrictions are set on the key names that uses can set to the builder.
  * Allows keys and their validity will be checked when populating and availability of all required properties will be
@@ -30,7 +28,6 @@ import java.util.HashMap;
 public class DefaultChoreoResponseMetricEventBuilder extends DefaultResponseMetricEventBuilder {
 
     protected DefaultChoreoResponseMetricEventBuilder() {
-        requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.CHOREO_RESPONSE);
-        eventMap = new HashMap<>();
+        super(DefaultInputValidator.getInstance().getEventProperties(MetricSchema.CHOREO_RESPONSE));
     }
 }

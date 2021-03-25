@@ -46,6 +46,11 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
         eventMap = new HashMap<>();
     }
 
+    protected DefaultResponseMetricEventBuilder(Map<String, Class> requiredAttributes) {
+        this.requiredAttributes = requiredAttributes;
+        eventMap = new HashMap<>();
+    }
+
     @Override
     public boolean validate() throws MetricReportingException {
         for (Map.Entry<String, Class> entry : requiredAttributes.entrySet()) {

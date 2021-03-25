@@ -20,15 +20,12 @@ package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 
-import java.util.HashMap;
-
 /**
  * Builder class for fault events
  */
 public class DefaultChoreoFaultMetricEventBuilder extends DefaultFaultMetricEventBuilder {
 
     protected DefaultChoreoFaultMetricEventBuilder() {
-        requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.CHOREO_ERROR);
-        eventMap = new HashMap<>();
+        super(DefaultInputValidator.getInstance().getEventProperties(MetricSchema.CHOREO_ERROR));
     }
 }
