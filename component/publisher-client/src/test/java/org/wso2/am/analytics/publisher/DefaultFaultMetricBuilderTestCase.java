@@ -20,7 +20,8 @@ package org.wso2.am.analytics.publisher;
 
 import com.azure.core.amqp.AmqpRetryMode;
 import com.azure.core.amqp.AmqpRetryOptions;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -39,7 +40,7 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 
 public class DefaultFaultMetricBuilderTestCase {
-    private static final Logger log = Logger.getLogger(DefaultFaultMetricBuilderTestCase.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultFaultMetricBuilderTestCase.class);
     private MetricEventBuilder builder;
 
     @BeforeMethod

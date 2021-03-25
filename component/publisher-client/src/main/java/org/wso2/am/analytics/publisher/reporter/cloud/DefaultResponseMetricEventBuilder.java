@@ -18,7 +18,8 @@
 
 package org.wso2.am.analytics.publisher.reporter.cloud;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
@@ -36,7 +37,7 @@ import java.util.Map;
  * checked when building.
  */
 public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilder {
-    private static final Logger log = Logger.getLogger(DefaultResponseMetricEventBuilder.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultResponseMetricEventBuilder.class);
     protected Map<String, Class> requiredAttributes;
     protected Map<String, Object> eventMap;
 

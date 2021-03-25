@@ -18,7 +18,8 @@
 
 package org.wso2.am.analytics.publisher.reporter.log;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
@@ -30,7 +31,7 @@ import java.util.Map;
  * Log counter metric class. Intended for testing only.
  */
 public class LogCounterMetric implements CounterMetric {
-    private static final Logger log = Logger.getLogger(LogCounterMetric.class);
+    private static final Logger log = LoggerFactory.getLogger(LogCounterMetric.class);
     private final String name;
 
     protected LogCounterMetric(String name) {

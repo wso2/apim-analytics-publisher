@@ -21,7 +21,8 @@ package org.wso2.am.analytics.publisher.client;
 import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.auth.AuthClient;
 import org.wso2.am.analytics.publisher.exception.ConnectionRecoverableException;
 import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
@@ -37,7 +38,7 @@ import java.util.Arrays;
  * WSO2 SAS token refresh implementation for TokenCredential
  */
 class WSO2TokenCredential implements TokenCredential {
-    private static final Logger log = Logger.getLogger(WSO2TokenCredential.class);
+    private static final Logger log = LoggerFactory.getLogger(WSO2TokenCredential.class);
     private final String authEndpoint;
     private final String authToken;
     private BackoffRetryCounter backoffRetryCounter;

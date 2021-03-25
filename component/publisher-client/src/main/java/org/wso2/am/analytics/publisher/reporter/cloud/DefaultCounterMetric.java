@@ -18,7 +18,8 @@
 
 package org.wso2.am.analytics.publisher.reporter.cloud;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.client.ClientStatus;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
@@ -31,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Implementation of {@link CounterMetric} for Choroe Metric Reporter
  */
 public class DefaultCounterMetric implements CounterMetric {
-    private static final Logger log = Logger.getLogger(DefaultCounterMetric.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultCounterMetric.class);
     private String name;
     private EventQueue queue;
     private MetricSchema schema;
