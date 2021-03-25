@@ -28,7 +28,7 @@ import java.util.HashMap;
 public class DefaultChoreoFaultMetricEventBuilder extends DefaultFaultMetricEventBuilder {
 
     protected DefaultChoreoFaultMetricEventBuilder() {
-        requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.ERROR);
+        requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.CHOREO_ERROR);
         eventMap = new HashMap<>();
     }
 }
