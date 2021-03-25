@@ -87,7 +87,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            !org.wso2.am.analytics.publisher.reporter.cloud.*;version="${project.version}",
+                            org.wso2.am.analytics.publisher.reporter.cloud.*;version="${project.version}",
                             !org.wso2.am.analytics.publisher.reporter.choreo;version="${project.version}",
                             org.wso2.am.analytics.publisher.client.*;version="${project.version}",
                             org.wso2.am.analytics.publisher.reporter.*;version="${project.version}",
