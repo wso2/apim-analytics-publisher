@@ -39,9 +39,8 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Map;
 
-public class DefaultResponseMetricBuilderTestCase {
-    private static final Logger log = LoggerFactory.getLogger(DefaultResponseMetricBuilderTestCase.class);
-
+public class DefaultChoreoFaultMetricBuilderTestCase {
+    private static final Logger log = LoggerFactory.getLogger(DefaultChoreoFaultMetricBuilderTestCase.class);
     private MetricEventBuilder builder;
 
     @BeforeMethod
@@ -54,87 +53,90 @@ public class DefaultResponseMetricBuilderTestCase {
                 .setMode(AmqpRetryMode.FIXED);
         EventHubClient client = new EventHubClient("some_endpoint", "some_token", retryOptions);
         EventQueue queue = new EventQueue(100, 1, client, 10);
-        DefaultCounterMetric metric = new DefaultCounterMetric("test.builder.metric", queue, MetricSchema.RESPONSE);
+        DefaultCounterMetric metric = new DefaultCounterMetric("test.builder.metric", queue,
+                MetricSchema.CHOREO_ERROR);
         builder = metric.getEventBuilder();
     }
 
     @Test(expectedExceptions = MetricReportingException.class)
     public void testMissingAttributes() throws MetricCreationException, MetricReportingException {
-        builder.addAttribute("apiName", "PizzaShack");
-        builder.build();
-    }
-
-    @Test(expectedExceptions = MetricReportingException.class)
-    public void testAttributesWithInvalidTypes() throws MetricCreationException, MetricReportingException {
         builder.addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.KEY_TYPE, "prod")
+                .addAttribute(Constants.ERROR_TYPE, "backend")
+                .addAttribute(Constants.ERROR_CODE, 401)
+                .addAttribute(Constants.ERROR_MESSAGE, "Authentication Error")
                 .addAttribute(Constants.API_ID, "9876-54f1")
                 .addAttribute(Constants.API_NAME, "PizzaShack")
                 .addAttribute(Constants.API_VERSION, "1.0.0")
                 .addAttribute(Constants.API_CREATION, "admin")
                 .addAttribute(Constants.API_METHOD, "POST")
-                .addAttribute(Constants.API_METHOD, "POST")
-                .addAttribute(Constants.API_RESOURCE_TEMPLATE, "/resource/{value}")
                 .addAttribute(Constants.API_CREATOR_TENANT_DOMAIN, "carbon.super")
-                .addAttribute(Constants.DESTINATION, "localhost:8080")
                 .addAttribute(Constants.APPLICATION_ID, "3445-6778")
                 .addAttribute(Constants.APPLICATION_NAME, "default")
                 .addAttribute(Constants.APPLICATION_OWNER, "admin")
                 .addAttribute(Constants.REGION_ID, "NA")
                 .addAttribute(Constants.GATEWAY_TYPE, "Synapse")
-                .addAttribute(Constants.USER_AGENT, "Mozilla")
                 .addAttribute(Constants.PROXY_RESPONSE_CODE, 401)
                 .addAttribute(Constants.TARGET_RESPONSE_CODE, "someString")
-                .addAttribute(Constants.RESPONSE_CACHE_HIT, true)
-                .addAttribute(Constants.RESPONSE_LATENCY, 2000)
-                .addAttribute(Constants.BACKEND_LATENCY, 3000)
-                .addAttribute(Constants.REQUEST_MEDIATION_LATENCY, "1000")
-                .addAttribute(Constants.RESPONSE_MEDIATION_LATENCY, 1000)
-                .addAttribute(Constants.USER_IP, "127.0.0.1")
+                .build();
+    }
+
+    @Test(expectedExceptions = MetricReportingException.class)
+    public void testAttributesWithInvalidTypes() throws MetricCreationException, MetricReportingException {
+        builder.addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
+                .addAttribute(Constants.ORGANIZATION_ID, "wso2.com")
+                .addAttribute(Constants.CORRELATION_ID, "1234-4567")
+                .addAttribute(Constants.KEY_TYPE, "prod")
+                .addAttribute(Constants.ERROR_TYPE, "backend")
+                .addAttribute(Constants.ERROR_CODE, 401)
+                .addAttribute(Constants.ERROR_MESSAGE, "Authentication Error")
+                .addAttribute(Constants.API_ID, "9876-54f1")
+                .addAttribute(Constants.API_NAME, "PizzaShack")
+                .addAttribute(Constants.API_VERSION, "1.0.0")
+                .addAttribute(Constants.API_CREATION, "admin")
+                .addAttribute(Constants.API_METHOD, "POST")
+                .addAttribute(Constants.API_CREATOR_TENANT_DOMAIN, "carbon.super")
+                .addAttribute(Constants.APPLICATION_ID, "3445-6778")
+                .addAttribute(Constants.APPLICATION_NAME, "default")
+                .addAttribute(Constants.APPLICATION_OWNER, "admin")
+                .addAttribute(Constants.REGION_ID, "NA")
+                .addAttribute(Constants.GATEWAY_TYPE, "Synapse")
+                .addAttribute(Constants.PROXY_RESPONSE_CODE, 401)
+                .addAttribute(Constants.TARGET_RESPONSE_CODE, "someString")
                 .build();
     }
 
     @Test
     public void testMetricBuilder() throws MetricCreationException, MetricReportingException {
-        String uaString = "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, "
-                + "like Gecko) Version/5.1 Mobile/9B206 Safari/7534.48.3";
-
         Map<String, Object> eventMap = builder
                 .addAttribute(Constants.REQUEST_TIMESTAMP, OffsetDateTime.now(Clock.systemUTC()).toString())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
+                .addAttribute(Constants.ORGANIZATION_ID, "wso2.com")
                 .addAttribute(Constants.KEY_TYPE, "prod")
+                .addAttribute(Constants.ERROR_TYPE, "backend")
+                .addAttribute(Constants.ERROR_CODE, 401)
+                .addAttribute(Constants.ERROR_MESSAGE, "Authentication Error")
                 .addAttribute(Constants.API_ID, "9876-54f1")
                 .addAttribute(Constants.API_TYPE, "HTTP")
                 .addAttribute(Constants.API_NAME, "PizzaShack")
                 .addAttribute(Constants.API_VERSION, "1.0.0")
                 .addAttribute(Constants.API_CREATION, "admin")
                 .addAttribute(Constants.API_METHOD, "POST")
-                .addAttribute(Constants.API_RESOURCE_TEMPLATE, "/resource/{value}")
                 .addAttribute(Constants.API_CREATOR_TENANT_DOMAIN, "carbon.super")
-                .addAttribute(Constants.DESTINATION, "localhost:8080")
                 .addAttribute(Constants.APPLICATION_ID, "3445-6778")
                 .addAttribute(Constants.APPLICATION_NAME, "default")
                 .addAttribute(Constants.APPLICATION_OWNER, "admin")
                 .addAttribute(Constants.REGION_ID, "NA")
                 .addAttribute(Constants.GATEWAY_TYPE, "Synapse")
-                .addAttribute(Constants.USER_AGENT_HEADER, uaString)
                 .addAttribute(Constants.PROXY_RESPONSE_CODE, 401)
                 .addAttribute(Constants.TARGET_RESPONSE_CODE, 401)
-                .addAttribute(Constants.RESPONSE_CACHE_HIT, true)
-                .addAttribute(Constants.RESPONSE_LATENCY, 2000L)
-                .addAttribute(Constants.BACKEND_LATENCY, 3000L)
-                .addAttribute(Constants.REQUEST_MEDIATION_LATENCY, 1000L)
-                .addAttribute(Constants.RESPONSE_MEDIATION_LATENCY, 1000L)
-                .addAttribute(Constants.USER_IP, "127.0.0.1")
                 .build();
 
         Assert.assertFalse(eventMap.isEmpty());
-        Assert.assertEquals(eventMap.size(), 28, "Some attributes are missing from the resulting event map");
-        Assert.assertEquals(eventMap.get(Constants.EVENT_TYPE), "response", "Event type should be set to fault");
-        Assert.assertEquals(eventMap.get(Constants.USER_AGENT), "Mobile Safari",
-                "User agent should be set to Mobile Safari");
-        Assert.assertEquals(eventMap.get(Constants.PLATFORM), "iOS", "Platform should be set to iOS");
-        Assert.assertEquals(eventMap.get(Constants.API_TYPE), "HTTP", "API type should be set to HTTP");
+        Assert.assertEquals(eventMap.size(), 22, "Some attributes are missing from the resulting event map");
+        Assert.assertEquals(eventMap.get(Constants.EVENT_TYPE), "fault", "Event type should be set to fault");
+        Assert.assertEquals(eventMap.get(Constants.ORGANIZATION_ID), "wso2.com",
+                "Organization ID should be wso2.com");
     }
 }

@@ -31,11 +31,16 @@ import java.util.Map;
  * Builder class for fault events
  */
 public class DefaultFaultMetricEventBuilder extends AbstractMetricEventBuilder {
-    private final Map<String, Class> requiredAttributes;
-    private Map<String, Object> eventMap;
+    protected final Map<String, Class> requiredAttributes;
+    protected final Map<String, Object> eventMap;
 
     protected DefaultFaultMetricEventBuilder() {
         requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.ERROR);
+        eventMap = new HashMap<>();
+    }
+
+    protected DefaultFaultMetricEventBuilder(Map<String, Class> requiredAttributes) {
+        this.requiredAttributes = requiredAttributes;
         eventMap = new HashMap<>();
     }
 

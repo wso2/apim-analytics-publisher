@@ -22,7 +22,8 @@ import com.azure.core.amqp.AmqpRetryOptions;
 import com.azure.core.credential.TokenCredential;
 import com.azure.messaging.eventhubs.EventHubClientBuilder;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.auth.AuthClient;
 import org.wso2.am.analytics.publisher.exception.ConnectionRecoverableException;
 import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
@@ -34,7 +35,7 @@ import java.net.URLDecoder;
  * Factory class to create EventHubProducerClient instance.
  */
 public class EventHubProducerClientFactory {
-    private static final Logger log = Logger.getLogger(EventHubClient.class);
+    private static final Logger log = LoggerFactory.getLogger(EventHubClient.class);
 
     public static EventHubProducerClient create(String authEndpoint, String authToken,
                                                 AmqpRetryOptions retryOptions)

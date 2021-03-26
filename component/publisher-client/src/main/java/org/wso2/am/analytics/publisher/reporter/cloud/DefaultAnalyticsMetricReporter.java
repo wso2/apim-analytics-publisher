@@ -20,7 +20,8 @@ package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import com.azure.core.amqp.AmqpRetryMode;
 import com.azure.core.amqp.AmqpRetryOptions;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.client.EventHubClient;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricReporter;
@@ -38,7 +39,8 @@ import java.util.Map;
  * cloud in a secure and reliable way.
  */
 public class DefaultAnalyticsMetricReporter extends AbstractMetricReporter {
-    private static final Logger log = Logger.getLogger(DefaultAnalyticsMetricReporter.class);
+
+    private static final Logger log = LoggerFactory.getLogger(DefaultAnalyticsMetricReporter.class);
     protected EventQueue eventQueue;
 
     public DefaultAnalyticsMetricReporter(Map<String, String> properties) throws MetricCreationException {

@@ -18,7 +18,8 @@
 
 package org.wso2.am.analytics.publisher.reporter;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsMetricReporter;
 import org.wso2.am.analytics.publisher.util.Constants;
@@ -34,7 +35,7 @@ import java.util.Map;
  * Factory will return earlier requested instance.
  */
 public class MetricReporterFactory {
-    private static final Logger log = Logger.getLogger(MetricReporterFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(MetricReporterFactory.class);
     private static final MetricReporterFactory instance = new MetricReporterFactory();
     private static Map<String, MetricReporter> reporterRegistry = new HashMap<>();
 
