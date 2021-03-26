@@ -39,8 +39,9 @@ import java.util.Map;
  * cloud in a secure and reliable way.
  */
 public class DefaultAnalyticsMetricReporter extends AbstractMetricReporter {
+
     private static final Logger log = LoggerFactory.getLogger(DefaultAnalyticsMetricReporter.class);
-    private EventQueue eventQueue;
+    protected EventQueue eventQueue;
 
     public DefaultAnalyticsMetricReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
