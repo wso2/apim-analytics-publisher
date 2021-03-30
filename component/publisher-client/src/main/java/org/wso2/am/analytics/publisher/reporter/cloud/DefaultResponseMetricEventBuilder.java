@@ -41,7 +41,7 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
     protected Map<String, Class> requiredAttributes;
     protected Map<String, Object> eventMap;
 
-    protected DefaultResponseMetricEventBuilder() {
+    public DefaultResponseMetricEventBuilder() {
         requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
         eventMap = new HashMap<>();
     }

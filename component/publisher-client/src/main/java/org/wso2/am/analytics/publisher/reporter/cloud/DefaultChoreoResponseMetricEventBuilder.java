@@ -27,7 +27,7 @@ import org.wso2.am.analytics.publisher.reporter.MetricSchema;
  */
 public class DefaultChoreoResponseMetricEventBuilder extends DefaultResponseMetricEventBuilder {
 
-    protected DefaultChoreoResponseMetricEventBuilder() {
+    public DefaultChoreoResponseMetricEventBuilder() {
         super(DefaultInputValidator.getInstance().getEventProperties(MetricSchema.CHOREO_RESPONSE));
     }
 }
