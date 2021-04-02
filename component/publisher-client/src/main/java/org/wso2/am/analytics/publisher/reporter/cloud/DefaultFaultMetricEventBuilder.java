@@ -34,7 +34,7 @@ public class DefaultFaultMetricEventBuilder extends AbstractMetricEventBuilder {
     protected final Map<String, Class> requiredAttributes;
     protected final Map<String, Object> eventMap;
 
-    protected DefaultFaultMetricEventBuilder() {
+    public DefaultFaultMetricEventBuilder() {
         requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.ERROR);
         eventMap = new HashMap<>();
     }

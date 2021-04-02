@@ -25,7 +25,7 @@ import org.wso2.am.analytics.publisher.reporter.MetricSchema;
  */
 public class DefaultChoreoFaultMetricEventBuilder extends DefaultFaultMetricEventBuilder {
 
-    protected DefaultChoreoFaultMetricEventBuilder() {
+    public DefaultChoreoFaultMetricEventBuilder() {
         super(DefaultInputValidator.getInstance().getEventProperties(MetricSchema.CHOREO_ERROR));
     }
 }
