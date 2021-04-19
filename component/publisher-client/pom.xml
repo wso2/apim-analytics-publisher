@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.am.analytics.publisher</groupId>
         <artifactId>apim-analytics-publisher-component</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
@@ -42,6 +42,7 @@
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -87,7 +88,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            !org.wso2.am.analytics.publisher.reporter.cloud.*;version="${project.version}",
+                            org.wso2.am.analytics.publisher.reporter.cloud.*;version="${project.version}",
                             !org.wso2.am.analytics.publisher.reporter.choreo;version="${project.version}",
                             org.wso2.am.analytics.publisher.client.*;version="${project.version}",
                             org.wso2.am.analytics.publisher.reporter.*;version="${project.version}",
@@ -96,7 +97,6 @@
                             org.wso2.am.analytics.publisher.util.*;version="${project.version}",
                         </Export-Package>
                         <Private-Package>
-                            org.wso2.am.analytics.publisher.reporter.cloud.*;version="${project.version}",
                         </Private-Package>
                         <Import-Package>
                             com.google.gson.*;version="${gson.import.version.range}",

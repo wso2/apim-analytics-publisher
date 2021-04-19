@@ -18,7 +18,8 @@
 
 package org.wso2.am.analytics.publisher.reporter.cloud;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.client.ClientStatus;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
@@ -31,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Implementation of {@link CounterMetric} for Choroe Metric Reporter
  */
 public class DefaultCounterMetric implements CounterMetric {
-    private static final Logger log = Logger.getLogger(DefaultCounterMetric.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultCounterMetric.class);
     private String name;
     private EventQueue queue;
     private MetricSchema schema;
@@ -42,11 +43,13 @@ public class DefaultCounterMetric implements CounterMetric {
         //Constructor should be made protected. Keeping public till testing plan is finalized
         this.name = name;
         this.queue = queue;
-        if (schema == MetricSchema.ERROR || schema == MetricSchema.RESPONSE) {
+        if (schema == MetricSchema.ERROR || schema == MetricSchema.RESPONSE
+                || schema == MetricSchema.CHOREO_ERROR || schema == MetricSchema.CHOREO_RESPONSE) {
             this.schema = schema;
         } else {
-            throw new MetricCreationException("Default Counter Metric only supports " + MetricSchema.RESPONSE + " and"
-                                                      + " " + MetricSchema.ERROR + " types.");
+            throw new MetricCreationException("Default Counter Metric only supports " + MetricSchema.RESPONSE + ", "
+                    + ", " + MetricSchema.ERROR + ", " + MetricSchema.CHOREO_RESPONSE + " and "
+                    + MetricSchema.CHOREO_RESPONSE + " types.");
         }
         this.status = queue.getClient().getStatus();
         this.failureCount = new AtomicInteger(0);
@@ -82,12 +85,18 @@ public class DefaultCounterMetric implements CounterMetric {
      */
     @Override
     public MetricEventBuilder getEventBuilder() {
-        if (schema == MetricSchema.RESPONSE) {
-            return new DefaultResponseMetricEventBuilder();
-        } else if (schema == MetricSchema.ERROR) {
-            return new DefaultFaultMetricEventBuilder();
+        switch (schema) {
+            case RESPONSE:
+                return new DefaultResponseMetricEventBuilder();
+            case ERROR:
+                return new DefaultFaultMetricEventBuilder();
+            case CHOREO_RESPONSE:
+                return new DefaultChoreoResponseMetricEventBuilder();
+            case CHOREO_ERROR:
+                return new DefaultChoreoFaultMetricEventBuilder();
+            default:
+                // will not happen
+                return null;
         }
-        //will not happen
-        return null;
     }
 }

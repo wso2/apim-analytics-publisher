@@ -18,7 +18,8 @@
 
 package org.wso2.am.analytics.publisher.reporter;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 
 import java.util.HashMap;
@@ -29,7 +30,7 @@ import java.util.Map;
  * metric type creation is enforced using this abstract class
  */
 public abstract class AbstractMetricReporter implements MetricReporter {
-    private static final Logger log = Logger.getLogger(AbstractMetricReporter.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractMetricReporter.class);
     private final Map<String, String> properties;
     private Map<String, Metric> metricRegistry;
 

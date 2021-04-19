@@ -16,16 +16,18 @@
  * under the License.
  */
 
-package org.wso2.am.analytics.publisher.reporter;
+package org.wso2.am.analytics.publisher.reporter.cloud;
+
+import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 
 /**
- * Enum to represent supported metric schema types by the reporting framework
+ * Default builder for response metric type. Restrictions are set on the key names that uses can set to the builder.
+ * Allows keys and their validity will be checked when populating and availability of all required properties will be
+ * checked when building.
  */
-public enum MetricSchema {
-    RESPONSE,
-    ERROR,
-    CHOREO_RESPONSE,
-    CHOREO_ERROR,
-    LATENCY,
-    PAYLOAD
+public class DefaultChoreoResponseMetricEventBuilder extends DefaultResponseMetricEventBuilder {
+
+    public DefaultChoreoResponseMetricEventBuilder() {
+        super(DefaultInputValidator.getInstance().getEventProperties(MetricSchema.CHOREO_RESPONSE));
+    }
 }
