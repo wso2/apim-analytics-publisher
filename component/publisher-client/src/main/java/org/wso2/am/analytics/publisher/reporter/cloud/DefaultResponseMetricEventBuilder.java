@@ -70,9 +70,14 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
     protected Map<String, Object> buildEvent() {
         eventMap.put(Constants.EVENT_TYPE, Constants.RESPONSE_EVENT_TYPE);
         // userAgent raw string is not required and removing
-        String userAgentHeader = (String) eventMap.remove(Constants.USER_AGENT_HEADER);
+        String userAgentHeader = (String) eventMap.get(Constants.USER_AGENT_HEADER);
         // userAgentHeader will not null since it is already validated
+        //if it is null then event has been already built. In such a case will return Map as it is
+        if (userAgentHeader == null) {
+            return eventMap;
+        }
         setUserAgentProperties(userAgentHeader);
+        eventMap.remove(Constants.USER_AGENT_HEADER);
         return eventMap;
     }
 
