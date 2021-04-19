@@ -40,6 +40,7 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
     private static final Logger log = LoggerFactory.getLogger(DefaultResponseMetricEventBuilder.class);
     protected Map<String, Class> requiredAttributes;
     protected Map<String, Object> eventMap;
+    private Boolean isBuilt = false;
 
     public DefaultResponseMetricEventBuilder() {
         requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
@@ -53,15 +54,17 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
 
     @Override
     public boolean validate() throws MetricReportingException {
-        for (Map.Entry<String, Class> entry : requiredAttributes.entrySet()) {
-            Object attribute = eventMap.get(entry.getKey());
-            if (attribute == null) {
-                throw new MetricReportingException(entry.getKey() + " is missing in metric data. This metric event "
-                                                           + "will not be processed further.");
-            } else if (!attribute.getClass().equals(entry.getValue())) {
-                throw new MetricReportingException(entry.getKey() + " is expecting a " + entry.getValue() + " type "
-                                                           + "attribute while attribute of type " + attribute.getClass()
-                                                           + " is present.");
+        if (!isBuilt) {
+            for (Map.Entry<String, Class> entry : requiredAttributes.entrySet()) {
+                Object attribute = eventMap.get(entry.getKey());
+                if (attribute == null) {
+                    throw new MetricReportingException(entry.getKey() + " is missing in metric data. This metric event "
+                                                               + "will not be processed further.");
+                } else if (!attribute.getClass().equals(entry.getValue())) {
+                    throw new MetricReportingException(entry.getKey() + " is expecting a " + entry.getValue() + " type "
+                                                               + "attribute while attribute of type "
+                                                               + attribute.getClass() + " is present.");
+                }
             }
         }
         return true;
@@ -74,11 +77,15 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
 
     @Override
     protected Map<String, Object> buildEvent() {
-        eventMap.put(Constants.EVENT_TYPE, Constants.RESPONSE_EVENT_TYPE);
-        // userAgent raw string is not required and removing
-        String userAgentHeader = (String) eventMap.remove(Constants.USER_AGENT_HEADER);
-        // userAgentHeader will not null since it is already validated
-        setUserAgentProperties(userAgentHeader);
+        if (!isBuilt) {
+            eventMap.put(Constants.EVENT_TYPE, Constants.RESPONSE_EVENT_TYPE);
+            // userAgent raw string is not required and removing
+            String userAgentHeader = (String) eventMap.remove(Constants.USER_AGENT_HEADER);
+            if (userAgentHeader != null) {
+                setUserAgentProperties(userAgentHeader);
+            }
+            isBuilt = true;
+        }
         return eventMap;
     }
 
