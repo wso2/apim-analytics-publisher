@@ -30,6 +30,10 @@ import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableExceptio
 import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsThreadFactory;
 import org.wso2.am.analytics.publisher.util.BackoffRetryCounter;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -38,14 +42,18 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.xml.bind.DatatypeConverter;
+
 /**
  * Event Hub client is responsible for sending events to
  * Azure Event Hub.
  */
 public class EventHubClient implements Cloneable {
     private static final Logger log = LoggerFactory.getLogger(EventHubClient.class);
+    private static final String TOKEN_HASH_USER_PROP = "token-hash";
     private final String authEndpoint;
     private final String authToken;
+    private final String authTokenHash;
     private final Lock publishingLock;
     private final BackoffRetryCounter producerRetryCounter;
     private final BackoffRetryCounter eventBatchRetryCounter;
@@ -67,6 +75,7 @@ public class EventHubClient implements Cloneable {
         eventBatchRetryCounter = new BackoffRetryCounter();
         this.authEndpoint = authEndpoint;
         this.authToken = authToken;
+        this.authTokenHash = toHash(authToken);
         this.retryOptions = retryOptions;
         this.clientStatus = ClientStatus.NOT_CONNECTED;
         createProducerWithRetry(authEndpoint, authToken, retryOptions, true);
@@ -141,6 +150,7 @@ public class EventHubClient implements Cloneable {
     public void sendEvent(String event) {
         if (clientStatus == ClientStatus.CONNECTED) {
             EventData eventData = new EventData(event);
+            eventData.getProperties().put(TOKEN_HASH_USER_PROP, this.authTokenHash);
             try {
                 publishingLock.lock();
                 boolean isAdded = batch.tryAdd(eventData);
@@ -316,5 +326,18 @@ public class EventHubClient implements Cloneable {
         return new EventHubClient(this.authEndpoint, this.authToken, this.retryOptions);
     }
 
-
+    private String toHash(String text) {
+        if (text == null) {
+            log.debug("The text trying to hash is empty.");
+            return null;
+        }
+        final MessageDigest messageDigest;
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error occurred when getting hash algorithm.", e);
+        }
+        byte[] digestBytes = messageDigest.digest(text.getBytes(StandardCharsets.UTF_8));
+        return DatatypeConverter.printHexBinary(digestBytes).toUpperCase(Locale.ENGLISH);
+    }
 }
