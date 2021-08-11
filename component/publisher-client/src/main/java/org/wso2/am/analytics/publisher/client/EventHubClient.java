@@ -232,6 +232,12 @@ public class EventHubClient implements Cloneable {
             } finally {
                 publishingLock.unlock();
             }
+        } else if (clientStatus == ClientStatus.FLUSHING_FAILED) {
+            log.error("client status is FLUSHING_FAILED. Producer client will be re-initialized "
+                    + "retaining the Event Data Batch");
+            this.clientStatus = ClientStatus.RETRYING;
+            createProducerWithRetry(authEndpoint, authToken, retryOptions, false);
+            sendEvent(event);
         } else {
             try {
                 threadBarrier.lock();
@@ -289,6 +295,10 @@ public class EventHubClient implements Cloneable {
                         log.debug("[{ " + Thread.currentThread().getName().replaceAll("[\r\n]", "") + " }] "
                                           + "Flushed " + size + " events to Analytics cluster.");
                     } catch (Exception e) {
+                        if (e instanceof AmqpException && isAuthenticationFailure((AmqpException) e)) {
+                            log.error("Marked client status as FLUSHING_FAILED due to AMQP authentication failure.");
+                            this.clientStatus = ClientStatus.FLUSHING_FAILED;
+                        }
                         log.error("Event flushing operation failed. Will be retried again according to the configured "
                                           + "client.flushing.delay. Error will be handled by publishing threads once "
                                           + "Event Data Batch is filled.");

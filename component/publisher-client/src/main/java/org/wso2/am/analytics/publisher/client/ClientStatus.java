@@ -24,5 +24,6 @@ package org.wso2.am.analytics.publisher.client;
 public enum ClientStatus {
     CONNECTED,
     NOT_CONNECTED,
+    FLUSHING_FAILED,
     RETRYING
 }
