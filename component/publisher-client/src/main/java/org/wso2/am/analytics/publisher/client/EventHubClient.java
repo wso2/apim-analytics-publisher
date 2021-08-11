@@ -233,7 +233,7 @@ public class EventHubClient implements Cloneable {
                 publishingLock.unlock();
             }
         } else if (clientStatus == ClientStatus.FLUSHING_FAILED) {
-            log.error("client status is FLUSHING_FAILED. Producer client will be re-initialized "
+            log.debug("client status is FLUSHING_FAILED. Producer client will be re-initialized "
                     + "retaining the Event Data Batch");
             this.clientStatus = ClientStatus.RETRYING;
             createProducerWithRetry(authEndpoint, authToken, retryOptions, false);
