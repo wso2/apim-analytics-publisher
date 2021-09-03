@@ -298,6 +298,13 @@ public class EventHubClient implements Cloneable {
                         if (e instanceof AmqpException && isAuthenticationFailure((AmqpException) e)) {
                             log.error("Marked client status as FLUSHING_FAILED due to AMQP authentication failure.");
                             this.clientStatus = ClientStatus.FLUSHING_FAILED;
+                        } else if (e.getCause() instanceof ConnectionUnrecoverableException) {
+                            this.clientStatus = ClientStatus.NOT_CONNECTED;
+                            log.error(
+                                    "Unrecoverable error occurred when event flushing. Analytics event flushing will be"
+                                            + " disabled until issue is rectified. Reason: " + e.getMessage()
+                                            .replaceAll("[\r\n]", ""));
+                            return;
                         }
                         log.error("Event flushing operation failed. Will be retried again according to the configured "
                                           + "client.flushing.delay. Error will be handled by publishing threads once "
