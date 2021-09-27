@@ -74,7 +74,7 @@ class WSO2TokenCredential implements TokenCredential {
             // reinitialize publisher.
             log.error("Error occurred when retrieving SAS token.", e);
             backoffRetryCounter.reset();
-            return null;
+            return Mono.error(e);
         }
     }
 
