@@ -108,6 +108,12 @@ public class EventHubClient implements Cloneable {
             } catch (IllegalStateException e) {
                 throw new ConnectionRecoverableException("Event batch creation failed. " + e.getMessage()
                         .replaceAll("[\r\n]", ""));
+            } catch (AmqpException e) {
+                throw new ConnectionRecoverableException("Event batch creation failed. " + e.getMessage()
+                        .replaceAll("[\r\n]", ""));
+            } catch (Exception e) {
+                throw new ConnectionUnrecoverableException("Event batch creation failed. " + e.getMessage()
+                        .replaceAll("[\r\n]", ""));
             }
             clientStatus = ClientStatus.CONNECTED;
             log.info("[" + Thread.currentThread().getName().replaceAll("[\r\n]", "") + "] "
