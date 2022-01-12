@@ -69,6 +69,11 @@
             <groupId>ua.parser.wso2</groupId>
             <artifactId>ua-parser</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-netty</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
