@@ -1,7 +1,14 @@
 # apim-analytics-publisher
 This repo contains the data publisher for Choreo Analytics cloud. Data publisher is responsible for sending analytics
  data into Azure cloud for processing and visualization. 
- 
+
+## About this repository
+
+|  Branch | Build Status(Jenkins) | 
+| :------------ |:-------------
+| master      | [![Build Status](https://wso2.org/jenkins/job/analytics-products/job/apim-analytics-publisher/badge/icon)](https://wso2.org/jenkins/job/analytics-products/job/apim-analytics-publisher) |
+
+
 ## Install
 ### Install from source
 
