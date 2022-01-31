@@ -17,27 +17,35 @@
  */
 
 package org.wso2.am.analytics.publisher.util;
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.spi.LoggingEvent;
+
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.plugins.Plugin;
+import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
+import org.apache.logging.log4j.core.config.plugins.PluginElement;
+import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UnitTestAppender extends AppenderSkeleton {
+@Plugin(name = "UnitTestAppender", category = "Core", elementType = "appender", printObject = true)
+public class UnitTestAppender extends AbstractAppender {
     private List<String> messages = new ArrayList<>();
 
-    @Override
-    protected void append(LoggingEvent loggingEvent) {
-        messages.add(loggingEvent.getRenderedMessage());
+    protected UnitTestAppender(String name, Filter filter) {
+        super(name, filter, null, false, null);
     }
 
-    @Override
-    public void close() {
-    }
-
-    @Override
-    public boolean requiresLayout() {
-        return false;
+    @PluginFactory
+    public static UnitTestAppender createAppender(
+            @PluginAttribute("name") String name,
+            @PluginElement("Filter") Filter filter) {
+        if (name == null) {
+            LOGGER.error("No name provided for UnitTestAppender");
+            return null;
+        }
+        return new UnitTestAppender(name, filter);
     }
 
     public List<String> getMessages() {
@@ -51,5 +59,10 @@ public class UnitTestAppender extends AppenderSkeleton {
             }
         }
         return false;
+    }
+
+    @Override
+    public void append(LogEvent event) {
+        messages.add(event.getMessage().getFormattedMessage());
     }
 }

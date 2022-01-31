@@ -18,8 +18,11 @@
 
 package org.wso2.am.analytics.publisher;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.am.analytics.publisher.client.EventHubClient;
@@ -41,9 +44,10 @@ public class ErrorHandlingTestCase {
 
     @Test
     public void testConnectionInvalidURL() throws MetricCreationException, MetricReportingException {
-        UnitTestAppender appender = new UnitTestAppender();
-        Logger log = Logger.getLogger(EventHubClient.class);
-        log.addAppender(appender);
+        Logger log = LogManager.getLogger(EventHubClient.class);
+        LoggerContext context = LoggerContext.getContext(false);
+        Configuration config = context.getConfiguration();
+        UnitTestAppender appender = config.getAppender("UnitTestAppender");
 
         Map<String, String> configMap = new HashMap<>();
         configMap.put(Constants.AUTH_API_URL, "some_url");
@@ -58,10 +62,11 @@ public class ErrorHandlingTestCase {
     @Test(dependsOnMethods = {"testConnectionInvalidURL"})
     public void testConnectionUnavailability() throws MetricCreationException, MetricReportingException,
                                                       InterruptedException {
-        UnitTestAppender appender = new UnitTestAppender();
-        Logger log = Logger.getLogger(EventHubClient.class);
-        log.setLevel(Level.DEBUG);
-        log.addAppender(appender);
+        Logger log = LogManager.getLogger(EventHubClient.class);
+        LoggerContext context = LoggerContext.getContext(false);
+        Configuration config = context.getConfiguration();
+        UnitTestAppender appender = config.getAppender("UnitTestAppender");
+        log.atLevel(Level.DEBUG);
 
         Map<String, String> configMap = new HashMap<>();
         configMap.put(Constants.AUTH_API_URL, "https://localhost:1234/non-existance");

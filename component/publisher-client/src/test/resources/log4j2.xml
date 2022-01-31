@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration packages="org.wso2.am.analytics.publisher" status="WARN">
+    <Appenders>
+        <UnitTestAppender name="UnitTestAppender"/>
+    </Appenders>
+    <Loggers>
+        <Root level="DEBUG">
+            <AppenderRef ref="UnitTestAppender" />
+        </Root>
+    </Loggers>
+</Configuration>

@@ -18,7 +18,10 @@
 
 package org.wso2.am.analytics.publisher;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
@@ -31,15 +34,17 @@ import org.wso2.am.analytics.publisher.reporter.log.LogCounterMetric;
 import org.wso2.am.analytics.publisher.util.UnitTestAppender;
 
 public class LogMetricReporterTestCase {
-    private static final Logger log = Logger.getLogger(LogMetricReporterTestCase.class);
+    private static final Logger log = LogManager.getLogger(LogMetricReporterTestCase.class);
 
 
     @Test
     public void testLogMetricReporter() throws MetricCreationException, MetricReportingException {
         log.info("Running log metric test case");
-        UnitTestAppender appender = new UnitTestAppender();
-        Logger log = Logger.getLogger(LogCounterMetric.class);
-        log.addAppender(appender);
+        Logger log = LogManager.getLogger(LogCounterMetric.class);
+        LoggerContext context = LoggerContext.getContext(false);
+        Configuration config = context.getConfiguration();
+        UnitTestAppender appender = config.getAppender("UnitTestAppender");
+
         MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(
                 "org.wso2.am.analytics.publisher.reporter.log.LogMetricReporter", null);
         CounterMetric metric = metricReporter.createCounterMetric("testCounter", null);

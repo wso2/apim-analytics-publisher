@@ -18,7 +18,8 @@
 
 package org.wso2.am.analytics.publisher;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
@@ -34,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MetricReporterTestCase {
-    private static final Logger log = Logger.getLogger(MetricReporterTestCase.class);
+    private static final Logger log = LogManager.getLogger(MetricReporterTestCase.class);
 
     @Test(enabled = false, expectedExceptions = MetricCreationException.class)
     public void testMetricReporterCreationWithoutConfigs() throws MetricCreationException, MetricReportingException {

@@ -54,6 +54,7 @@
                 <artifactId>log4j</artifactId>
                 <version>${log4j.version}</version>
                 <scope>test</scope>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -134,6 +135,44 @@
                 <artifactId>mockserver-netty</artifactId>
                 <version>${mockserver-netty.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons.logging.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>servlet-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>logkit</groupId>
+                        <artifactId>logkit</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>servlet-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>avalon-framework</groupId>
+                        <artifactId>avalon-framework</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -245,6 +284,7 @@
         <gson.version>2.8.6</gson.version>
         <slf4j.version>1.7.2</slf4j.version>
         <log4j.version>1.2.12</log4j.version>
+        <log4j2.version>2.17.1</log4j2.version>
         <junit.version>4.13.1</junit.version>
         <testng.version>6.10</testng.version>
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
@@ -262,12 +302,13 @@
         <azure.messaging.import.version.range>[5.3.1, 6.0.0)</azure.messaging.import.version.range>
         <google.gson.import.version.range>[2.8.0, 3.0.0)</google.gson.import.version.range>
         <feign.import.version.range>[11.0.0, 12.0.0)</feign.import.version.range>
-        <apache.log4j.import.version.range>[1.2.0, 2.0.0)</apache.log4j.import.version.range>
+        <apache.log4j.import.version.range>[2.17.0, 3.0.0)</apache.log4j.import.version.range>
         <ua_parser.version>1.3.0.wso2v2</ua_parser.version>
         <ua_parser.import.version.range>[1.3.0,2)</ua_parser.import.version.range>
         <jacoco.version>0.8.6</jacoco.version>
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
         <mockserver-netty.version>3.10.8</mockserver-netty.version>
+        <commons.logging.version>1.1.1</commons.logging.version>
     </properties>
     <scm>
         <url>https://github.com/wso2/apim-analytics-publisher.git</url>
