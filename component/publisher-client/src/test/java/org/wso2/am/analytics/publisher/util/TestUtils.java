@@ -23,6 +23,7 @@ import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * Util class  containing helper methods for test
@@ -58,5 +59,14 @@ public class TestUtils {
                 .addAttribute(Constants.REQUEST_MEDIATION_LATENCY, 1000L)
                 .addAttribute(Constants.RESPONSE_MEDIATION_LATENCY, 1000L)
                 .addAttribute(Constants.USER_IP, "127.0.0.1");
+    }
+
+    public static boolean isContains(List<String> messages, String message) {
+        for (String log : messages) {
+            if (log.contains(message)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

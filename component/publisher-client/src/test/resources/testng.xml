@@ -19,7 +19,7 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="Analytics-Publisher-Test-Suite">
+<suite name="Analytics-Publisher-Test-Suite" parallel="false">
     <test name="analytics-publisher-tests" enabled="true" preserve-order="true">
         <classes>
             <class name="org.wso2.am.analytics.publisher.MetricReporterTestCase"/>

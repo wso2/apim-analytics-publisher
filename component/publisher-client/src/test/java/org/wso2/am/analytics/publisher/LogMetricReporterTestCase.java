@@ -31,7 +31,10 @@ import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricReporter;
 import org.wso2.am.analytics.publisher.reporter.MetricReporterFactory;
 import org.wso2.am.analytics.publisher.reporter.log.LogCounterMetric;
+import org.wso2.am.analytics.publisher.util.TestUtils;
 import org.wso2.am.analytics.publisher.util.UnitTestAppender;
+
+import java.util.List;
 
 public class LogMetricReporterTestCase {
     private static final Logger log = LogManager.getLogger(LogMetricReporterTestCase.class);
@@ -53,16 +56,18 @@ public class LogMetricReporterTestCase {
                                                                                                     "value3");
         metric.incrementCount(builder);
 
-        Assert.assertTrue(appender.checkContains("testCounter"), "Metric name is not properly logged");
-        Assert.assertTrue(appender.checkContains("attribute1=value1"), "Metric attribute is not properly "
+        List<String> messages = appender.getMessages();
+
+        Assert.assertTrue(TestUtils.isContains(messages, "testCounter"), "Metric name is not properly logged");
+        Assert.assertTrue(TestUtils.isContains(messages, "attribute1=value1"), "Metric attribute is not properly "
                 + "logged");
-        Assert.assertTrue(appender.checkContains("attribute2=value2"), "Metric attribute is not properly "
+        Assert.assertTrue(TestUtils.isContains(messages, "attribute2=value2"), "Metric attribute is not properly "
                 + "logged");
-        Assert.assertTrue(appender.checkContains("attribute3=value3"), "Metric attribute is not properly "
+        Assert.assertTrue(TestUtils.isContains(messages, "attribute3=value3"), "Metric attribute is not properly "
                 + "logged");
     }
 
-    @Test(expectedExceptions = MetricReportingException.class)
+    @Test(expectedExceptions = MetricReportingException.class, dependsOnMethods = {"testLogMetricReporter"})
     public void testLogMetricReporterWithInvalidAttributes() throws MetricCreationException, MetricReportingException {
         MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(
                 "org.wso2.am.analytics.publisher.reporter.log.LogMetricReporter", null);

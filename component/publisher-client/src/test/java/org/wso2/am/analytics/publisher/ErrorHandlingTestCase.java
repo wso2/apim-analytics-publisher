@@ -38,6 +38,7 @@ import org.wso2.am.analytics.publisher.util.TestUtils;
 import org.wso2.am.analytics.publisher.util.UnitTestAppender;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ErrorHandlingTestCase {
@@ -54,14 +55,14 @@ public class ErrorHandlingTestCase {
         configMap.put(Constants.AUTH_API_TOKEN, "some_token");
         MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configMap);
         CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
-        Assert.assertTrue(appender.checkContains("Unrecoverable error occurred when creating Eventhub "
+        List<String> messages = appender.getMessages();
+        Assert.assertTrue(TestUtils.isContains(messages, "Unrecoverable error occurred when creating Eventhub "
                                                          + "Client"), "Expected error hasn't logged in the "
                                   + "EventHubClientClass");
     }
 
     @Test(dependsOnMethods = {"testConnectionInvalidURL"})
-    public void testConnectionUnavailability() throws MetricCreationException, MetricReportingException,
-                                                      InterruptedException {
+    public void testConnectionUnavailability() throws Exception {
         Logger log = LogManager.getLogger(EventHubClient.class);
         LoggerContext context = LoggerContext.getContext(false);
         Configuration config = context.getConfiguration();
@@ -75,16 +76,18 @@ public class ErrorHandlingTestCase {
         factory.reset();
         MetricReporter metricReporter = factory.createMetricReporter(configMap);
         CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
-        Assert.assertTrue(appender.checkContains("Recoverable error occurred when creating Eventhub Client. "
+        List<String> messages = appender.getMessages();
+        Assert.assertTrue(TestUtils.isContains(messages, "Recoverable error occurred when creating Eventhub Client. "
                                                          + "Retry attempts will be made"));
-        Assert.assertTrue(appender.checkContains("Provided authentication endpoint "
+        Assert.assertTrue(TestUtils.isContains(messages, "Provided authentication endpoint "
                                                          + "https://localhost:1234/non-existance is not "
                                                          + "reachable."));
         MetricEventBuilder builder = metric.getEventBuilder();
         TestUtils.populateBuilder(builder);
         metric.incrementCount(builder);
         Thread.sleep(1000);
-        Assert.assertTrue(appender.checkContains("will be parked as EventHub Client is inactive."), "Thread "
+        messages = appender.getMessages();
+        Assert.assertTrue(TestUtils.isContains(messages, "will be parked as EventHub Client is inactive."), "Thread "
                 + "waiting log entry has not printed.");
     }
 }
