@@ -77,10 +77,6 @@
             <artifactId>mockserver-netty</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
