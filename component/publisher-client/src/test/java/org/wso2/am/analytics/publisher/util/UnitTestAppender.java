@@ -27,11 +27,12 @@ import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Plugin(name = "UnitTestAppender", category = "Core", elementType = "appender", printObject = true)
 public class UnitTestAppender extends AbstractAppender {
-    private List<String> messages = new ArrayList<>();
+    private List<String> messages = Collections.synchronizedList(new ArrayList<>());
 
     protected UnitTestAppender(String name, Filter filter) {
         super(name, filter, null, false, null);
