@@ -63,7 +63,7 @@ public class DefaultFaultMetricBuilderTestCase {
         builder.build();
     }
 
-    @Test(expectedExceptions = MetricReportingException.class)
+    @Test(expectedExceptions = MetricReportingException.class, dependsOnMethods = {"testMissingAttributes"})
     public void testAttributesWithInvalidTypes() throws MetricCreationException, MetricReportingException {
         builder.addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
@@ -87,7 +87,7 @@ public class DefaultFaultMetricBuilderTestCase {
                 .build();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"testAttributesWithInvalidTypes"})
     public void testMetricBuilder() throws MetricCreationException, MetricReportingException {
         Map<String, Object> eventMap = builder
                 .addAttribute(Constants.REQUEST_TIMESTAMP, OffsetDateTime.now(Clock.systemUTC()).toString())
