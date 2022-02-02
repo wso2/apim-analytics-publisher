@@ -18,6 +18,7 @@
 
 package org.wso2.am.analytics.publisher.reporter.log;
 
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
@@ -28,21 +29,24 @@ import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import java.util.Map;
 
 /**
- * Log counter metric class. Intended for testing only.
+ * Log Counter Metrics class, This class can be used to log analytics event to a separate log file.
  */
 public class LogCounterMetric implements CounterMetric {
     private static final Logger log = LoggerFactory.getLogger(LogCounterMetric.class);
     private final String name;
+    private final Gson gson;
 
     protected LogCounterMetric(String name) {
         this.name = name;
+        this.gson = new Gson();
     }
 
     @Override
     public int incrementCount(MetricEventBuilder builder) throws MetricReportingException {
-        Map<String, Object> properties = builder.build();
-        log.info("Metric Name: " + name.replaceAll("[\r\n]", "") + " Metric Value: "
-                         + properties.toString().replaceAll("[\r\n]", ""));
+        Map<String, Object> event = builder.build();
+        String jsonString = gson.toJson(event);
+        log.info("apimMetrics: " + name.replaceAll("[\r\n]", "") + ", properties :" +
+                jsonString.replaceAll("[\r\n]", ""));
         return 0;
     }
 

@@ -49,12 +49,11 @@ public class LogMetricReporterTestCase {
         metric.incrementCount(builder);
 
         Assert.assertTrue(appender.checkContains("testCounter"), "Metric name is not properly logged");
-        Assert.assertTrue(appender.checkContains("attribute1=value1"), "Metric attribute is not properly "
+        Assert.assertTrue(appender.checkContains("properties"), "Metric attribute is not properly "
                 + "logged");
-        Assert.assertTrue(appender.checkContains("attribute2=value2"), "Metric attribute is not properly "
-                + "logged");
-        Assert.assertTrue(appender.checkContains("attribute3=value3"), "Metric attribute is not properly "
-                + "logged");
+        Assert.assertTrue(appender.checkContains("apimMetrics: testCounter, properties :" +
+                "{\"attribute1\":\"value1\",\"attribute3\":\"value3\",\"attribute2\":\"value2\"}"),
+                "Metric attribute is not properly logged");
     }
 
     @Test(expectedExceptions = MetricReportingException.class)

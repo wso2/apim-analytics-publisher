@@ -18,6 +18,8 @@
 
 package org.wso2.am.analytics.publisher.reporter.log;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricReporter;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
@@ -30,9 +32,11 @@ import java.util.Map;
  * Log Metric Reporter class. Intended for testing only.
  */
 public class LogMetricReporter extends AbstractMetricReporter {
+    private static final Logger log = LoggerFactory.getLogger(LogMetricReporter.class);
 
     public LogMetricReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
+        log.info("LogMetricReporter successfully initialized");
     }
 
     @Override protected void validateConfigProperties(Map<String, String> properties) throws MetricCreationException {
