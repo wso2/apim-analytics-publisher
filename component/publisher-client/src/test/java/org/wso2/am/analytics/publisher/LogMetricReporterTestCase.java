@@ -18,7 +18,10 @@
 
 package org.wso2.am.analytics.publisher;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
@@ -28,18 +31,23 @@ import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricReporter;
 import org.wso2.am.analytics.publisher.reporter.MetricReporterFactory;
 import org.wso2.am.analytics.publisher.reporter.log.LogCounterMetric;
+import org.wso2.am.analytics.publisher.util.TestUtils;
 import org.wso2.am.analytics.publisher.util.UnitTestAppender;
 
+import java.util.List;
+
 public class LogMetricReporterTestCase {
-    private static final Logger log = Logger.getLogger(LogMetricReporterTestCase.class);
+    private static final Logger log = LogManager.getLogger(LogMetricReporterTestCase.class);
 
 
     @Test
     public void testLogMetricReporter() throws MetricCreationException, MetricReportingException {
         log.info("Running log metric test case");
-        UnitTestAppender appender = new UnitTestAppender();
-        Logger log = Logger.getLogger(LogCounterMetric.class);
-        log.addAppender(appender);
+        Logger log = LogManager.getLogger(LogCounterMetric.class);
+        LoggerContext context = LoggerContext.getContext(false);
+        Configuration config = context.getConfiguration();
+        UnitTestAppender appender = config.getAppender("UnitTestAppender");
+
         MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(
                 "org.wso2.am.analytics.publisher.reporter.log.LogMetricReporter", null);
         CounterMetric metric = metricReporter.createCounterMetric("testCounter", null);
@@ -48,15 +56,17 @@ public class LogMetricReporterTestCase {
                                                                                                     "value3");
         metric.incrementCount(builder);
 
-        Assert.assertTrue(appender.checkContains("testCounter"), "Metric name is not properly logged");
-        Assert.assertTrue(appender.checkContains("properties"), "Metric attribute is not properly "
+        List<String> messages = appender.getMessages();
+
+        Assert.assertTrue(TestUtils.isContains(messages, "testCounter"), "Metric name is not properly logged");
+        Assert.assertTrue(TestUtils.isContains(messages, "properties"), "Metric attribute is not properly "
                 + "logged");
-        Assert.assertTrue(appender.checkContains("apimMetrics: testCounter, properties :" +
+        Assert.assertTrue(TestUtils.isContains(messages, "apimMetrics: testCounter, properties :" +
                 "{\"attribute1\":\"value1\",\"attribute3\":\"value3\",\"attribute2\":\"value2\"}"),
                 "Metric attribute is not properly logged");
     }
 
-    @Test(expectedExceptions = MetricReportingException.class)
+    @Test(expectedExceptions = MetricReportingException.class, dependsOnMethods = {"testLogMetricReporter"})
     public void testLogMetricReporterWithInvalidAttributes() throws MetricCreationException, MetricReportingException {
         MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(
                 "org.wso2.am.analytics.publisher.reporter.log.LogMetricReporter", null);

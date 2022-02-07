@@ -40,13 +40,16 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <scope>test</scope>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
@@ -68,6 +71,11 @@
         <dependency>
             <groupId>ua.parser.wso2</groupId>
             <artifactId>ua-parser</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-netty</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -107,7 +115,7 @@
                             feign.codec.*;version="${feign.import.version.range}",
                             feign.gson.*;version="${feign.import.version.range}",
                             feign.slf4j.*;version="${feign.import.version.range}",
-                            org.apache.log4j.*;version="${apache.log4j.import.version.range}",
+                            org.apache.logging.log4j.*;version="${apache.log4j.import.version.range}",
                             ua_parser.*;version="${ua_parser.import.version.range}",
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
