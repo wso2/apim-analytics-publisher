@@ -65,15 +65,4 @@ public class LogMetricReporterTestCase {
                 "{\"attribute1\":\"value1\",\"attribute3\":\"value3\",\"attribute2\":\"value2\"}"),
                 "Metric attribute is not properly logged");
     }
-
-    @Test(expectedExceptions = MetricReportingException.class, dependsOnMethods = {"testLogMetricReporter"})
-    public void testLogMetricReporterWithInvalidAttributes() throws MetricCreationException, MetricReportingException {
-        MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(
-                "org.wso2.am.analytics.publisher.reporter.log.LogMetricReporter", null);
-        CounterMetric metric = metricReporter.createCounterMetric("testCounter", null);
-        MetricEventBuilder builder = metric.getEventBuilder();
-        builder.addAttribute("attribute1", 123).addAttribute("attribute2", "value2").addAttribute("attribute3",
-                                                                                                       "value3");
-        metric.incrementCount(builder);
-    }
 }
