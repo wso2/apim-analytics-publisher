@@ -37,16 +37,12 @@ public class LogMetricEventBuilder extends AbstractMetricEventBuilder {
     }
 
     @Override
-    public boolean validate() throws MetricReportingException {
-        for (Object value : eventMap.values()) {
-            if (!(value instanceof String)) {
-                throw new MetricReportingException("Only attributes of type String is supported");
-            }
-        }
+    public boolean validate() {
         return true;
     }
 
-    @Override public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
+    @Override
+    public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
         eventMap.put(key, value);
         return this;
     }
