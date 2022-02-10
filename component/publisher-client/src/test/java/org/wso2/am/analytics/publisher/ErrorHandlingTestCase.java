@@ -77,6 +77,7 @@ public class ErrorHandlingTestCase {
         MetricReporter metricReporter = factory.createMetricReporter(configMap);
         CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
         List<String> messages = appender.getMessages();
+        Thread.sleep(1000);
         Assert.assertTrue(TestUtils.isContains(messages,
                 "Recoverable error occurred when creating Eventhub Client. Retry attempts will be made"));
         Assert.assertTrue(TestUtils.isContains(messages, "Provided authentication endpoint "
