@@ -67,6 +67,7 @@ public class Constants {
 
     //Reporter constants
     public static final String DEFAULT_REPORTER = "default";
+    public static final String ELK_REPORTER = "elk";
 
     //EventHub Client retry options constants
     public static final int DEFAULT_MAX_RETRIES = 2;

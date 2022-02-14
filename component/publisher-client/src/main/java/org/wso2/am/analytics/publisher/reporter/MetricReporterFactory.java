@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsMetricReporter;
+import org.wso2.am.analytics.publisher.reporter.log.LogMetricReporter;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.lang.reflect.Constructor;
@@ -59,6 +60,24 @@ public class MetricReporterFactory {
                          " is already created. Hence returning same instance");
         return reporterInstance;
     }
+
+    public MetricReporter createLogMetricReporter(Map<String, String> properties) throws MetricCreationException {
+        if (reporterRegistry.get(Constants.ELK_REPORTER) == null){
+            synchronized (this){
+                if (reporterRegistry.get(Constants.ELK_REPORTER) == null) {
+                    MetricReporter reporterInstance = new LogMetricReporter(properties);
+                    reporterRegistry.put(Constants.ELK_REPORTER, reporterInstance);
+                    return reporterInstance;
+                }
+            }
+        }
+
+        MetricReporter reporterInstance = reporterRegistry.get(Constants.ELK_REPORTER);
+        log.info("Metric Reporter of type " + reporterInstance.getClass().toString().replaceAll("[\r\n]", "") +
+                " is already created. Hence returning same instance");
+        return reporterInstance;
+    }
+
     public MetricReporter createMetricReporter(String fullyQualifiedClassName, Map<String, String> properties)
             throws MetricCreationException {
         if (reporterRegistry.get(fullyQualifiedClassName) == null) {
