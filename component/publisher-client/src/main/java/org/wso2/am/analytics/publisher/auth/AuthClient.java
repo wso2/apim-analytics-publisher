@@ -23,9 +23,13 @@ import feign.FeignException;
 import feign.RetryableException;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
+import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import org.wso2.am.analytics.publisher.exception.ConnectionRecoverableException;
 import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
+import org.wso2.am.analytics.publisher.util.Constants;
+
+import java.util.Map;
 
 /**
  * Auth client to generate SAS token that can use to authenticate with event hub
@@ -33,15 +37,27 @@ import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableExceptio
 public class AuthClient {
     public static final String AUTH_HEADER = "Authorization";
 
-    public static String getSASToken(String authEndpoint, String token) throws ConnectionRecoverableException,
-                                                                               ConnectionUnrecoverableException {
+    public static String getSASToken(String authEndpoint, String token, Map<String, String> properties)
+            throws ConnectionRecoverableException, ConnectionUnrecoverableException {
 
-        DefaultApi defaultApi = Feign.builder()
-                .encoder(new GsonEncoder())
-                .decoder(new GsonDecoder())
-                .logger(new Slf4jLogger())
-                .requestInterceptor(requestTemplate -> requestTemplate.header(AUTH_HEADER, "Bearer " + token))
-                .target(DefaultApi.class, authEndpoint);
+        String proxyEnabled = properties.get(Constants.PROXY_ENABLE);
+        DefaultApi defaultApi;
+
+        if (Boolean.parseBoolean(proxyEnabled)) {
+            defaultApi = Feign.builder().client(new OkHttpClient(AuthProxyUtils.getProxyClient(properties)))
+                    .encoder(new GsonEncoder())
+                    .decoder(new GsonDecoder())
+                    .logger(new Slf4jLogger())
+                    .requestInterceptor(requestTemplate -> requestTemplate.header(AUTH_HEADER, "Bearer " + token))
+                    .target(DefaultApi.class, authEndpoint);
+        } else {
+            defaultApi = Feign.builder()
+                    .encoder(new GsonEncoder())
+                    .decoder(new GsonDecoder())
+                    .logger(new Slf4jLogger())
+                    .requestInterceptor(requestTemplate -> requestTemplate.header(AUTH_HEADER, "Bearer " + token))
+                    .target(DefaultApi.class, authEndpoint);
+        }
         try {
             TokenDetailsDTO dto = defaultApi.tokenGet();
             return dto.getToken();

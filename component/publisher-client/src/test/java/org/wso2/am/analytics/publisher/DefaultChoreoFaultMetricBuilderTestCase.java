@@ -37,6 +37,7 @@ import org.wso2.am.analytics.publisher.util.Constants;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 public class DefaultChoreoFaultMetricBuilderTestCase {
@@ -51,7 +52,8 @@ public class DefaultChoreoFaultMetricBuilderTestCase {
                 .setMaxDelay(Duration.ofSeconds(120))
                 .setTryTimeout(Duration.ofSeconds(30))
                 .setMode(AmqpRetryMode.FIXED);
-        EventHubClient client = new EventHubClient("some_endpoint", "some_token", retryOptions);
+        EventHubClient client = new EventHubClient("some_endpoint", "some_token", retryOptions,
+                new HashMap<>());
         EventQueue queue = new EventQueue(100, 1, client, 10);
         DefaultCounterMetric metric = new DefaultCounterMetric("test.builder.metric", queue,
                 MetricSchema.CHOREO_ERROR);

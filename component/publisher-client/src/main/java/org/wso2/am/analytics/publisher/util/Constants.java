@@ -65,6 +65,17 @@ public class Constants {
     public static final String AUTH_API_URL = "auth.api.url";
     public static final String AUTH_API_TOKEN = "auth.api.token";
 
+    //Proxy configs
+    public static final String PROXY_ENABLE = "proxyConfig.enable";
+    public static final String PROXY_HOST = "proxyConfig.host";
+    public static final String PROXY_PORT = "proxyConfig.port";
+    public static final String PROXY_USERNAME = "proxyConfig.username";
+    public static final String PROXY_PASSWORD = "proxyConfig.password";
+    public static final String KEYSTORE_LOCATION = "keystore.location";
+    public static final String KEYSTORE_PASSWORD = "keystore.password";
+    public static final String TRUSTSTORE_LOCATION = "truststore.location";
+    public static final String TRUSTSTORE_PASSWORD = "truststore.password";
+
     //Reporter constants
     public static final String DEFAULT_REPORTER = "default";
 
