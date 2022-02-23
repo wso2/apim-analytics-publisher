@@ -40,10 +40,10 @@ public class AuthClient {
     public static String getSASToken(String authEndpoint, String token, Map<String, String> properties)
             throws ConnectionRecoverableException, ConnectionUnrecoverableException {
 
-        String proxyEnabled = properties.get(Constants.PROXY_ENABLE);
+        String isProxyEnabled = properties.get(Constants.PROXY_ENABLE);
         DefaultApi defaultApi;
 
-        if (Boolean.parseBoolean(proxyEnabled)) {
+        if (Boolean.parseBoolean(isProxyEnabled)) {
             defaultApi = Feign.builder().client(new OkHttpClient(AuthProxyUtils.getProxyClient(properties)))
                     .encoder(new GsonEncoder())
                     .decoder(new GsonDecoder())
