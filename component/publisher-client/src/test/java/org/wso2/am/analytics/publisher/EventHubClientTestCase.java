@@ -136,6 +136,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
         verify(client, timeout(20000).times(1)).send(any(EventDataBatch.class));
 
         // verify flushing thread identified the auth error when try to send via AMQP
+        Thread.sleep(1000);
         List<String> messages = appender.getMessages();
         Assert.assertTrue(TestUtils
                 .isContains(messages, "Marked client status as FLUSHING_FAILED due to AMQP authentication failure."));
