@@ -29,6 +29,7 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -68,6 +69,11 @@ public class EventHubClientTestCase extends AuthAPIMockService {
     @BeforeClass
     public void init() {
         clientFactoryMocked = Mockito.mockStatic(EventHubProducerClientFactory.class);
+    }
+
+    @AfterClass
+    public void finalized() {
+        clientFactoryMocked.close();
     }
 
     @BeforeMethod
