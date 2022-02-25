@@ -34,11 +34,14 @@ public class AuthAPIMockService {
 
     protected static final String SAS_TOKEN = "SharedAccessSignature sr=sb://localhost/incoming-hub/publishers"
             + "/pub1&sig=signature&se=1641892957&skn=send-policy";
+    private static final int TEST_PORT = 9191;
     private ClientAndServer mockServer;
+    protected String authApiEndpoint;
 
     @BeforeClass
     public void startServer() {
-        mockServer = ClientAndServer.startClientAndServer(1234);
+        mockServer = ClientAndServer.startClientAndServer(TEST_PORT);
+        authApiEndpoint = "http://localhost:" + TEST_PORT + "/auth-api";
     }
 
     @AfterClass
