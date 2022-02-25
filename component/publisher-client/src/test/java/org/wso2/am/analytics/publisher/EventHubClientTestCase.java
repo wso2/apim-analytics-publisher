@@ -49,6 +49,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -74,7 +75,8 @@ public class EventHubClientTestCase extends AuthAPIMockService {
 
         client = Mockito.mock(EventHubProducerClient.class);
         clientFactoryMocked.when(() -> EventHubProducerClientFactory
-                .create(any(String.class), any(String.class), any(AmqpRetryOptions.class))).thenReturn(client);
+                .create(any(String.class), any(String.class), any(AmqpRetryOptions.class), anyMap()))
+                .thenReturn(client);
 
         String authToken = UUID.randomUUID().toString();
         mock(200, authToken);
