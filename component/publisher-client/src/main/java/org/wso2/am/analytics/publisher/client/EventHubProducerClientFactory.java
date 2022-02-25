@@ -30,6 +30,7 @@ import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableExceptio
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Map;
 
 /**
  * Factory class to create EventHubProducerClient instance.
@@ -37,13 +38,13 @@ import java.net.URLDecoder;
 public class EventHubProducerClientFactory {
     private static final Logger log = LoggerFactory.getLogger(EventHubClient.class);
 
-    public static EventHubProducerClient create(String authEndpoint, String authToken,
-                                                AmqpRetryOptions retryOptions)
+    public static EventHubProducerClient create(String authEndpoint, String authToken, AmqpRetryOptions retryOptions,
+                                                Map<String, String> properties)
             throws ConnectionRecoverableException, ConnectionUnrecoverableException {
-        TokenCredential tokenCredential = new WSO2TokenCredential(authEndpoint, authToken);
+        TokenCredential tokenCredential = new WSO2TokenCredential(authEndpoint, authToken, properties);
         String tempSASToken = null;
         // generate SAS token to get eventhub meta data
-        tempSASToken = getSASToken(authEndpoint, authToken);
+        tempSASToken = getSASToken(authEndpoint, authToken, properties);
 
         String resourceURI = getResourceURI(tempSASToken);
         String fullyQualifiedNamespace = getNamespace(resourceURI);
@@ -54,9 +55,9 @@ public class EventHubProducerClientFactory {
                 .buildProducerClient();
     }
 
-    private static String getSASToken(String authEndpoint, String authToken) throws ConnectionRecoverableException,
-                                                                                    ConnectionUnrecoverableException {
-        return AuthClient.getSASToken(authEndpoint, authToken);
+    private static String getSASToken(String authEndpoint, String authToken, Map<String, String> properties)
+            throws ConnectionRecoverableException, ConnectionUnrecoverableException {
+        return AuthClient.getSASToken(authEndpoint, authToken, properties);
     }
 
     /**

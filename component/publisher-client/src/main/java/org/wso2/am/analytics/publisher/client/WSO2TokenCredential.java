@@ -33,6 +33,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * WSO2 SAS token refresh implementation for TokenCredential
@@ -41,11 +42,13 @@ class WSO2TokenCredential implements TokenCredential {
     private static final Logger log = LoggerFactory.getLogger(WSO2TokenCredential.class);
     private final String authEndpoint;
     private final String authToken;
+    private final Map<String, String> properties;
     private BackoffRetryCounter backoffRetryCounter;
 
-    public WSO2TokenCredential(String authEndpoint, String authToken) {
+    public WSO2TokenCredential(String authEndpoint, String authToken, Map<String, String> properties) {
         this.authEndpoint = authEndpoint;
         this.authToken = authToken;
+        this.properties = properties;
         backoffRetryCounter = new BackoffRetryCounter();
     }
 
@@ -53,7 +56,7 @@ class WSO2TokenCredential implements TokenCredential {
     public Mono<AccessToken> getToken(TokenRequestContext tokenRequestContext) {
         log.debug("Trying to retrieving a new SAS token.");
         try {
-            String sasToken = AuthClient.getSASToken(this.authEndpoint, this.authToken);
+            String sasToken = AuthClient.getSASToken(this.authEndpoint, this.authToken, this.properties);
             backoffRetryCounter.reset();
             log.debug("New SAS token retrieved.");
             // Using lower duration than actual.
