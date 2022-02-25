@@ -34,6 +34,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.am.analytics.publisher.client.EventHubProducerClientFactory;
+import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricReporter;
@@ -48,9 +49,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -64,6 +67,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
     private EventHubProducerClient client;
     private Map<String, String> configs;
     private UnitTestAppender appender;
+    private List<String> messages;
     private MockedStatic<EventHubProducerClientFactory> clientFactoryMocked;
 
     @BeforeClass
@@ -81,7 +85,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
 
         client = Mockito.mock(EventHubProducerClient.class);
         clientFactoryMocked.when(() -> EventHubProducerClientFactory
-                .create(any(String.class), any(String.class), any(AmqpRetryOptions.class), anyMap()))
+                .create(anyString(), anyString(), any(AmqpRetryOptions.class), anyMap()))
                 .thenReturn(client);
 
         String authToken = UUID.randomUUID().toString();
@@ -97,7 +101,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
     }
 
     @Test
-    public void testEventPublishing() throws Exception {
+    public void testEventFlushing() throws Exception {
         EventDataBatch eventDataBatch = Mockito.mock(EventDataBatch.class);
         EventDataBatch newEventDataBatch = Mockito.mock(EventDataBatch.class);
         when(client.createBatch()).thenReturn(eventDataBatch).thenReturn(newEventDataBatch);
@@ -118,7 +122,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
     }
 
     @Test
-    public void testEventPublishingWithAMQPAuthException() throws Exception {
+    public void testEventFlushingWithAMQPAuthException() throws Exception {
 
         EventDataBatch eventDataBatch = Mockito.mock(EventDataBatch.class);
         when(client.createBatch()).thenReturn(eventDataBatch);
@@ -145,7 +149,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
 
         // verify flushing thread identified the auth error when try to send via AMQP
         Thread.sleep(1000);
-        List<String> messages = appender.getMessages();
+        messages = appender.getMessages();
         Assert.assertTrue(TestUtils
                 .isContains(messages, "Marked client status as FLUSHING_FAILED due to AMQP authentication failure."));
 
@@ -161,4 +165,230 @@ public class EventHubClientTestCase extends AuthAPIMockService {
                 + "will be re-initialized retaining the Event Data Batch"));
     }
 
+    @Test
+    public void testEventFlushingWithConnectionUnrecoverableException() throws Exception {
+        EventDataBatch eventDataBatch = Mockito.mock(EventDataBatch.class);
+        when(client.createBatch()).thenReturn(eventDataBatch);
+        when(eventDataBatch.tryAdd(any(EventData.class))).thenReturn(true);
+        when(eventDataBatch.getCount()).thenReturn(1);
+
+        doThrow(new RuntimeException(new ConnectionUnrecoverableException("ConnectionUnrecoverableException")))
+                .when(client).send(any(EventDataBatch.class));
+
+        MetricReporter metricReporter = new DefaultAnalyticsMetricReporter(configs);
+        CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter2", MetricSchema.RESPONSE);
+        MetricEventBuilder builder = metric.getEventBuilder();
+        TestUtils.populateBuilder(builder);
+
+        // try publishing an event
+        metric.incrementCount(builder);
+
+        // waiting to adding event to the queue
+        verify(eventDataBatch, timeout(10000).times(1)).tryAdd(any(EventData.class));
+
+        // waiting to flushing thread try to send
+        verify(client, timeout(20000).times(1)).send(any(EventDataBatch.class));
+
+        // verify worker thread has already identified the Unrecoverable error
+        String msg = "Unrecoverable error occurred when event flushing. Analytics event flushing will be disabled "
+                + "until issue is rectified. Reason: org.wso2.am.analytics.publisher.exception."
+                + "ConnectionUnrecoverableException: ConnectionUnrecoverableException";
+        messages = appender.getMessages();
+        Assert.assertTrue(TestUtils.isContains(messages, msg));
+
+        // try to publish another event
+        metric.incrementCount(builder);
+        // waiting to confirm that the event is not added to the queue
+        verify(eventDataBatch, timeout(10000).times(1)).tryAdd(any(EventData.class));
+    }
+
+
+    @Test
+    public void testEventPublishingInWorkerThread() throws Exception {
+        EventDataBatch eventDataBatch = Mockito.mock(EventDataBatch.class);
+        EventDataBatch newEventDataBatch = Mockito.mock(EventDataBatch.class);
+        when(client.createBatch()).thenReturn(eventDataBatch).thenReturn(newEventDataBatch);
+        when(eventDataBatch.tryAdd(any(EventData.class))).thenReturn(false);
+        when(newEventDataBatch.tryAdd(any(EventData.class))).thenReturn(true);
+        when(eventDataBatch.getCount()).thenReturn(1);
+        when(newEventDataBatch.getCount()).thenReturn(1);
+
+        MetricReporter metricReporter = new DefaultAnalyticsMetricReporter(configs);
+        CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
+        MetricEventBuilder builder = metric.getEventBuilder();
+        TestUtils.populateBuilder(builder);
+
+        // try publishing an event
+        metric.incrementCount(builder);
+
+        // waiting for worker thread flush the queue
+        verify(client, timeout(20000).times(1)).send(any(EventDataBatch.class));
+        // waiting for worker thread, adding event to the queue
+        verify(newEventDataBatch, timeout(10000).times(1)).tryAdd(any(EventData.class));
+    }
+
+    @Test
+    public void testEventPublishingAndAuthExceptionInWorkerThread() throws Exception {
+        EventDataBatch eventDataBatch = Mockito.mock(EventDataBatch.class);
+        when(client.createBatch()).thenReturn(eventDataBatch);
+        when(eventDataBatch.tryAdd(any(EventData.class))).thenReturn(false).thenReturn(true);
+        when(eventDataBatch.getCount()).thenReturn(1).thenReturn(0);
+
+        doThrow(new AmqpException(false, AmqpErrorCondition.UNAUTHORIZED_ACCESS, "", null))
+                .when(client)
+                .send(any(EventDataBatch.class));
+
+        MetricReporter metricReporter = new DefaultAnalyticsMetricReporter(configs);
+        CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
+        MetricEventBuilder builder = metric.getEventBuilder();
+        TestUtils.populateBuilder(builder);
+
+        // try publishing an event
+        metric.incrementCount(builder);
+
+        // waiting for worker thread flush the queue
+        verify(client, timeout(20000).times(1)).send(any(EventDataBatch.class));
+        // waiting for worker thread, and verify adding event to the queue get succeed second time
+        verify(eventDataBatch, timeout(10000).times(2)).tryAdd(any(EventData.class));
+
+        // verify worker thread has already identified the Unrecoverable error
+        String msg = "Authentication issue happened. Producer client will be re-initialized retaining the Event Data "
+                + "Batch";
+        messages = appender.getMessages();
+        Assert.assertTrue(TestUtils.isContains(messages, msg));
+    }
+
+    @Test
+    public void testEventPublishingAndResourceLimitExceededInWorkerThread() throws Exception {
+        EventDataBatch eventDataBatch = Mockito.mock(EventDataBatch.class);
+        when(client.createBatch()).thenReturn(eventDataBatch);
+        when(eventDataBatch.tryAdd(any(EventData.class))).thenReturn(false).thenReturn(true);
+        when(eventDataBatch.getCount()).thenReturn(1).thenReturn(0);
+
+        doThrow(new AmqpException(false, AmqpErrorCondition.RESOURCE_LIMIT_EXCEEDED, "", null))
+                .when(client)
+                .send(any(EventDataBatch.class));
+
+        MetricReporter metricReporter = new DefaultAnalyticsMetricReporter(configs);
+        CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
+        MetricEventBuilder builder = metric.getEventBuilder();
+        TestUtils.populateBuilder(builder);
+
+        // try publishing an event
+        metric.incrementCount(builder);
+
+        // waiting for worker thread flush the queue
+        verify(client, timeout(20000).times(1)).send(any(EventDataBatch.class));
+
+        // waiting for worker thread, and verify adding event to the queue get succeed second time
+        verify(eventDataBatch, timeout(100000).times(2)).tryAdd(any(EventData.class));
+
+        // verify worker thread has already identified the Resource limit exceeded error
+        String msg = "Resource limit exceeded when publishing Event Data Batch. Operation will be retried after "
+                + "constant delay";
+        messages = appender.getMessages();
+        Assert.assertTrue(TestUtils.isContains(messages, msg));
+    }
+
+    @Test
+    public void testEventPublishingAndAnyAMQPExceptionInWorkerThread() throws Exception {
+        EventDataBatch eventDataBatch = Mockito.mock(EventDataBatch.class);
+        EventDataBatch newEventDataBatch = Mockito.mock(EventDataBatch.class);
+        when(client.createBatch()).thenReturn(eventDataBatch).thenReturn(newEventDataBatch);
+        when(eventDataBatch.tryAdd(any(EventData.class))).thenReturn(false);
+        when(newEventDataBatch.tryAdd(any(EventData.class))).thenReturn(true);
+        when(eventDataBatch.getCount()).thenReturn(1).thenReturn(0);
+        when(newEventDataBatch.getCount()).thenReturn(1).thenReturn(0);
+
+        doThrow(new AmqpException(false, AmqpErrorCondition.ARGUMENT_ERROR, "", null))
+                .when(client)
+                .send(any(EventDataBatch.class));
+
+        MetricReporter metricReporter = new DefaultAnalyticsMetricReporter(configs);
+        CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
+        MetricEventBuilder builder = metric.getEventBuilder();
+        TestUtils.populateBuilder(builder);
+
+        // try publishing an event
+        metric.incrementCount(builder);
+
+        // waiting for worker thread flush the queue
+        verify(client, timeout(20000).times(1)).send(any(EventDataBatch.class));
+
+        // verify existing producer client is close, before create new producer and batch
+        verify(client, timeout(10000).times(1)).close();
+
+        // verify worker thread has already identified the amqp exception
+        String msg = "AMQP error occurred while publishing Event Data Batch. Producer client will be re-initialized. "
+                + "Events may be lost in the process.";
+        messages = appender.getMessages();
+        Assert.assertTrue(TestUtils.isContains(messages, msg));
+    }
+
+    @Test
+    public void testEventPublishingAndTimeOutExceptionInWorkerThread() throws Exception {
+        EventDataBatch eventDataBatch = Mockito.mock(EventDataBatch.class);
+        when(client.createBatch()).thenReturn(eventDataBatch);
+        when(eventDataBatch.tryAdd(any(EventData.class))).thenReturn(false).thenReturn(true);
+        when(eventDataBatch.getCount()).thenReturn(1).thenReturn(0);
+
+        doThrow(new RuntimeException(new TimeoutException()))
+                .when(client)
+                .send(any(EventDataBatch.class));
+
+        MetricReporter metricReporter = new DefaultAnalyticsMetricReporter(configs);
+        CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
+        MetricEventBuilder builder = metric.getEventBuilder();
+        TestUtils.populateBuilder(builder);
+
+        // try publishing an event
+        metric.incrementCount(builder);
+
+        // waiting for worker thread flush the queue
+        verify(client, timeout(20000).times(1)).send(any(EventDataBatch.class));
+
+        // waiting for worker thread, and verify adding event to the queue get succeed second time
+        verify(eventDataBatch, timeout(20000).times(2)).tryAdd(any(EventData.class));
+
+        // verify worker thread has already identified the Timeout exception
+        String msg = "Timeout occurred after retrying 2 times with an timeout of 30 seconds while trying to publish "
+                + "Event Data Batch. Next retry cycle will begin shortly.";
+        messages = appender.getMessages();
+        Assert.assertTrue(TestUtils.isContains(messages, msg));
+    }
+
+    @Test
+    public void testEventPublishingAndAnyOtherExceptionInWorkerThread() throws Exception {
+        EventDataBatch eventDataBatch = Mockito.mock(EventDataBatch.class);
+        EventDataBatch newEventDataBatch = Mockito.mock(EventDataBatch.class);
+        when(client.createBatch()).thenReturn(eventDataBatch).thenReturn(newEventDataBatch);
+        when(eventDataBatch.tryAdd(any(EventData.class))).thenReturn(false);
+        when(newEventDataBatch.tryAdd(any(EventData.class))).thenReturn(true);
+        when(eventDataBatch.getCount()).thenReturn(1).thenReturn(0);
+        when(newEventDataBatch.getCount()).thenReturn(1).thenReturn(0);
+
+        doThrow(new RuntimeException())
+                .when(client)
+                .send(any(EventDataBatch.class));
+
+        MetricReporter metricReporter = new DefaultAnalyticsMetricReporter(configs);
+        CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
+        MetricEventBuilder builder = metric.getEventBuilder();
+        TestUtils.populateBuilder(builder);
+
+        // try publishing an event
+        metric.incrementCount(builder);
+
+        // waiting for worker thread flush the queue
+        verify(client, timeout(20000).times(1)).send(any(EventDataBatch.class));
+
+        // verify existing producer client is close, before create new producer and batch
+        verify(client, timeout(10000).times(1)).close();
+
+        // verify worker thread has already identified the runtime exception
+        String msg = "Unknown error occurred while publishing Event Data Batch. Producer client will be re-initialized."
+                + " Events may be lost in the process.";
+        messages = appender.getMessages();
+        Assert.assertTrue(TestUtils.isContains(messages, msg));
+    }
 }
