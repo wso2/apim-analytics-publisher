@@ -25,6 +25,7 @@ import org.wso2.am.analytics.publisher.exception.ConnectionRecoverableException;
 import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
 import org.wso2.am.analytics.publisher.util.AuthAPIMockService;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 public class AuthAPIClientTestCase extends AuthAPIMockService {
@@ -36,7 +37,7 @@ public class AuthAPIClientTestCase extends AuthAPIMockService {
         String authToken = UUID.randomUUID().toString();
         mock(401, authToken);
 
-        AuthClient.getSASToken(authApiEndpoint, authToken);
+        AuthClient.getSASToken(authApiEndpoint, authToken, new HashMap<>());
     }
 
     @Test
@@ -45,7 +46,7 @@ public class AuthAPIClientTestCase extends AuthAPIMockService {
         String authToken = UUID.randomUUID().toString();
         mock(200, authToken);
 
-        String sasToken = AuthClient.getSASToken(authApiEndpoint, authToken);
+        String sasToken = AuthClient.getSASToken(authApiEndpoint, authToken, new HashMap<>());
         Assert.assertEquals(sasToken, SAS_TOKEN);
     }
 
@@ -55,7 +56,7 @@ public class AuthAPIClientTestCase extends AuthAPIMockService {
         String authToken = UUID.randomUUID().toString();
         mock(500, authToken);
 
-        AuthClient.getSASToken(authApiEndpoint, authToken);
+        AuthClient.getSASToken(authApiEndpoint, authToken, new HashMap<>());
     }
 
     @Test(expectedExceptions = { ConnectionRecoverableException.class })
@@ -64,7 +65,7 @@ public class AuthAPIClientTestCase extends AuthAPIMockService {
         String authToken = UUID.randomUUID().toString();
         mock(400, authToken);
 
-        AuthClient.getSASToken(authApiEndpoint, authToken);
+        AuthClient.getSASToken(authApiEndpoint, authToken, new HashMap<>());
     }
 
     @Test(expectedExceptions = { ConnectionRecoverableException.class },
@@ -74,7 +75,7 @@ public class AuthAPIClientTestCase extends AuthAPIMockService {
         String authToken = UUID.randomUUID().toString();
         mock(403, authToken);
 
-        AuthClient.getSASToken(authApiEndpoint, authToken);
+        AuthClient.getSASToken(authApiEndpoint, authToken, new HashMap<>());
     }
 
     @Test(expectedExceptions = { ConnectionUnrecoverableException.class },
@@ -85,7 +86,7 @@ public class AuthAPIClientTestCase extends AuthAPIMockService {
         mock(200, authToken);
 
         String authEndpoint = "invalid/host/auth-api";
-        AuthClient.getSASToken(authEndpoint, authToken);
+        AuthClient.getSASToken(authEndpoint, authToken, new HashMap<>());
     }
 
     @Test(expectedExceptions = { ConnectionRecoverableException.class },
@@ -96,6 +97,6 @@ public class AuthAPIClientTestCase extends AuthAPIMockService {
         mock(200, authToken);
 
         String authEndpoint = "https://no.such.host/auth-api";
-        AuthClient.getSASToken(authEndpoint, authToken);
+        AuthClient.getSASToken(authEndpoint, authToken, new HashMap<>());
     }
 }
