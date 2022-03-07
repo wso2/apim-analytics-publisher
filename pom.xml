@@ -30,7 +30,7 @@
     </modules>
     <groupId>org.wso2.am.analytics.publisher</groupId>
     <artifactId>apim-analytics-publisher-parent</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8-SNAPSHOT</version>
     <name>APIM Analytics Publisher</name>
     <dependencyManagement>
         <dependencies>
@@ -319,6 +319,6 @@
         <url>https://github.com/wso2/apim-analytics-publisher.git</url>
         <developerConnection>scm:git:https://github.com/wso2/apim-analytics-publisher.git</developerConnection>
         <connection>scm:git:https://github.com/wso2/apim-analytics-publisher.git</connection>
-        <tag>v1.0.7</tag>
+        <tag>HEAD</tag>
     </scm>
 </project>
