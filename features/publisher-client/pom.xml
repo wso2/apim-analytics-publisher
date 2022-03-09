@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.am.analytics.publisher</groupId>
         <artifactId>apim-analytics-publisher-features</artifactId>
-        <version>1.0.6-SNAPSHOT</version>
+        <version>1.0.8-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -117,14 +117,6 @@
                                 <bundle>
                                     <symbolicName>com.google.gson</symbolicName>
                                     <version>${gson.version}</version>
-                                </bundle>
-                                <bundle>
-                                    <symbolicName>slf4j.log4j12</symbolicName>
-                                    <version>${slf4j.version}</version>
-                                </bundle>
-                                <bundle>
-                                    <symbolicName>slf4j.api</symbolicName>
-                                    <version>${slf4j.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>azure-core</symbolicName>

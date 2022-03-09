@@ -60,7 +60,7 @@ public class DefaultAnalyticsMetricReporter extends AbstractMetricReporter {
         String authToken = properties.get(Constants.AUTH_API_TOKEN);
         String authEndpoint = properties.get(Constants.AUTH_API_URL);
         AmqpRetryOptions retryOptions = createRetryOptions(properties);
-        EventHubClient client = new EventHubClient(authEndpoint, authToken, retryOptions);
+        EventHubClient client = new EventHubClient(authEndpoint, authToken, retryOptions, properties);
         eventQueue = new EventQueue(queueSize, workerThreads, client, flushingDelay);
     }
 

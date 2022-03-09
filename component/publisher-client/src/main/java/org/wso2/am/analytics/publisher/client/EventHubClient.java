@@ -33,7 +33,9 @@ import org.wso2.am.analytics.publisher.util.BackoffRetryCounter;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -64,8 +66,10 @@ public class EventHubClient implements Cloneable {
     private EventHubProducerClient producer;
     private EventDataBatch batch;
     private ClientStatus clientStatus;
+    private Map<String, String> properties = new HashMap<>();
 
-    public EventHubClient(String authEndpoint, String authToken, AmqpRetryOptions retryOptions) {
+    public EventHubClient(String authEndpoint, String authToken, AmqpRetryOptions retryOptions,
+                          Map<String, String> properties) {
         threadBarrier = new ReentrantLock();
         waitCondition = threadBarrier.newCondition();
         publishingLock = new ReentrantLock();
@@ -78,7 +82,7 @@ public class EventHubClient implements Cloneable {
         this.authTokenHash = toHash(authToken);
         this.retryOptions = retryOptions;
         this.clientStatus = ClientStatus.NOT_CONNECTED;
-        createProducerWithRetry(authEndpoint, authToken, retryOptions, true);
+        createProducerWithRetry(authEndpoint, authToken, retryOptions, true, properties);
     }
 
     private void retryWithBackoff(String authEndpoint, String authToken,
@@ -86,21 +90,21 @@ public class EventHubClient implements Cloneable {
         scheduledExecutorService.schedule(new Runnable() {
             @Override
             public void run() {
-                createProducerWithRetry(authEndpoint, authToken, retryOptions, createBatch);
+                createProducerWithRetry(authEndpoint, authToken, retryOptions, createBatch, properties);
             }
         }, producerRetryCounter.getTimeIntervalMillis(), TimeUnit.MILLISECONDS);
         producerRetryCounter.increment();
     }
 
-    private void createProducerWithRetry(String authEndpoint, String authToken,
-                                         AmqpRetryOptions retryOptions, boolean createBatch) {
+    private void createProducerWithRetry(String authEndpoint, String authToken, AmqpRetryOptions retryOptions,
+                                         boolean createBatch, Map<String, String> properties) {
         log.debug("[{ " + Thread.currentThread().getName().replaceAll("[\r\n]", "") + " }] "
                           + "- Creating Eventhub client instance.");
         try {
             if (producer != null) {
                 producer.close();
             }
-            producer = EventHubProducerClientFactory.create(authEndpoint, authToken, retryOptions);
+            producer = EventHubProducerClientFactory.create(authEndpoint, authToken, retryOptions, properties);
             try {
                 if (createBatch) {
                     batch = producer.createBatch();
@@ -179,7 +183,7 @@ public class EventHubClient implements Cloneable {
                             log.error("Authentication issue happened. Producer client will be re-initialized "
                                               + "retaining the Event Data Batch");
                             this.clientStatus = ClientStatus.RETRYING;
-                            createProducerWithRetry(authEndpoint, authToken, retryOptions, false);
+                            createProducerWithRetry(authEndpoint, authToken, retryOptions, false, properties);
                             sendEvent(event);
                         } else if (e.getErrorCondition() == AmqpErrorCondition.RESOURCE_LIMIT_EXCEEDED) {
                             //If resource limit is exceeded we will retry after a constant delay
@@ -200,7 +204,7 @@ public class EventHubClient implements Cloneable {
                                               + "publishing Event Data Batch. Producer client will "
                                               + "be re-initialized. Events may be lost in the process.", e);
                             this.clientStatus = ClientStatus.RETRYING;
-                            createProducerWithRetry(authEndpoint, authToken, retryOptions, true);
+                            createProducerWithRetry(authEndpoint, authToken, retryOptions, true, properties);
                             sendEvent(event);
                         }
                     } catch (Exception e) {
@@ -219,7 +223,7 @@ public class EventHubClient implements Cloneable {
                                               + "Producer client will "
                                               + "be re-initialized. Events may be lost in the process.", e);
                             this.clientStatus = ClientStatus.RETRYING;
-                            createProducerWithRetry(authEndpoint, authToken, retryOptions, true);
+                            createProducerWithRetry(authEndpoint, authToken, retryOptions, true, properties);
                             sendEvent(event);
                         }
                     }
@@ -242,7 +246,7 @@ public class EventHubClient implements Cloneable {
             log.debug("client status is FLUSHING_FAILED. Producer client will be re-initialized "
                     + "retaining the Event Data Batch");
             this.clientStatus = ClientStatus.RETRYING;
-            createProducerWithRetry(authEndpoint, authToken, retryOptions, false);
+            createProducerWithRetry(authEndpoint, authToken, retryOptions, false, properties);
             sendEvent(event);
         } else {
             try {
@@ -346,7 +350,7 @@ public class EventHubClient implements Cloneable {
      * @return New clone of current object
      */
     public EventHubClient clone() {
-        return new EventHubClient(this.authEndpoint, this.authToken, this.retryOptions);
+        return new EventHubClient(this.authEndpoint, this.authToken, this.retryOptions, this.properties);
     }
 
     private String toHash(String text) {
