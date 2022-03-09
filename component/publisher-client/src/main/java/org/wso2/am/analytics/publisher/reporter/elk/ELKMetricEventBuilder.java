@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.am.analytics.publisher.reporter.log;
+package org.wso2.am.analytics.publisher.reporter.elk;
 
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricEventBuilder;
@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * Event builder for log Metric Reporter
  */
-public class LogMetricEventBuilder extends AbstractMetricEventBuilder {
+public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     private Map<String, Object> eventMap = new HashMap<>();
 
     @Override
@@ -37,16 +37,12 @@ public class LogMetricEventBuilder extends AbstractMetricEventBuilder {
     }
 
     @Override
-    public boolean validate() throws MetricReportingException {
-        for (Object value : eventMap.values()) {
-            if (!(value instanceof String)) {
-                throw new MetricReportingException("Only attributes of type String is supported");
-            }
-        }
+    public boolean validate() {
         return true;
     }
 
-    @Override public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
+    @Override
+    public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
         eventMap.put(key, value);
         return this;
     }

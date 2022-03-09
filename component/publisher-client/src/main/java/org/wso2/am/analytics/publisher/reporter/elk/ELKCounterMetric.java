@@ -16,8 +16,9 @@
  * under the License.
  */
 
-package org.wso2.am.analytics.publisher.reporter.log;
+package org.wso2.am.analytics.publisher.reporter.elk;
 
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
@@ -30,19 +31,23 @@ import java.util.Map;
 /**
  * Log Counter Metrics class, This class can be used to log analytics event to a separate log file.
  */
-public class LogCounterMetric implements CounterMetric {
-    private static final Logger log = LoggerFactory.getLogger(LogCounterMetric.class);
+public class ELKCounterMetric implements CounterMetric {
+    private static final Logger log = LoggerFactory.getLogger(ELKCounterMetric.class);
     private final String name;
+    private final Gson gson;
 
-    protected LogCounterMetric(String name) {
+    protected ELKCounterMetric(String name) {
         this.name = name;
+        this.gson = new Gson();
     }
 
     @Override
     public int incrementCount(MetricEventBuilder builder) throws MetricReportingException {
-        Map<String, Object> properties = builder.build();
-        log.info("Metric Name: " + name.replaceAll("[\r\n]", "") + " Metric Value: "
-                + properties.toString().replaceAll("[\r\n]", ""));
+        Map<String, Object> event = builder.build();
+        String jsonString = gson.toJson(event);
+
+        log.info("apimMetrics: " + name.replaceAll("[\r\n]", "") + ", properties :" +
+                jsonString.replaceAll("[\r\n]", ""));
         return 0;
     }
 
@@ -58,6 +63,6 @@ public class LogCounterMetric implements CounterMetric {
 
     @Override
     public MetricEventBuilder getEventBuilder() {
-        return new LogMetricEventBuilder();
+        return new ELKMetricEventBuilder();
     }
 }

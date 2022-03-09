@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsMetricReporter;
+import org.wso2.am.analytics.publisher.reporter.elk.ELKMetricReporter;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.lang.reflect.Constructor;
@@ -48,17 +49,35 @@ public class MetricReporterFactory {
         if (reporterRegistry.get(Constants.DEFAULT_REPORTER) == null) {
             synchronized (this) {
                 if (reporterRegistry.get(Constants.DEFAULT_REPORTER) == null) {
-                        MetricReporter reporterInstance = new DefaultAnalyticsMetricReporter(properties);
-                        reporterRegistry.put(Constants.DEFAULT_REPORTER, reporterInstance);
-                        return reporterInstance;
+                    MetricReporter reporterInstance = new DefaultAnalyticsMetricReporter(properties);
+                    reporterRegistry.put(Constants.DEFAULT_REPORTER, reporterInstance);
+                    return reporterInstance;
                 }
             }
         }
         MetricReporter reporterInstance = reporterRegistry.get(Constants.DEFAULT_REPORTER);
         log.info("Metric Reporter of type " + reporterInstance.getClass().toString().replaceAll("[\r\n]", "") +
-                         " is already created. Hence returning same instance");
+                " is already created. Hence returning same instance");
         return reporterInstance;
     }
+
+    public MetricReporter createLogMetricReporter(Map<String, String> properties) throws MetricCreationException {
+        if (reporterRegistry.get(Constants.ELK_REPORTER) == null) {
+            synchronized (this) {
+                if (reporterRegistry.get(Constants.ELK_REPORTER) == null) {
+                    MetricReporter reporterInstance = new ELKMetricReporter(properties);
+                    reporterRegistry.put(Constants.ELK_REPORTER, reporterInstance);
+                    return reporterInstance;
+                }
+            }
+        }
+
+        MetricReporter reporterInstance = reporterRegistry.get(Constants.ELK_REPORTER);
+        log.info("Metric Reporter of type " + reporterInstance.getClass().toString().replaceAll("[\r\n]", "") +
+                " is already created. Hence returning same instance");
+        return reporterInstance;
+    }
+
     public MetricReporter createMetricReporter(String fullyQualifiedClassName, Map<String, String> properties)
             throws MetricCreationException {
         if (reporterRegistry.get(fullyQualifiedClassName) == null) {
@@ -76,18 +95,18 @@ public class MetricReporterFactory {
                         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException
                                 | NoSuchMethodException | InvocationTargetException e) {
                             throw new MetricCreationException("Error occurred while creating a Metric Reporter of type"
-                                                                      + " " + fullyQualifiedClassName, e);
+                                    + " " + fullyQualifiedClassName, e);
                         }
                     } else {
                         throw new MetricCreationException("Provided class name is either empty or null. Hence cannot "
-                                                                  + "create the Reporter.");
+                                + "create the Reporter.");
                     }
                 }
             }
         }
         MetricReporter reporterInstance = reporterRegistry.get(fullyQualifiedClassName);
         log.info("Metric Reporter of type " + reporterInstance.getClass().toString().replaceAll("[\r\n]", "") +
-                         " is already created. Hence returning same instance");
+                " is already created. Hence returning same instance");
         return reporterInstance;
     }
 
