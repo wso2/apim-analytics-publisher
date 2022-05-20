@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import ua_parser.Client;
 import ua_parser.Parser;
 
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -38,20 +37,16 @@ public class UserAgentParser {
     private Map<String, Client> clientCache;
 
     private UserAgentParser() {
-        try {
-            uaParser = new Parser();
-            isInitialized = true;
-            clientCache = new LinkedHashMap<String, Client>(Constants.USER_AGENT_DEFAULT_CACHE_SIZE
-                                                                    + Constants.DEFAULT_WORKER_THREADS) {
-                static final int MAX = Constants.USER_AGENT_DEFAULT_CACHE_SIZE;
-                @Override
-                protected boolean removeEldestEntry(Map.Entry eldest) {
-                    return size() > MAX;
-                }
-            };
-        } catch (IOException e) {
-            log.error("Error occurred when initializing uaParser", e);
-        }
+        uaParser = new Parser();
+        isInitialized = true;
+        clientCache = new LinkedHashMap<String, Client>(Constants.USER_AGENT_DEFAULT_CACHE_SIZE
+                                                                + Constants.DEFAULT_WORKER_THREADS) {
+            static final int MAX = Constants.USER_AGENT_DEFAULT_CACHE_SIZE;
+            @Override
+            protected boolean removeEldestEntry(Map.Entry eldest) {
+                return size() > MAX;
+            }
+        };
     }
 
     public static UserAgentParser getInstance() {
