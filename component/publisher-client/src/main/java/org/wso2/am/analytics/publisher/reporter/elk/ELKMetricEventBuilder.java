@@ -21,6 +21,9 @@ package org.wso2.am.analytics.publisher.reporter.elk;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
+import org.wso2.am.analytics.publisher.util.Constants;
+import org.wso2.am.analytics.publisher.util.UserAgentParser;
+import ua_parser.Client;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,9 +33,19 @@ import java.util.Map;
  */
 public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     private Map<String, Object> eventMap = new HashMap<>();
+    private Boolean isBuilt = false;
 
     @Override
     protected Map<String, Object> buildEvent() {
+        if (!isBuilt) {
+            eventMap.put(Constants.EVENT_TYPE, Constants.RESPONSE_EVENT_TYPE);
+            // userAgent raw string is not required and removing
+            String userAgentHeader = (String) eventMap.remove(Constants.USER_AGENT_HEADER);
+            if (userAgentHeader != null) {
+                setUserAgentProperties(userAgentHeader);
+            }
+            isBuilt = true;
+        }
         return eventMap;
     }
 
@@ -45,5 +58,24 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
         eventMap.put(key, value);
         return this;
+    }
+
+    private void setUserAgentProperties(String userAgentHeader) {
+        String browser = null;
+        String platform = null;
+        Client client = UserAgentParser.getInstance().parseUserAgent(userAgentHeader);
+        if (client != null) {
+            browser = client.userAgent.family;
+            platform = client.os.family;
+        }
+
+        if (browser == null || browser.isEmpty()) {
+            browser = Constants.UNKNOWN_VALUE;
+        }
+        if (platform == null || platform.isEmpty()) {
+            platform = Constants.UNKNOWN_VALUE;
+        }
+        eventMap.put(Constants.USER_AGENT, browser);
+        eventMap.put(Constants.PLATFORM, platform);
     }
 }
