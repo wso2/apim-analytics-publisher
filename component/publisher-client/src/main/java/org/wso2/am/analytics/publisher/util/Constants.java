@@ -56,6 +56,7 @@ public class Constants {
     public static final String ERROR_TYPE = "errorType";
     public static final String ERROR_CODE = "errorCode";
     public static final String ERROR_MESSAGE = "errorMessage";
+    public static final String PROPERTIES = "properties";
 
     //Builder event types
     public static final String RESPONSE_EVENT_TYPE = "response";
