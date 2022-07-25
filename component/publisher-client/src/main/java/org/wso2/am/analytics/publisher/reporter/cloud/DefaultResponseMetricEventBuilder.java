@@ -84,6 +84,8 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
             if (userAgentHeader != null) {
                 setUserAgentProperties(userAgentHeader);
             }
+            // customProperties object is not required and removing
+            eventMap.remove(Constants.PROPERTIES);
             isBuilt = true;
         }
         return eventMap;
