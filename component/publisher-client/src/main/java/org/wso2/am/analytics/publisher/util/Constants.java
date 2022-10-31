@@ -27,6 +27,7 @@ public class Constants {
     public static final String API_ID = "apiId";
     public static final String API_NAME = "apiName";
     public static final String API_CONTEXT = "apiContext";
+    public static final String USER_NAME = "userName";
     public static final String API_VERSION = "apiVersion";
     public static final String API_CREATION = "apiCreator";
     public static final String API_METHOD = "apiMethod";

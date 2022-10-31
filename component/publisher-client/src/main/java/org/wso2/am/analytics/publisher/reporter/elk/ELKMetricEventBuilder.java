@@ -38,11 +38,14 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     @Override
     protected Map<String, Object> buildEvent() {
         if (!isBuilt) {
-            eventMap.put(Constants.EVENT_TYPE, Constants.RESPONSE_EVENT_TYPE);
             // userAgent raw string is not required and removing
             String userAgentHeader = (String) eventMap.remove(Constants.USER_AGENT_HEADER);
             if (userAgentHeader != null) {
                 setUserAgentProperties(userAgentHeader);
+            }
+            Map<String, String> propertyMap = (Map<String, String>) eventMap.remove(Constants.PROPERTIES);
+            if (propertyMap != null) {
+                copyDefaultPropertiesToRootLevel(propertyMap);
             }
             isBuilt = true;
         }
@@ -77,5 +80,13 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
         }
         eventMap.put(Constants.USER_AGENT, browser);
         eventMap.put(Constants.PLATFORM, platform);
+    }
+
+    private void copyDefaultPropertiesToRootLevel(Map<String, String> properties) {
+        String apiContext = properties.remove(Constants.API_CONTEXT);
+        String userName = properties.remove(Constants.USER_NAME);
+        eventMap.put(Constants.API_CONTEXT, apiContext);
+        eventMap.put(Constants.USER_NAME, userName);
+        eventMap.put(Constants.PROPERTIES, properties);
     }
 }
