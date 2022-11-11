@@ -71,7 +71,7 @@ public class DefaultFaultMetricEventBuilder extends AbstractMetricEventBuilder {
     @Override
     protected Map<String, Object> buildEvent() {
         eventMap.put(Constants.EVENT_TYPE, Constants.FAULT_EVENT_TYPE);
-        // customProperties object is not required and removing
+        // properties object is not required and removing
         eventMap.remove(Constants.PROPERTIES);
         return eventMap;
     }
