@@ -18,33 +18,44 @@
 
 package org.wso2.am.analytics.publisher.auth;
 
-import okhttp3.Authenticator;
-import okhttp3.Credentials;
-import okhttp3.OkHttpClient;
+import feign.Client;
+import feign.httpclient.ApacheHttpClient;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.ProxyAuthenticationStrategy;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.am.analytics.publisher.exception.HttpClientException;
 import org.wso2.am.analytics.publisher.util.Constants;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
 import java.util.Map;
-import javax.net.ssl.KeyManagerFactory;
+
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
+
+import static org.wso2.am.analytics.publisher.util.Constants.HTTPS_PROTOCOL;
+import static org.wso2.am.analytics.publisher.util.Constants.HTTP_PROTOCOL;
+import static org.wso2.am.analytics.publisher.util.Constants.KEYSTORE_TYPE;
 
 /**
  * Util class to generate http client with proxy configurations
@@ -52,93 +63,85 @@ import javax.net.ssl.X509TrustManager;
 public class AuthProxyUtils {
 
     private static final Logger log = LoggerFactory.getLogger(AuthProxyUtils.class);
-    private static KeyStore trustStore;
-    private static TrustManagerFactory trustManagerFactory;
-    private static final String KEYSTORE_TYPE = "JKS";
-    private static final String PROTOCOL = "TLS";
-    private static final String ALGORITHM = "SunX509";
 
-    public static okhttp3.OkHttpClient getProxyClient(Map<String, String> properties) {
+    public static Client getClient(Map<String, String> properties) {
+        return getFeignHttpClient(properties, HTTPS_PROTOCOL);
+    }
 
+    public static ApacheHttpClient getFeignHttpClient(Map<String, String> properties, String protocol) {
         String proxyHost = properties.get(Constants.PROXY_HOST);
-        String proxyPort = properties.get(Constants.PROXY_PORT);
+        int proxyPort = Integer.parseInt(properties.get(Constants.PROXY_PORT));
         String proxyUsername = properties.get(Constants.PROXY_USERNAME);
         String proxyPassword = properties.get(Constants.PROXY_PASSWORD);
+        String proxyProtocol = properties.get(Constants.PROXY_PROTOCOL);
 
-        OkHttpClient.Builder okHttpClientBuilder;
-        SSLSocketFactory sslSocketFactory = getTrustedSSLSocketFactory(properties);
-        TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-        if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
-            throw new IllegalStateException("Unexpected default trust managers:" + Arrays.toString(trustManagers));
-        }
-        okHttpClientBuilder = new okhttp3.OkHttpClient.Builder()
-                .sslSocketFactory(sslSocketFactory, (X509TrustManager) trustManagers[0])
-                .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort))));
-
-        if (StringUtils.isNotEmpty(proxyUsername) && StringUtils.isNotEmpty(proxyPassword)) {
-            Authenticator proxyAuthenticator = (route, response) -> {
-                String credential = Credentials.basic(proxyUsername, proxyPassword);
-                return response.request().newBuilder().header("Proxy-Authorization", credential).build();
-            };
-            okHttpClientBuilder.proxyAuthenticator(proxyAuthenticator);
+        if (proxyProtocol != null) {
+            protocol = proxyProtocol;
         }
 
-        return okHttpClientBuilder.build();
-    }
-
-    private static SSLSocketFactory getTrustedSSLSocketFactory(Map<String, String> configProperties) {
-
+        PoolingHttpClientConnectionManager pool = null;
         try {
-            String keyStorePassword = configProperties.get(Constants.KEYSTORE_PASSWORD);
-            String keyStoreLocation = configProperties.get(Constants.KEYSTORE_LOCATION);
-            String trustStorePassword = configProperties.get(Constants.TRUSTSTORE_PASSWORD);
-            String trustStoreLocation = configProperties.get(Constants.TRUSTSTORE_LOCATION);
-
-            KeyStore keyStore = loadKeyStore(keyStoreLocation, keyStorePassword);
-            trustStore = loadTrustStore(trustStoreLocation, trustStorePassword);
-            return initSSLConnection(keyStore, keyStorePassword);
-        } catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException | CertificateException
-                | IOException | UnrecoverableKeyException e) {
-            log.error("Error while creating the SSL socket factory", e);
-            return null;
+            pool = getPoolingHttpClientConnectionManager(properties);
+        } catch (HttpClientException e) {
+            log.error("Error while getting http client connection manager", e);
         }
+
+        HttpHost host = new HttpHost(proxyHost, proxyPort, protocol);
+        DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(host);
+        HttpClientBuilder clientBuilder = HttpClientBuilder.create()
+                .setRoutePlanner(routePlanner)
+                .setConnectionManager(pool);
+
+        if (!StringUtils.isBlank(proxyUsername) && !StringUtils.isBlank(proxyPassword)) {
+            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(new AuthScope(proxyHost, proxyPort),
+                    new UsernamePasswordCredentials(proxyUsername, proxyPassword));
+            clientBuilder
+                    .setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy())
+                    .setDefaultCredentialsProvider(credentialsProvider);
+        }
+
+        return new ApacheHttpClient(clientBuilder.build());
     }
 
-    private static SSLSocketFactory initSSLConnection(KeyStore keyStore, String keyStorePassword) throws
-            NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException, KeyManagementException {
-
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(ALGORITHM);
-        keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
-
-        trustManagerFactory = TrustManagerFactory.getInstance(ALGORITHM);
-        trustManagerFactory.init(trustStore);
-
-        SSLContext sslContext = SSLContext.getInstance(PROTOCOL);
-        sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
-        SSLContext.setDefault(sslContext);
-        return sslContext.getSocketFactory();
+    private static PoolingHttpClientConnectionManager getPoolingHttpClientConnectionManager(Map<String,
+            String> properties) throws HttpClientException {
+        SSLConnectionSocketFactory socketFactory = createSocketFactory(properties);
+        ConnectionSocketFactory httpSocketFactory = new PlainConnectionSocketFactory();
+        org.apache.http.config.Registry<ConnectionSocketFactory> socketFactoryRegistry =
+                RegistryBuilder.<ConnectionSocketFactory>create()
+                        .register(HTTP_PROTOCOL, httpSocketFactory)
+                        .register(HTTPS_PROTOCOL, socketFactory)
+                        .build();
+        return new PoolingHttpClientConnectionManager(socketFactoryRegistry);
     }
 
-    private static KeyStore loadKeyStore(String keyStorePath, String ksPassword) throws KeyStoreException,
-            IOException, CertificateException, NoSuchAlgorithmException {
+    private static SSLConnectionSocketFactory createSocketFactory(Map<String, String> properties)
+            throws HttpClientException {
+        SSLContext sslContext;
 
-        InputStream fileInputStream = null;
+        String keyStorePassword = properties.get(Constants.KEYSTORE_PASSWORD);
+        String keyStorePath = properties.get(Constants.KEYSTORE_LOCATION);
         try {
-            char[] keypassChar = ksPassword.toCharArray();
-            KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
-            fileInputStream = new FileInputStream(keyStorePath);
-            keyStore.load(fileInputStream, keypassChar);
-            return keyStore;
-        } finally {
-            if (fileInputStream != null) {
-                fileInputStream.close();
-            }
+            KeyStore trustStore = KeyStore.getInstance(KEYSTORE_TYPE);
+            trustStore.load(Files.newInputStream(Paths.get(keyStorePath)), keyStorePassword.toCharArray());
+            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
+            return new SSLConnectionSocketFactory(sslContext, new DefaultHostnameVerifier());
+        } catch (KeyStoreException e) {
+            handleException("Failed to read from Key Store", e);
+        } catch (IOException e) {
+            handleException("Key Store not found in " + keyStorePath, e);
+        } catch (CertificateException e) {
+            handleException("Failed to read Certificate", e);
+        } catch (NoSuchAlgorithmException e) {
+            handleException("Failed to load Key Store from " + keyStorePath, e);
+        } catch (KeyManagementException e) {
+            handleException("Failed to load key from" + keyStorePath, e);
         }
+        return null;
     }
 
-    private static KeyStore loadTrustStore(String trustStorePath, String tsPassword) throws KeyStoreException,
-            IOException, CertificateException, NoSuchAlgorithmException {
-
-        return loadKeyStore(trustStorePath, tsPassword);
+    private static void handleException(String msg, Throwable t) throws HttpClientException {
+        throw new HttpClientException(msg, t);
     }
 }

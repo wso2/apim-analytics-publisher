@@ -21,13 +21,22 @@
 
 <suite name="Analytics-Publisher-Test-Suite" parallel="false">
     <test name="analytics-publisher-tests" enabled="true" preserve-order="true">
-        <classes>
-            <class name="org.wso2.am.analytics.publisher.MetricReporterTestCase"/>
-            <class name="org.wso2.am.analytics.publisher.LogMetricReporterTestCase"/>
-            <class name="org.wso2.am.analytics.publisher.DefaultResponseMetricBuilderTestCase"/>
-            <class name="org.wso2.am.analytics.publisher.DefaultFaultMetricBuilderTestCase"/>
-            <class name="org.wso2.am.analytics.publisher.ErrorHandlingTestCase"/>
-            <class name="org.wso2.am.analytics.publisher.EventHubClientTestCase"/>
-        </classes>
+        <parameter name="proxyConfigEnabled" value="false">
+            <classes>
+                <class name="org.wso2.am.analytics.publisher.MetricReporterTestCase"/>
+                <class name="org.wso2.am.analytics.publisher.LogMetricReporterTestCase"/>
+                <class name="org.wso2.am.analytics.publisher.DefaultResponseMetricBuilderTestCase"/>
+                <class name="org.wso2.am.analytics.publisher.DefaultFaultMetricBuilderTestCase"/>
+                <class name="org.wso2.am.analytics.publisher.ErrorHandlingTestCase"/>
+                <class name="org.wso2.am.analytics.publisher.EventHubClientTestCase"/>
+            </classes>
+        </parameter>
+    </test>
+    <test name="analytics-publisher-tests-with-proxy-config" enabled="true" preserve-order="true">
+        <parameter name="proxyConfigEnabled" value="true">
+            <classes>
+                <class name="org.wso2.am.analytics.publisher.EventHubClientTestCase"/>
+            </classes>
+        </parameter>
     </test>
 </suite>

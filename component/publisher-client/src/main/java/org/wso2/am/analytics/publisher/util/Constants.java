@@ -73,10 +73,12 @@ public class Constants {
     public static final String PROXY_PORT = "proxy_config_port";
     public static final String PROXY_USERNAME = "proxy_config_username";
     public static final String PROXY_PASSWORD = "proxy_config_password";
+    public static final String PROXY_PROTOCOL = "proxy_config_protocol";
     public static final String KEYSTORE_LOCATION = "keystore_location";
     public static final String KEYSTORE_PASSWORD = "keystore_password";
-    public static final String TRUSTSTORE_LOCATION = "truststore_location";
-    public static final String TRUSTSTORE_PASSWORD = "truststore_password";
+    public static final String HTTPS_PROTOCOL = "https";
+    public static final String HTTP_PROTOCOL = "http";
+    public static final String KEYSTORE_TYPE = "JKS";
 
     //Reporter constants
     public static final String DEFAULT_REPORTER = "default";

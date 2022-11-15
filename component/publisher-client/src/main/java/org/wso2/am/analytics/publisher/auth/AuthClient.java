@@ -23,7 +23,6 @@ import feign.FeignException;
 import feign.RetryableException;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
-import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import org.wso2.am.analytics.publisher.exception.ConnectionRecoverableException;
 import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
@@ -44,7 +43,7 @@ public class AuthClient {
         DefaultApi defaultApi;
 
         if (Boolean.parseBoolean(isProxyEnabled)) {
-            defaultApi = Feign.builder().client(new OkHttpClient(AuthProxyUtils.getProxyClient(properties)))
+            defaultApi = Feign.builder().client(AuthProxyUtils.getClient(properties))
                     .encoder(new GsonEncoder())
                     .decoder(new GsonDecoder())
                     .logger(new Slf4jLogger())

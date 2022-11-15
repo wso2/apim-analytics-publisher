@@ -19,16 +19,24 @@
 package org.wso2.am.analytics.publisher.client;
 
 import com.azure.core.amqp.AmqpRetryOptions;
+import com.azure.core.amqp.AmqpTransportType;
+import com.azure.core.amqp.ProxyAuthenticationType;
+import com.azure.core.amqp.ProxyOptions;
 import com.azure.core.credential.TokenCredential;
 import com.azure.messaging.eventhubs.EventHubClientBuilder;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.auth.AuthClient;
 import org.wso2.am.analytics.publisher.exception.ConnectionRecoverableException;
 import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
+import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.SocketAddress;
 import java.net.URLDecoder;
 import java.util.Map;
 
@@ -42,17 +50,44 @@ public class EventHubProducerClientFactory {
                                                 Map<String, String> properties)
             throws ConnectionRecoverableException, ConnectionUnrecoverableException {
         TokenCredential tokenCredential = new WSO2TokenCredential(authEndpoint, authToken, properties);
-        String tempSASToken = null;
+        String tempSASToken;
         // generate SAS token to get eventhub meta data
         tempSASToken = getSASToken(authEndpoint, authToken, properties);
 
         String resourceURI = getResourceURI(tempSASToken);
         String fullyQualifiedNamespace = getNamespace(resourceURI);
         String eventhubName = getEventHubName(resourceURI);
-        return new EventHubClientBuilder()
-                .credential(fullyQualifiedNamespace, eventhubName, tokenCredential)
-                .retry(retryOptions)
-                .buildProducerClient();
+
+        String isProxyEnabled = properties.get(Constants.PROXY_ENABLE);
+        if (Boolean.parseBoolean(isProxyEnabled)) {
+            String proxyHost = properties.get(Constants.PROXY_HOST);
+            int proxyPort = Integer.parseInt(properties.get(Constants.PROXY_PORT));
+            String proxyUsername = properties.get(Constants.PROXY_USERNAME);
+            String proxyPassword = properties.get(Constants.PROXY_PASSWORD);
+
+            SocketAddress address = new InetSocketAddress(proxyHost, proxyPort);
+            Proxy proxyAddress = new Proxy(Proxy.Type.HTTP, address);
+            ProxyOptions proxyOptions;
+            if (!StringUtils.isBlank(proxyUsername) && !StringUtils.isBlank(proxyPassword)) {
+                proxyOptions =
+                        new ProxyOptions(ProxyAuthenticationType.BASIC, proxyAddress, proxyUsername, proxyPassword);
+            } else {
+                proxyOptions =
+                        new ProxyOptions(ProxyAuthenticationType.NONE, proxyAddress, null, null);
+            }
+
+            return new EventHubClientBuilder()
+                    .credential(fullyQualifiedNamespace, eventhubName, tokenCredential)
+                    .proxyOptions(proxyOptions)
+                    .retry(retryOptions)
+                    .transportType(AmqpTransportType.AMQP_WEB_SOCKETS)
+                    .buildProducerClient();
+        } else {
+            return new EventHubClientBuilder()
+                    .credential(fullyQualifiedNamespace, eventhubName, tokenCredential)
+                    .retry(retryOptions)
+                    .buildProducerClient();
+        }
     }
 
     private static String getSASToken(String authEndpoint, String authToken, Map<String, String> properties)
