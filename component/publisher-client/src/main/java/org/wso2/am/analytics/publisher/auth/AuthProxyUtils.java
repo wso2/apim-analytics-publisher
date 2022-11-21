@@ -68,7 +68,7 @@ public class AuthProxyUtils {
         return getFeignHttpClient(properties, HTTPS_PROTOCOL);
     }
 
-    public static ApacheHttpClient getFeignHttpClient(Map<String, String> properties, String protocol) {
+    private static ApacheHttpClient getFeignHttpClient(Map<String, String> properties, String protocol) {
         String proxyHost = properties.get(Constants.PROXY_HOST);
         int proxyPort = Integer.parseInt(properties.get(Constants.PROXY_PORT));
         String proxyUsername = properties.get(Constants.PROXY_USERNAME);
