@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.am.analytics.publisher</groupId>
         <artifactId>apim-analytics-publisher-features</artifactId>
-        <version>1.0.12-SNAPSHOT</version>
+        <version>1.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -65,6 +65,10 @@
         <dependency>
             <groupId>org.wso2.orbit.com.azure</groupId>
             <artifactId>azure-core-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.microsoft.azure</groupId>
+            <artifactId>qpid-proton-j-extensions</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.com.azure</groupId>
@@ -125,6 +129,10 @@
                                 <bundle>
                                     <symbolicName>azure-core-amqp</symbolicName>
                                     <version>${azure-core-amqp.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>qpid-proton-j-extensions</symbolicName>
+                                    <version>${azure-qpid-proton-j-extensions.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>azure-messaging-eventhubs</symbolicName>

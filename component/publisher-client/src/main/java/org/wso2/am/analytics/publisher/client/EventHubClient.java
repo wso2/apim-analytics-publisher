@@ -82,6 +82,7 @@ public class EventHubClient implements Cloneable {
         this.authTokenHash = toHash(authToken);
         this.retryOptions = retryOptions;
         this.clientStatus = ClientStatus.NOT_CONNECTED;
+        this.properties = properties;
         createProducerWithRetry(authEndpoint, authToken, retryOptions, true, properties);
     }
 

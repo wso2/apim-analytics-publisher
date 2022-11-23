@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.am.analytics.publisher</groupId>
         <artifactId>apim-analytics-publisher-component</artifactId>
-        <version>1.0.12-SNAPSHOT</version>
+        <version>1.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
@@ -33,15 +33,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
-            <artifactId>feign-okhttp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.openfeign</groupId>
-            <artifactId>feign-jaxrs</artifactId>
+            <artifactId>feign-httpclient</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -151,6 +143,8 @@
                             feign.slf4j.*;version="${feign.import.version.range}",
                             org.apache.logging.log4j.*;version="${apache.log4j.import.version.range}",
                             ua_parser.*;version="${ua_parser.import.version.range}",
+                            com.microsoft.azure.proton.transport.*;version="${azure-qpid-proton-j-extensions.import.version.range}",
+                            org.apache.http.*,
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>

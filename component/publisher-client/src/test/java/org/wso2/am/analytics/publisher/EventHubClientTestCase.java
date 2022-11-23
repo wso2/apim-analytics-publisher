@@ -32,6 +32,8 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.wso2.am.analytics.publisher.client.EventHubProducerClientFactory;
 import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
@@ -80,8 +82,9 @@ public class EventHubClientTestCase extends AuthAPIMockService {
         clientFactoryMocked.close();
     }
 
+    @Parameters({"proxyConfigEnabled"})
     @BeforeMethod
-    public void setup() {
+    public void setup(@Optional("false") String proxyConfigEnabled) {
 
         client = Mockito.mock(EventHubProducerClient.class);
         clientFactoryMocked.when(() -> EventHubProducerClientFactory
@@ -94,6 +97,12 @@ public class EventHubClientTestCase extends AuthAPIMockService {
         configs = new HashMap<>();
         configs.put(Constants.AUTH_API_URL, authApiEndpoint);
         configs.put(Constants.AUTH_API_TOKEN, authToken);
+        if (proxyConfigEnabled.equals("true")) {
+            configs.put(Constants.PROXY_PORT, String.valueOf(3128));
+            configs.put(Constants.PROXY_HOST, "localhost");
+            configs.put(Constants.PROXY_USERNAME, "admin");
+            configs.put(Constants.PROXY_PASSWORD, "admin");
+        }
 
         LoggerContext context = LoggerContext.getContext(false);
         Configuration config = context.getConfiguration();
