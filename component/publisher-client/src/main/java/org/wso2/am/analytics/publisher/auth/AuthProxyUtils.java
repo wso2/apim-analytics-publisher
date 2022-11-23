@@ -65,18 +65,18 @@ public class AuthProxyUtils {
     private static final Logger log = LoggerFactory.getLogger(AuthProxyUtils.class);
 
     public static Client getClient(Map<String, String> properties) {
-        return getFeignHttpClient(properties, HTTPS_PROTOCOL);
+        return getFeignHttpClient(properties);
     }
 
-    private static ApacheHttpClient getFeignHttpClient(Map<String, String> properties, String protocol) {
+    private static ApacheHttpClient getFeignHttpClient(Map<String, String> properties) {
         String proxyHost = properties.get(Constants.PROXY_HOST);
         int proxyPort = Integer.parseInt(properties.get(Constants.PROXY_PORT));
         String proxyUsername = properties.get(Constants.PROXY_USERNAME);
         String proxyPassword = properties.get(Constants.PROXY_PASSWORD);
         String proxyProtocol = properties.get(Constants.PROXY_PROTOCOL);
 
-        if (proxyProtocol != null) {
-            protocol = proxyProtocol;
+        if (StringUtils.isEmpty(proxyProtocol)) {
+            proxyProtocol = HTTP_PROTOCOL;
         }
 
         PoolingHttpClientConnectionManager pool = null;
@@ -86,7 +86,7 @@ public class AuthProxyUtils {
             log.error("Error while getting http client connection manager", e);
         }
 
-        HttpHost host = new HttpHost(proxyHost, proxyPort, protocol);
+        HttpHost host = new HttpHost(proxyHost, proxyPort, proxyProtocol);
         DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(host);
         HttpClientBuilder clientBuilder = HttpClientBuilder.create()
                 .setRoutePlanner(routePlanner)
@@ -128,20 +128,15 @@ public class AuthProxyUtils {
             sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
             return new SSLConnectionSocketFactory(sslContext, new DefaultHostnameVerifier());
         } catch (KeyStoreException e) {
-            handleException("Failed to read from Key Store", e);
+            throw new HttpClientException("Failed to read from Key Store", e);
         } catch (IOException e) {
-            handleException("Key Store not found in " + keyStorePath, e);
+            throw new HttpClientException("Key Store not found in " + keyStorePath, e);
         } catch (CertificateException e) {
-            handleException("Failed to read Certificate", e);
+            throw new HttpClientException("Failed to read Certificate", e);
         } catch (NoSuchAlgorithmException e) {
-            handleException("Failed to load Key Store from " + keyStorePath, e);
+            throw new HttpClientException("Failed to load Key Store from " + keyStorePath, e);
         } catch (KeyManagementException e) {
-            handleException("Failed to load key from" + keyStorePath, e);
+            throw new HttpClientException("Failed to load key from" + keyStorePath, e);
         }
-        return null;
-    }
-
-    private static void handleException(String msg, Throwable t) throws HttpClientException {
-        throw new HttpClientException(msg, t);
     }
 }
