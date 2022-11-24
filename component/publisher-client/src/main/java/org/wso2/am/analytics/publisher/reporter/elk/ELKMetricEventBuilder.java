@@ -21,7 +21,10 @@ package org.wso2.am.analytics.publisher.reporter.elk;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
+import org.wso2.am.analytics.publisher.reporter.MetricSchema;
+import org.wso2.am.analytics.publisher.reporter.cloud.DefaultInputValidator;
 import org.wso2.am.analytics.publisher.util.Constants;
+import org.wso2.am.analytics.publisher.util.EventMapAttributeFilter;
 import org.wso2.am.analytics.publisher.util.UserAgentParser;
 import ua_parser.Client;
 
@@ -32,12 +35,26 @@ import java.util.Map;
  * Event builder for log Metric Reporter
  */
 public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
-    private Map<String, Object> eventMap = new HashMap<>();
+
+    protected Map<String, Class> requiredAttributes;
+    private Map<String, Object> eventMap;
     private Boolean isBuilt = false;
 
+
+    public ELKMetricEventBuilder(){
+        requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
+        eventMap = new HashMap<>();
+    }
+    public ELKMetricEventBuilder(Map<String,Class> requiredAttributes){
+        this.requiredAttributes = requiredAttributes;
+        eventMap = new HashMap<>();
+    }
     @Override
-    protected Map<String, Object> buildEvent() {
+    protected Map<String, Object> buildEvent() throws MetricReportingException{
         if (!isBuilt) {
+            // util function to filter required attributes
+            eventMap = EventMapAttributeFilter.getInstance().filter(eventMap,requiredAttributes);
+
             // userAgent raw string is not required and removing
             String userAgentHeader = (String) eventMap.remove(Constants.USER_AGENT_HEADER);
             if (userAgentHeader != null) {
@@ -85,8 +102,8 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     private void copyDefaultPropertiesToRootLevel(Map<String, String> properties) {
         String apiContext = properties.remove(Constants.API_CONTEXT);
         String userName = properties.remove(Constants.USER_NAME);
-        eventMap.put(Constants.API_CONTEXT, apiContext);
-        eventMap.put(Constants.USER_NAME, userName);
+        // No need to put apiContext and userName to root level
+        // since the response schema is modified to have both userName and apiContext
         eventMap.put(Constants.PROPERTIES, properties);
     }
 }

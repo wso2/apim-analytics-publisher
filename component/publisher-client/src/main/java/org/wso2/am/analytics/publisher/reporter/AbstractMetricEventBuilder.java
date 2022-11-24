@@ -40,5 +40,5 @@ public abstract class AbstractMetricEventBuilder implements MetricEventBuilder {
      *
      * @return Map representing attributes of Metric Event
      */
-    protected abstract Map<String, Object> buildEvent();
+    protected abstract Map<String, Object> buildEvent() throws MetricReportingException;
 }
