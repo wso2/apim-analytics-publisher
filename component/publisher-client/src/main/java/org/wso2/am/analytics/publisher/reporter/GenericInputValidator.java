@@ -40,6 +40,10 @@ import static org.wso2.am.analytics.publisher.util.Constants.USER_AGENT_HEADER;
 import static org.wso2.am.analytics.publisher.util.Constants.USER_NAME;
 import static org.wso2.am.analytics.publisher.util.Constants.USER_IP;
 
+/**
+ * Generic Input Validator for any event metric reporter. In default required attributes include userName. Validator holds all required attributes against which
+ * inputs will be validated.
+ */
 public class GenericInputValidator {
     private static final org.wso2.am.analytics.publisher.reporter.GenericInputValidator INSTANCE = new org.wso2.am.analytics.publisher.reporter.GenericInputValidator();
     private static final Map<String, Class> defaultResponseEventSchema = Stream.of(
