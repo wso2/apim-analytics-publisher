@@ -20,9 +20,9 @@ package org.wso2.am.analytics.publisher.reporter.elk;
 
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricEventBuilder;
+import org.wso2.am.analytics.publisher.reporter.GenericInputValidator;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
-import org.wso2.am.analytics.publisher.reporter.cloud.DefaultInputValidator;
 import org.wso2.am.analytics.publisher.util.Constants;
 import org.wso2.am.analytics.publisher.util.EventMapAttributeFilter;
 import org.wso2.am.analytics.publisher.util.UserAgentParser;
@@ -42,7 +42,7 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
 
 
     public ELKMetricEventBuilder(){
-        requiredAttributes = DefaultInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
+        requiredAttributes = GenericInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
         eventMap = new HashMap<>();
     }
     public ELKMetricEventBuilder(Map<String,Class> requiredAttributes){
