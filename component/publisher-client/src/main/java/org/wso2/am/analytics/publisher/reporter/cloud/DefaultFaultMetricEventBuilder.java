@@ -55,7 +55,6 @@ public class DefaultFaultMetricEventBuilder extends AbstractMetricEventBuilder {
                 throw new MetricReportingException(entry.getKey() + " is expecting a " + entry.getValue() + " type "
                                                            + "attribute while attribute of type " + attribute.getClass()
                                                            + " is present");
-
             }
         }
         return true;

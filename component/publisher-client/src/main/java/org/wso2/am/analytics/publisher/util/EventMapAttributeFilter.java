@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.am.analytics.publisher.util;
 
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
@@ -13,33 +31,17 @@ public class EventMapAttributeFilter {
         return INSTANCE;
     }
 
-    public Map<String,Object> filter(Map<String,Object> source, Map<String,Class> requiredAttributes) throws  MetricReportingException{
+    public Map<String,Object> filter(Map<String,Object> source, Map<String,Class> requiredAttributes){
 
         Set<String> targetKeys = requiredAttributes.keySet();
         Map<String,Object> filteredEventMap = new HashMap<>();
-        if(validateRequiredAttributes(source,requiredAttributes)) {
-            for (String key : targetKeys) {
-                filteredEventMap.put(key, source.get(key));
-            }
+
+        for (String key : targetKeys) {
+            filteredEventMap.put(key, source.get(key));
         }
 
         return filteredEventMap;
     }
 
-    private static boolean validateRequiredAttributes(Map<String,Object> source, Map<String,Class> requiredAttributes) throws MetricReportingException {
-
-        for (Map.Entry<String, Class> entry : requiredAttributes.entrySet()) {
-            Object attribute = source.get(entry.getKey());
-            if (attribute == null) {
-                throw new MetricReportingException(entry.getKey() + " is set as required attribute but missing in metric data. This metric event "
-                        + "will not be processed further.");
-            } else if (!attribute.getClass().equals(entry.getValue())) {
-                throw new MetricReportingException(entry.getKey() + " is expecting a " + entry.getValue() + " type "
-                        + "required attribute while attribute of type "
-                        + attribute.getClass() + " is present.");
-            }
-        }
-        return true;
-    }
 
 }

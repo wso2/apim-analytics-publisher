@@ -50,7 +50,7 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
         eventMap = new HashMap<>();
     }
     @Override
-    protected Map<String, Object> buildEvent() throws MetricReportingException{
+    protected Map<String, Object> buildEvent(){
         if (!isBuilt) {
             // util function to filter required attributes
             eventMap = EventMapAttributeFilter.getInstance().filter(eventMap,requiredAttributes);
@@ -70,7 +70,20 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     }
 
     @Override
-    public boolean validate() {
+    public boolean validate() throws MetricReportingException{
+        if (!isBuilt) {
+            for (Map.Entry<String, Class> entry : requiredAttributes.entrySet()) {
+                Object attribute = eventMap.get(entry.getKey());
+                if (attribute == null) {
+                    throw new MetricReportingException(entry.getKey() + " is missing in metric data. This metric event "
+                            + "will not be processed further.");
+                } else if (!attribute.getClass().equals(entry.getValue())) {
+                    throw new MetricReportingException(entry.getKey() + " is expecting a " + entry.getValue() + " type "
+                            + "attribute while attribute of type "
+                            + attribute.getClass() + " is present.");
+                }
+            }
+        }
         return true;
     }
 
@@ -100,9 +113,7 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     }
 
     private void copyDefaultPropertiesToRootLevel(Map<String, String> properties) {
-        String apiContext = properties.remove(Constants.API_CONTEXT);
-        String userName = properties.remove(Constants.USER_NAME);
-        // No need to put apiContext and userName to root level
+        // No need to put apiContext and userName to root level from the properties bag
         // since the response schema is modified to have both userName and apiContext
         eventMap.put(Constants.PROPERTIES, properties);
     }
