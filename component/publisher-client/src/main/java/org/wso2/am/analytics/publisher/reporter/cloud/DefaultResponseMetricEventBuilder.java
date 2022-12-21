@@ -71,16 +71,17 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
         return true;
     }
 
-    @Override public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
+    @Override
+    public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
         eventMap.put(key, value);
         return this;
     }
 
     @Override
-    protected Map<String, Object> buildEvent(){
+    protected Map<String, Object> buildEvent() {
         if (!isBuilt) {
             // util function to filter required attributes
-            eventMap = EventMapAttributeFilter.getInstance().filter(eventMap,requiredAttributes);
+            eventMap = EventMapAttributeFilter.getInstance().filter(eventMap, requiredAttributes);
 
             eventMap.put(Constants.EVENT_TYPE, Constants.RESPONSE_EVENT_TYPE);
             // userAgent raw string is not required and removing

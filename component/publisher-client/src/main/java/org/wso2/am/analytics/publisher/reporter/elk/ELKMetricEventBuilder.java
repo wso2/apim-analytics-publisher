@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Event builder for log Metric Reporter
+ * Event builder for log Metric Reporter.
  */
 public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
 
@@ -41,19 +41,21 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     private Boolean isBuilt = false;
 
 
-    public ELKMetricEventBuilder(){
+    public ELKMetricEventBuilder() {
         requiredAttributes = GenericInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
         eventMap = new HashMap<>();
     }
-    public ELKMetricEventBuilder(Map<String,Class> requiredAttributes){
+
+    public ELKMetricEventBuilder(Map<String, Class> requiredAttributes) {
         this.requiredAttributes = requiredAttributes;
         eventMap = new HashMap<>();
     }
+
     @Override
-    protected Map<String, Object> buildEvent(){
+    protected Map<String, Object> buildEvent() {
         if (!isBuilt) {
             // util function to filter required attributes
-            eventMap = EventMapAttributeFilter.getInstance().filter(eventMap,requiredAttributes);
+            eventMap = EventMapAttributeFilter.getInstance().filter(eventMap, requiredAttributes);
 
             // userAgent raw string is not required and removing
             String userAgentHeader = (String) eventMap.remove(Constants.USER_AGENT_HEADER);
@@ -70,7 +72,7 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     }
 
     @Override
-    public boolean validate() throws MetricReportingException{
+    public boolean validate() throws MetricReportingException {
         if (!isBuilt) {
             for (Map.Entry<String, Class> entry : requiredAttributes.entrySet()) {
                 Object attribute = eventMap.get(entry.getKey());

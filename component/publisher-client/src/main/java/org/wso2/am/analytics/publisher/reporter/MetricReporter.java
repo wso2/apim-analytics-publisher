@@ -28,9 +28,9 @@ import java.util.Map;
 public interface MetricReporter {
 
     /**
-     * Create and return {@link CounterMetric} to instrument collected metrics
+     * Create and return {@link CounterMetric} to instrument collected metrics.
      *
-     * @param name Name of the metric
+     * @param name   Name of the metric
      * @param schema Metric schema
      * @return {@link CounterMetric}
      * @throws MetricCreationException if error occurred when creating CounterMetric
@@ -38,7 +38,7 @@ public interface MetricReporter {
     CounterMetric createCounterMetric(String name, MetricSchema schema) throws MetricCreationException;
 
     /**
-     * Create and return {@link TimerMetric} to instrument collected metrics
+     * Create and return {@link TimerMetric} to instrument collected metrics.
      *
      * @param name Name of the metric
      * @return {@link TimerMetric}

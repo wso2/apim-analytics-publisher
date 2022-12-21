@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.wso2.am.analytics.publisher.util.Constants.API_CONTEXT;
 import static org.wso2.am.analytics.publisher.util.Constants.API_CREATION;
 import static org.wso2.am.analytics.publisher.util.Constants.API_CREATOR_TENANT_DOMAIN;
 import static org.wso2.am.analytics.publisher.util.Constants.API_ID;
@@ -39,7 +40,6 @@ import static org.wso2.am.analytics.publisher.util.Constants.API_VERSION;
 import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_NAME;
 import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_OWNER;
-import static org.wso2.am.analytics.publisher.util.Constants.API_CONTEXT;
 import static org.wso2.am.analytics.publisher.util.Constants.BACKEND_LATENCY;
 import static org.wso2.am.analytics.publisher.util.Constants.CORRELATION_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.DESTINATION;

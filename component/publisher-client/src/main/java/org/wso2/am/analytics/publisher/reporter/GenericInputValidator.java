@@ -25,14 +25,47 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.wso2.am.analytics.publisher.util.Constants.*;
+import static org.wso2.am.analytics.publisher.util.Constants.API_CONTEXT;
+import static org.wso2.am.analytics.publisher.util.Constants.API_CREATION;
+import static org.wso2.am.analytics.publisher.util.Constants.API_CREATOR_TENANT_DOMAIN;
+import static org.wso2.am.analytics.publisher.util.Constants.API_ID;
+import static org.wso2.am.analytics.publisher.util.Constants.API_METHOD;
+import static org.wso2.am.analytics.publisher.util.Constants.API_NAME;
+import static org.wso2.am.analytics.publisher.util.Constants.API_RESOURCE_TEMPLATE;
+import static org.wso2.am.analytics.publisher.util.Constants.API_TYPE;
+import static org.wso2.am.analytics.publisher.util.Constants.API_VERSION;
+import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_ID;
+import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_NAME;
+import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_OWNER;
+import static org.wso2.am.analytics.publisher.util.Constants.BACKEND_LATENCY;
+import static org.wso2.am.analytics.publisher.util.Constants.CORRELATION_ID;
+import static org.wso2.am.analytics.publisher.util.Constants.DESTINATION;
+import static org.wso2.am.analytics.publisher.util.Constants.ERROR_CODE;
+import static org.wso2.am.analytics.publisher.util.Constants.ERROR_MESSAGE;
+import static org.wso2.am.analytics.publisher.util.Constants.ERROR_TYPE;
+import static org.wso2.am.analytics.publisher.util.Constants.GATEWAY_TYPE;
+import static org.wso2.am.analytics.publisher.util.Constants.KEY_TYPE;
+import static org.wso2.am.analytics.publisher.util.Constants.ORGANIZATION_ID;
+import static org.wso2.am.analytics.publisher.util.Constants.PROXY_RESPONSE_CODE;
+import static org.wso2.am.analytics.publisher.util.Constants.REGION_ID;
+import static org.wso2.am.analytics.publisher.util.Constants.REQUEST_MEDIATION_LATENCY;
+import static org.wso2.am.analytics.publisher.util.Constants.REQUEST_TIMESTAMP;
+import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_CACHE_HIT;
+import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_LATENCY;
+import static org.wso2.am.analytics.publisher.util.Constants.RESPONSE_MEDIATION_LATENCY;
+import static org.wso2.am.analytics.publisher.util.Constants.TARGET_RESPONSE_CODE;
+import static org.wso2.am.analytics.publisher.util.Constants.USER_AGENT_HEADER;
+import static org.wso2.am.analytics.publisher.util.Constants.USER_IP;
+import static org.wso2.am.analytics.publisher.util.Constants.USER_NAME;
 
 /**
- * Generic Input Validator for any event metric reporter. In default required attributes include userName. Validator holds all required attributes against which
+ * Generic Input Validator for any event metric reporter. In default required attributes include userName.
+ * Validator holds all required attributes against which
  * inputs will be validated.
  */
 public class GenericInputValidator {
-    private static final org.wso2.am.analytics.publisher.reporter.GenericInputValidator INSTANCE = new org.wso2.am.analytics.publisher.reporter.GenericInputValidator();
+    private static final org.wso2.am.analytics.publisher.reporter.GenericInputValidator INSTANCE =
+            new org.wso2.am.analytics.publisher.reporter.GenericInputValidator();
     private static final Map<String, Class> defaultResponseEventSchema = Stream.of(
                     new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, String.class),
                     new AbstractMap.SimpleImmutableEntry<>(CORRELATION_ID, String.class),

@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Builder class for fault events
+ * Builder class for fault events.
  */
 public class DefaultFaultMetricEventBuilder extends AbstractMetricEventBuilder {
     protected final Map<String, Class> requiredAttributes;

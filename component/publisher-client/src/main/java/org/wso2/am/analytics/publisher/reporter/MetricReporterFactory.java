@@ -93,7 +93,7 @@ public class MetricReporterFactory {
                             reporterRegistry.put(fullyQualifiedClassName, reporterInstance);
                             return reporterInstance;
                         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException
-                                | NoSuchMethodException | InvocationTargetException e) {
+                                 | NoSuchMethodException | InvocationTargetException e) {
                             throw new MetricCreationException("Error occurred while creating a Metric Reporter of type"
                                     + " " + fullyQualifiedClassName, e);
                         }

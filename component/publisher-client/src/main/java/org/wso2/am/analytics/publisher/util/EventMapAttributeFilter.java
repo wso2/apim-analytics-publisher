@@ -17,23 +17,25 @@
 
 package org.wso2.am.analytics.publisher.util;
 
-import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Utility to filter only the required attributes.
+ */
 public class EventMapAttributeFilter {
-    private static  final EventMapAttributeFilter INSTANCE = new EventMapAttributeFilter();
+    private static final EventMapAttributeFilter INSTANCE = new EventMapAttributeFilter();
 
-    public static EventMapAttributeFilter getInstance(){
+    public static EventMapAttributeFilter getInstance() {
         return INSTANCE;
     }
 
-    public Map<String,Object> filter(Map<String,Object> source, Map<String,Class> requiredAttributes){
+    public Map<String, Object> filter(Map<String, Object> source, Map<String, Class> requiredAttributes) {
 
         Set<String> targetKeys = requiredAttributes.keySet();
-        Map<String,Object> filteredEventMap = new HashMap<>();
+        Map<String, Object> filteredEventMap = new HashMap<>();
 
         for (String key : targetKeys) {
             filteredEventMap.put(key, source.get(key));
