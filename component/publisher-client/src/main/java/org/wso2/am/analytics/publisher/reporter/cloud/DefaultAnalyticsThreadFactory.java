@@ -19,7 +19,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Custom Thread Factory for Analytics publisher impl
+ * Custom Thread Factory for Analytics publisher impl.
  */
 public class DefaultAnalyticsThreadFactory implements ThreadFactory {
     private static final AtomicInteger poolNumber = new AtomicInteger(1);

@@ -18,7 +18,7 @@
 package org.wso2.am.analytics.publisher.client;
 
 /**
- * Data holder class to generate mock analytics events
+ * Data holder class to generate mock analytics events.
  */
 public class DataHolder {
     static final String[] NODE_ID = new String[]{"1", "2", "3", "4", "5"};

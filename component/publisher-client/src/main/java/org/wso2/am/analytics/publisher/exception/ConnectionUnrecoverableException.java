@@ -19,7 +19,7 @@
 package org.wso2.am.analytics.publisher.exception;
 
 /**
- * Exception to represent any unrecoverable errors event publishing client encounter
+ * Exception to represent any unrecoverable errors event publishing client encounter.
  */
 public class ConnectionUnrecoverableException extends Exception {
     public ConnectionUnrecoverableException(String msg) {

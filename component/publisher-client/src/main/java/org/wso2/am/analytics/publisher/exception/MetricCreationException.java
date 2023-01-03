@@ -19,7 +19,7 @@
 package org.wso2.am.analytics.publisher.exception;
 
 /**
- * This exception will be thrown if any error happens during Metric Reporter Creation
+ * This exception will be thrown if any error happens during Metric Reporter Creation.
  */
 public class MetricCreationException extends Exception {
     public MetricCreationException(String msg) {

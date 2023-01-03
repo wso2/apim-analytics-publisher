@@ -27,7 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * User agent parser util class
+ * User agent parser util class.
  */
 public class UserAgentParser {
     private static final Logger log = LoggerFactory.getLogger(UserAgentParser.class);

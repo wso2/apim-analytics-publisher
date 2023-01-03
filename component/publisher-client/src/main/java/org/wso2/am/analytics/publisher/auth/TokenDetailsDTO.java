@@ -21,7 +21,7 @@ package org.wso2.am.analytics.publisher.auth;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * TokenDetailsDTO of the Auth API response
+ * TokenDetailsDTO of the Auth API response.
  */
 public class TokenDetailsDTO  {
 

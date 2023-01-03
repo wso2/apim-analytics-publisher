@@ -24,7 +24,7 @@ import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import java.util.concurrent.BlockingQueue;
 
 /**
- * Class to periodically flush event batch
+ * Class to periodically flush event batch.
  */
 public class QueueFlusher implements Runnable {
 

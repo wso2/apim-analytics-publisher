@@ -19,7 +19,7 @@
 package org.wso2.am.analytics.publisher.reporter;
 
 /**
- * Interface for Timer Metric
+ * Interface for Timer Metric.
  */
 public interface TimerMetric extends Metric {
 }

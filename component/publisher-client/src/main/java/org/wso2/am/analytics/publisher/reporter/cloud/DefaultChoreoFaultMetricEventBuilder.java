@@ -21,7 +21,7 @@ package org.wso2.am.analytics.publisher.reporter.cloud;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 
 /**
- * Builder class for fault events
+ * Builder class for fault events.
  */
 public class DefaultChoreoFaultMetricEventBuilder extends DefaultFaultMetricEventBuilder {
 

@@ -36,7 +36,7 @@ public abstract class AbstractMetricEventBuilder implements MetricEventBuilder {
     }
 
     /**
-     * Process the added data and return as a flat {@link Map}
+     * Process the added data and return as a flat {@link Map}.
      *
      * @return Map representing attributes of Metric Event
      */

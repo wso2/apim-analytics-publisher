@@ -31,7 +31,7 @@ import org.wso2.am.analytics.publisher.util.Constants;
 import java.util.Map;
 
 /**
- * Auth client to generate SAS token that can use to authenticate with event hub
+ * Auth client to generate SAS token that can use to authenticate with event hub.
  */
 public class AuthClient {
     public static final String AUTH_HEADER = "Authorization";

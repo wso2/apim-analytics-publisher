@@ -96,7 +96,7 @@ public class EventHubProducerClientFactory {
     }
 
     /**
-     * Extracts the resource URI from the SAS Token
+     * Extracts the resource URI from the SAS Token.
      *
      * @param sasToken SAS token of the user
      * @return decoded resource URI from the token

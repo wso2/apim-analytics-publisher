@@ -18,7 +18,7 @@
 
 package org.wso2.am.analytics.publisher.util;
 /**
- * Class to hold String constants
+ * Class to hold String constants.
  */
 public class Constants {
     //Event attribute names
