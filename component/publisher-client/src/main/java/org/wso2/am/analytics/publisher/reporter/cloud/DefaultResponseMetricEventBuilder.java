@@ -25,6 +25,7 @@ import org.wso2.am.analytics.publisher.reporter.AbstractMetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import org.wso2.am.analytics.publisher.util.Constants;
+import org.wso2.am.analytics.publisher.util.EventMapAttributeFilter;
 import org.wso2.am.analytics.publisher.util.UserAgentParser;
 import ua_parser.Client;
 
@@ -59,18 +60,19 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
                 Object attribute = eventMap.get(entry.getKey());
                 if (attribute == null) {
                     throw new MetricReportingException(entry.getKey() + " is missing in metric data. This metric event "
-                                                               + "will not be processed further.");
+                            + "will not be processed further.");
                 } else if (!attribute.getClass().equals(entry.getValue())) {
                     throw new MetricReportingException(entry.getKey() + " is expecting a " + entry.getValue() + " type "
-                                                               + "attribute while attribute of type "
-                                                               + attribute.getClass() + " is present.");
+                            + "attribute while attribute of type "
+                            + attribute.getClass() + " is present.");
                 }
             }
         }
         return true;
     }
 
-    @Override public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
+    @Override
+    public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
         eventMap.put(key, value);
         return this;
     }
@@ -78,14 +80,15 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
     @Override
     protected Map<String, Object> buildEvent() {
         if (!isBuilt) {
+            // util function to filter required attributes
+            eventMap = EventMapAttributeFilter.getInstance().filter(eventMap, requiredAttributes);
+
             eventMap.put(Constants.EVENT_TYPE, Constants.RESPONSE_EVENT_TYPE);
             // userAgent raw string is not required and removing
             String userAgentHeader = (String) eventMap.remove(Constants.USER_AGENT_HEADER);
             if (userAgentHeader != null) {
                 setUserAgentProperties(userAgentHeader);
             }
-            // properties object is not required and removing
-            eventMap.remove(Constants.PROPERTIES);
             isBuilt = true;
         }
         return eventMap;

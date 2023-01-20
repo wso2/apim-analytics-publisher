@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Event builder for log Metric Reporter
+ * Event builder for log Metric Reporter.
  */
 public class LogMetricEventBuilder extends AbstractMetricEventBuilder {
     private Map<String, Object> eventMap = new HashMap<>();

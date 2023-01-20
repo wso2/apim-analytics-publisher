@@ -19,7 +19,7 @@
 package org.wso2.am.analytics.publisher.client;
 
 /**
- * Enum to represent the status of Eventhub publisher
+ * Enum to represent the status of Eventhub publisher.
  */
 public enum ClientStatus {
     CONNECTED,

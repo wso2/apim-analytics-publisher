@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.wso2.am.analytics.publisher.util.Constants.API_CONTEXT;
 import static org.wso2.am.analytics.publisher.util.Constants.API_CREATION;
 import static org.wso2.am.analytics.publisher.util.Constants.API_CREATOR_TENANT_DOMAIN;
 import static org.wso2.am.analytics.publisher.util.Constants.API_ID;
@@ -75,6 +76,7 @@ public class DefaultInputValidator {
             new AbstractMap.SimpleImmutableEntry<>(API_VERSION, String.class),
             new AbstractMap.SimpleImmutableEntry<>(API_CREATION, String.class),
             new AbstractMap.SimpleImmutableEntry<>(API_METHOD, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_CONTEXT, String.class),
             new AbstractMap.SimpleImmutableEntry<>(API_RESOURCE_TEMPLATE, String.class),
             new AbstractMap.SimpleImmutableEntry<>(API_CREATOR_TENANT_DOMAIN, String.class),
             new AbstractMap.SimpleImmutableEntry<>(DESTINATION, String.class),
@@ -128,6 +130,7 @@ public class DefaultInputValidator {
             new AbstractMap.SimpleImmutableEntry<>(API_METHOD, String.class),
             new AbstractMap.SimpleImmutableEntry<>(API_RESOURCE_TEMPLATE, String.class),
             new AbstractMap.SimpleImmutableEntry<>(API_CREATOR_TENANT_DOMAIN, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_CONTEXT, String.class),
             new AbstractMap.SimpleImmutableEntry<>(DESTINATION, String.class),
             new AbstractMap.SimpleImmutableEntry<>(APPLICATION_ID, String.class),
             new AbstractMap.SimpleImmutableEntry<>(APPLICATION_NAME, String.class),

@@ -21,7 +21,7 @@ package org.wso2.am.analytics.publisher.reporter;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 
 /**
- * Interface for Counter Metric
+ * Interface for Counter Metric.
  */
 public interface CounterMetric extends Metric {
     /**

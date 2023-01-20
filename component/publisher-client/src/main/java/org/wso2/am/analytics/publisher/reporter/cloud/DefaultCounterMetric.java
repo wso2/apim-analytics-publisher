@@ -29,7 +29,7 @@ import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Implementation of {@link CounterMetric} for Choroe Metric Reporter
+ * Implementation of {@link CounterMetric} for Choroe Metric Reporter.
  */
 public class DefaultCounterMetric implements CounterMetric {
     private static final Logger log = LoggerFactory.getLogger(DefaultCounterMetric.class);

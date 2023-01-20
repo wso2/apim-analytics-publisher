@@ -19,7 +19,7 @@
 package org.wso2.am.analytics.publisher.reporter;
 
 /**
- * Enum to represent supported metric schema types by the reporting framework
+ * Enum to represent supported metric schema types by the reporting framework.
  */
 public enum MetricSchema {
     RESPONSE,

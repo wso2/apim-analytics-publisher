@@ -58,7 +58,7 @@ import static org.wso2.am.analytics.publisher.util.Constants.HTTP_PROTOCOL;
 import static org.wso2.am.analytics.publisher.util.Constants.KEYSTORE_TYPE;
 
 /**
- * Util class to generate http client with proxy configurations
+ * Util class to generate http client with proxy configurations.
  */
 public class AuthProxyUtils {
 

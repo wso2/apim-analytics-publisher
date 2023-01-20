@@ -346,7 +346,7 @@ public class EventHubClient implements Cloneable {
     }
 
     /**
-     * Returns a clone of this eventhub client
+     * Returns a clone of this eventhub client.
      *
      * @return New clone of current object
      */

@@ -103,6 +103,7 @@ public class DefaultChoreoResponseMetricBuilderTestCase {
                 .addAttribute(Constants.API_CREATION, "admin")
                 .addAttribute(Constants.API_METHOD, "POST")
                 .addAttribute(Constants.API_METHOD, "POST")
+                .addAttribute(Constants.API_CONTEXT, "/v1/")
                 .addAttribute(Constants.API_RESOURCE_TEMPLATE, "/resource/{value}")
                 .addAttribute(Constants.API_CREATOR_TENANT_DOMAIN, "carbon.super")
                 .addAttribute(Constants.DESTINATION, "localhost:8080")
@@ -112,6 +113,7 @@ public class DefaultChoreoResponseMetricBuilderTestCase {
                 .addAttribute(Constants.REGION_ID, "NA")
                 .addAttribute(Constants.GATEWAY_TYPE, "Synapse")
                 .addAttribute(Constants.USER_AGENT, "Mozilla")
+                .addAttribute(Constants.USER_NAME, "admin")
                 .addAttribute(Constants.PROXY_RESPONSE_CODE, 401)
                 .addAttribute(Constants.TARGET_RESPONSE_CODE, "someString")
                 .addAttribute(Constants.RESPONSE_CACHE_HIT, true)
@@ -139,6 +141,8 @@ public class DefaultChoreoResponseMetricBuilderTestCase {
                 .addAttribute(Constants.API_VERSION, "1.0.0")
                 .addAttribute(Constants.API_CREATION, "admin")
                 .addAttribute(Constants.API_METHOD, "POST")
+                .addAttribute(Constants.API_CONTEXT, "/v1/")
+                .addAttribute(Constants.USER_NAME, "admin")
                 .addAttribute(Constants.API_RESOURCE_TEMPLATE, "/resource/{value}")
                 .addAttribute(Constants.API_CREATOR_TENANT_DOMAIN, "carbon.super")
                 .addAttribute(Constants.DESTINATION, "localhost:8080")
@@ -159,7 +163,7 @@ public class DefaultChoreoResponseMetricBuilderTestCase {
                 .build();
 
         Assert.assertFalse(eventMap.isEmpty());
-        Assert.assertEquals(eventMap.size(), 29, "Some attributes are missing from the resulting event map");
+        Assert.assertEquals(eventMap.size(), 30, "Some attributes are missing from the resulting event map");
         Assert.assertEquals(eventMap.get(Constants.EVENT_TYPE), "response", "Event type should be set to fault");
         Assert.assertEquals(eventMap.get(Constants.USER_AGENT), "Mobile Safari",
                 "User agent should be set to Mobile Safari");

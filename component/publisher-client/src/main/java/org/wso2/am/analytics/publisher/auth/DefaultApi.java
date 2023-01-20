@@ -21,9 +21,9 @@ package org.wso2.am.analytics.publisher.auth;
 import feign.RequestLine;
 
 /**
- * Analytics Auth API
+ * Analytics Auth API.
  *
- * <p>This is a RESTFul API for authenication information to communcate with event hub 
+ * <p>This is a RESTFul API for authenication information to communcate with event hub.
  *
  */
 public interface DefaultApi  {

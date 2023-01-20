@@ -19,7 +19,7 @@
 package org.wso2.am.analytics.publisher.reporter;
 
 /**
- * Base class for {@link CounterMetric} and {@link TimerMetric}
+ * Base class for {@link CounterMetric} and {@link TimerMetric}.
  */
 public interface Metric {
     /**
@@ -30,7 +30,7 @@ public interface Metric {
     public String getName();
 
     /**
-     * Method to get schema name
+     * Method to get schema name.
      *
      * @return Schema name of this Metric
      */

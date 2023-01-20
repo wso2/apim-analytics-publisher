@@ -19,7 +19,7 @@
 package org.wso2.am.analytics.publisher.exception;
 
 /**
- * Exception to represent any recoverable errors event publishing client encounter
+ * Exception to represent any recoverable errors event publishing client encounter.
  */
 public class ConnectionRecoverableException extends Exception {
     public ConnectionRecoverableException(String msg) {

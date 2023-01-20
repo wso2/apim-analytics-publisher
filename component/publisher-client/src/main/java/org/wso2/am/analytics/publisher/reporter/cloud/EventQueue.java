@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Bounded concurrent queue wrapping {@link java.util.concurrent.ArrayBlockingQueue}
+ * Bounded concurrent queue wrapping {@link java.util.concurrent.ArrayBlockingQueue}.
  */
 public class EventQueue {
 

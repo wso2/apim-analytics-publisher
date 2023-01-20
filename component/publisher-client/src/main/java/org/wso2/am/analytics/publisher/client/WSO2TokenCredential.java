@@ -36,7 +36,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * WSO2 SAS token refresh implementation for TokenCredential
+ * WSO2 SAS token refresh implementation for TokenCredential.
  */
 class WSO2TokenCredential implements TokenCredential {
     private static final Logger log = LoggerFactory.getLogger(WSO2TokenCredential.class);
