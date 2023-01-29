@@ -21,6 +21,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.moesif.api.MoesifAPIClient;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.APICallException;
@@ -78,7 +81,7 @@ public class MoesifKeyRetriever {
             callListResource();
         } catch (IOException | APICallException ex) {
             // TODO: Separate retry logic to a separate class.
-            log.error("First attempt failed,retrying.", ex.getMessage());
+            log.error("First attempt failed,retrying.", ex);
             while (attempts > 0) {
                 attempts--;
                 try {
@@ -89,7 +92,7 @@ public class MoesifKeyRetriever {
                 try {
                     callListResource();
                 } catch (IOException | APICallException e) {
-                    log.error("Retry attempt failed and got: " + e.getMessage());
+                    log.error("Retry attempt failed." + e);
                 }
             }
         }
@@ -108,7 +111,7 @@ public class MoesifKeyRetriever {
             response = callDetailResource(orgID);
         } catch (IOException | APICallException ex) {
             // TODO: Separate retry logic to a separate class.
-            log.error("First attempt failed,retrying.", ex.getMessage());
+            log.error("First attempt failed,retrying.", ex);
             while (attempts > 0) {
                 attempts--;
                 try {
@@ -120,7 +123,7 @@ public class MoesifKeyRetriever {
                     response = callDetailResource(orgID);
                     return response;
                 } catch (IOException | APICallException e) {
-                    log.error("Retry attempt failed and got: " + e.getMessage());
+                    log.error("Retry attempt failed." + e);
                 }
             }
             response = null;
@@ -141,40 +144,51 @@ public class MoesifKeyRetriever {
 
     private void callListResource() throws IOException, APICallException {
         URL obj;
+        String[] urlWhiteArr = {"example.com", "www.example.com"};
+        List<String> urlWhiteList = Arrays.asList(urlWhiteArr);
+
         try {
             obj = new URL(MoesifMicroserviceConstants.LIST_URL);
+            if (urlWhiteList.contains(obj.getHost())) {
+                throw new MalformedURLException("Received a malformed url");
+            }
         } catch (MalformedURLException ex) {
-            log.error("Event will be dropped. Getting " + ex);
+            log.error("Event will be dropped. Getting" + ex);
             return;
         }
         String auth = gaAuthUsername + ":" + gaAuthPwd;
         String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
         String authHeaderValue = "Basic " + encodedAuth;
+        HttpsURLConnection con = null;
+        BufferedReader in = null;
+        try {
+            con = (HttpsURLConnection) obj.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("Authorization", authHeaderValue);
+            con.setRequestProperty("Content-Type", MoesifMicroserviceConstants.CONTENT_TYPE);
+            con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
+            int responseCode = con.getResponseCode();
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                String inputLine;
+                StringBuffer response = new StringBuffer();
 
-        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty("Authorization", authHeaderValue);
-        con.setRequestProperty("Content-Type", MoesifMicroserviceConstants.CONTENT_TYPE);
-        con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
-        int responseCode = con.getResponseCode();
-        if (responseCode == HttpsURLConnection.HTTP_OK) {
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                updateMap(response.toString());
+            } else if (responseCode >= 400 && responseCode < 500) {
+                log.error("Event will be dropped. Getting" + responseCode);
+            } else {
+                throw new APICallException("Getting " + responseCode + " from the microservice and retrying.");
             }
-            in.close();
-
-            updateMap(response.toString());
-            con.disconnect();
-        } else if (responseCode >= 400 && responseCode < 500) {
-            con.disconnect();
-            log.error("Event will be dropped. Getting " + responseCode);
-        } else {
-            con.disconnect();
-            throw new APICallException("Getting " + responseCode + " from the microservice and retrying.");
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+            if (con != null) {
+                con.disconnect();
+            }
         }
 
     }
@@ -184,42 +198,54 @@ public class MoesifKeyRetriever {
         String url = MoesifMicroserviceConstants.DETAIL_URL + "?" + MoesifMicroserviceConstants.QUERY_PARAM + "=" +
                 orgID;
         URL obj;
+        String[] urlWhiteArr = {"example.com", "www.example.com"};
+        List<String> urlWhiteList = Arrays.asList(urlWhiteArr);
+
         try {
-            obj = new URL(url);
+            obj = new URL(MoesifMicroserviceConstants.LIST_URL);
+            if (urlWhiteList.contains(obj.getHost())) {
+                throw new MalformedURLException("Received a malformed url");
+            }
         } catch (MalformedURLException ex) {
-            log.error("Event will be dropped. Getting " + ex);
+            log.error("Event will be dropped. Getting" + ex);
             return null;
         }
         String auth = gaAuthUsername + ":" + gaAuthPwd;
         String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
         String authHeaderValue = "Basic " + encodedAuth;
+        HttpsURLConnection con = null;
+        BufferedReader in = null;
+        try {
+            con = (HttpsURLConnection) obj.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("Content-Type", MoesifMicroserviceConstants.CONTENT_TYPE);
+            con.setRequestProperty("Authorization", authHeaderValue);
+            con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
+            int responseCode = con.getResponseCode();
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                String inputLine;
 
-        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty("Content-Type", MoesifMicroserviceConstants.CONTENT_TYPE);
-        con.setRequestProperty("Authorization", authHeaderValue);
-        con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
-        int responseCode = con.getResponseCode();
-        if (responseCode == HttpsURLConnection.HTTP_OK) {
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-            String inputLine;
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                updateMoesifKey(response.toString());
+                return response.toString();
+            } else if (responseCode >= 400 && responseCode < 500) {
+                log.error("Event will be dropped. Getting " + responseCode);
+                return null;
+            } else {
+                throw new APICallException("Getting " + responseCode + " from the microservice and retrying.");
             }
-            in.close();
-
-            updateMoesifKey(response.toString());
-            con.disconnect();
-        } else if (responseCode >= 400 && responseCode < 500) {
-            con.disconnect();
-            log.error("Event will be dropped. Getting " + responseCode);
-            return null;
-        } else {
-            con.disconnect();
-            throw new APICallException("Getting " + responseCode + " from the microservice and retrying.");
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+            if (con != null) {
+                con.disconnect();
+            }
         }
-        return response.toString();
+
     }
 
     private void updateMoesifKey(String response) {

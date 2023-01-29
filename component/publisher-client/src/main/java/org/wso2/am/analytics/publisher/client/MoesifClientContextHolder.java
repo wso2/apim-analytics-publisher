@@ -24,7 +24,7 @@ public class MoesifClientContextHolder {
     public static final ThreadLocal<Integer> PUBLISH_ATTEMPTS = new ThreadLocal<Integer>() {
         @Override
         protected Integer initialValue() {
-            return new Integer(1);
+            return Integer.valueOf(1);
         }
 
         @Override

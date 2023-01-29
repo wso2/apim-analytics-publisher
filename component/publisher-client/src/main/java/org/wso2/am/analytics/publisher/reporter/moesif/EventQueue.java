@@ -48,7 +48,8 @@ public class EventQueue {
         eventQueue = new LinkedBlockingQueue<>(queueSize);
         failureCount = new AtomicInteger(0);
         for (int i = 0; i < workerThreadCount; i++) {
-            publisherExecutorService.submit(new ParallelQueueWorker(eventQueue, moesifKeyRetriever));
+            ExecutorService executorService = (ExecutorService) publisherExecutorService.submit(
+                    new ParallelQueueWorker(eventQueue, moesifKeyRetriever));
         }
     }
 

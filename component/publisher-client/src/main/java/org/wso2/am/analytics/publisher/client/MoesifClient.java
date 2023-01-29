@@ -84,7 +84,7 @@ public class MoesifClient {
     /**
      * publish method is responsible for checking the availability of relevant moesif key
      * and initiating moesif client sdk.
-    */
+     */
     public void publish(Map<String, Object> event) throws MetricReportingException {
         ConcurrentHashMap<String, String> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
         if (orgIDMoesifKeyMap.isEmpty()) {
@@ -126,9 +126,9 @@ public class MoesifClient {
                 if (statusCode >= 400 && statusCode < 500) {
                     log.error("Event publishing failed. Moesif returned " + statusCode);
                 } else if (error != null) {
-                    log.error("Event publishing failed." + error.getMessage());
+                    log.error("Event publishing failed." + error);
                 } else {
-                    log.error("Event publishing failed.Retrying.");
+                    log.error("Event publishing failed. Retrying.");
                     doRetry(orgId, event);
                 }
 
