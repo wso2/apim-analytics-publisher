@@ -17,13 +17,17 @@
  */
 package org.wso2.am.analytics.publisher.reporter.moesif.util;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * POJO to parse the JSON.
  */
 public class MoesifKeyEntry {
     private String uuid;
-    private String organization_id;
-    private String moesif_key;
+    @SerializedName("organization_id")
+    private String organizationID;
+    @SerializedName("moesif_key")
+    private String moesifKey;
     private String env;
 
     public MoesifKeyEntry() {
@@ -31,11 +35,11 @@ public class MoesifKeyEntry {
     }
 
     public String getMoesif_key() {
-        return moesif_key;
+        return moesifKey;
     }
 
     public String getOrganization_id() {
-        return organization_id;
+        return organizationID;
     }
 
     public String getUuid() {

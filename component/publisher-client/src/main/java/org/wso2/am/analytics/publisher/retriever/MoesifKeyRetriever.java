@@ -51,12 +51,12 @@ public class MoesifKeyRetriever {
 
     private ConcurrentHashMap<String, MoesifAPIClient> moesifKeyClientMap;
     private String gaAuthUsername;
-    private char[] gaAuthPwd;
+    private String gaAuthPwd;
 
     private MoesifKeyRetriever(String authUsername, String authPwd) {
 
         this.gaAuthUsername = authUsername;
-        this.gaAuthPwd = authPwd.toCharArray();
+        this.gaAuthPwd = authPwd;
         orgIDMoesifKeyMap = new ConcurrentHashMap();
         moesifKeyClientMap = new ConcurrentHashMap();
     }
@@ -97,6 +97,7 @@ public class MoesifKeyRetriever {
 
     /**
      * Will retrieve single Moesif key corresponding to given organization ID.
+     *
      * @param orgID
      * @return Moesif Key corresponding orgID
      */
@@ -130,6 +131,7 @@ public class MoesifKeyRetriever {
     /**
      * Will remove Moesif key corresponding to organization ID.
      * Existing Moesif SDK client associated with the moesif key will be also removed.
+     *
      * @param orgID
      */
     public void removeMoesifKeyFromMap(String orgID) {
@@ -145,7 +147,7 @@ public class MoesifKeyRetriever {
             log.error("Event will be dropped. Getting " + ex);
             return;
         }
-        String auth = gaAuthUsername + ":" + gaAuthPwd.toString();
+        String auth = gaAuthUsername + ":" + gaAuthPwd;
         String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
         String authHeaderValue = "Basic " + encodedAuth;
 
@@ -156,7 +158,7 @@ public class MoesifKeyRetriever {
         con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
         int responseCode = con.getResponseCode();
         if (responseCode == HttpsURLConnection.HTTP_OK) {
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
             String inputLine;
             StringBuffer response = new StringBuffer();
 
@@ -188,7 +190,7 @@ public class MoesifKeyRetriever {
             log.error("Event will be dropped. Getting " + ex);
             return null;
         }
-        String auth = gaAuthUsername + ":" + gaAuthPwd.toString();
+        String auth = gaAuthUsername + ":" + gaAuthPwd;
         String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
         String authHeaderValue = "Basic " + encodedAuth;
 
@@ -199,7 +201,7 @@ public class MoesifKeyRetriever {
         con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
         int responseCode = con.getResponseCode();
         if (responseCode == HttpsURLConnection.HTTP_OK) {
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
             String inputLine;
 
             while ((inputLine = in.readLine()) != null) {
@@ -247,6 +249,7 @@ public class MoesifKeyRetriever {
 
     /**
      * returning orgID-MoesifKey map.
+     *
      * @return
      */
     public ConcurrentHashMap<String, String> getMoesifKeyMap() {
@@ -255,6 +258,7 @@ public class MoesifKeyRetriever {
 
     /**
      * returning Moesif SDK client associated with the given Moesif key.
+     *
      * @param moesifKey
      * @return
      */

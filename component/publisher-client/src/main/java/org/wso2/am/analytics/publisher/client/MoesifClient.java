@@ -57,7 +57,7 @@ public class MoesifClient {
     }
 
     private void doRetry(String orgId, Map<String, Object> event) {
-        Integer currentAttempt = MoesifClientContextHolder.publishAttempts.get();
+        Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
 
         if (currentAttempt > 0) {
             if (currentAttempt == MoesifMicroserviceConstants.NUM_RETRY_ATTEMPTS_PUBLISH) {
@@ -67,7 +67,7 @@ public class MoesifClient {
                 keyRetriever.removeMoesifKeyFromMap(orgId);
             }
             currentAttempt -= 1;
-            MoesifClientContextHolder.publishAttempts.set(currentAttempt);
+            MoesifClientContextHolder.PUBLISH_ATTEMPTS.set(currentAttempt);
             try {
                 Thread.sleep(MoesifMicroserviceConstants.TIME_TO_WAIT_PUBLISH);
                 publish(event);

@@ -18,9 +18,6 @@
 
 package org.wso2.am.analytics.publisher;
 
-import java.time.Clock;
-import java.time.OffsetDateTime;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -34,6 +31,9 @@ import org.wso2.am.analytics.publisher.reporter.moesif.EventQueue;
 import org.wso2.am.analytics.publisher.reporter.moesif.MoesifCounterMetric;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 import org.wso2.am.analytics.publisher.util.Constants;
+import java.time.Clock;
+import java.time.OffsetDateTime;
+import java.util.Map;
 
 public class MoesifMetricBuilderTestCase {
     private static final Logger log = LoggerFactory.getLogger(MoesifMetricBuilderTestCase.class);
@@ -44,7 +44,8 @@ public class MoesifMetricBuilderTestCase {
     public void createBuilder() throws MetricCreationException {
         MoesifKeyRetriever keyRetriever = MoesifKeyRetriever.getInstance("some_username", "some_password");
         EventQueue queue = new EventQueue(100, 1, keyRetriever);
-        MoesifCounterMetric metric = new MoesifCounterMetric("test.builder.metric",queue,MetricSchema.CHOREO_RESPONSE);
+        MoesifCounterMetric metric =
+                new MoesifCounterMetric("test.builder.metric", queue, MetricSchema.CHOREO_RESPONSE);
         builder = metric.getEventBuilder();
     }
 
@@ -151,8 +152,9 @@ public class MoesifMetricBuilderTestCase {
                 .build();
 
         Assert.assertFalse(eventMap.isEmpty());
-        // We expect only 29 attributes in Moesif scenario unlike in choreo scenario. In choreo scenario we parse user agent header,
-        // and build additional attribute.
+        // We expect only 29 attributes in Moesif scenario unlike in choreo scenario.
+        // In choreo scenario we parse user agent header,
+        // and build one additional attribute.
         Assert.assertEquals(eventMap.size(), 29, "Some attributes are missing from the resulting event map");
         Assert.assertEquals(eventMap.get(Constants.ORGANIZATION_ID), "wso2.com",
                 "Organization ID should be wso2.com");

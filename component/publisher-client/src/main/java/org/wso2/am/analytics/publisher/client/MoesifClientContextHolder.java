@@ -21,7 +21,7 @@ package org.wso2.am.analytics.publisher.client;
  * Holds context of the Moesif client retry mechanism.
  */
 public class MoesifClientContextHolder {
-    public static ThreadLocal<Integer> publishAttempts = new ThreadLocal<Integer>() {
+    public static final ThreadLocal<Integer> PUBLISH_ATTEMPTS = new ThreadLocal<Integer>() {
         @Override
         protected Integer initialValue() {
             return new Integer(1);
