@@ -142,7 +142,7 @@ public class MoesifKeyRetriever {
     }
 
     private void callListResource() throws IOException, APICallException {
-        URL obj;
+        final URL obj;
         String[] urlWhiteArr = {"example.com", "www.example.com"};
         List<String> urlWhiteList = Arrays.asList(urlWhiteArr);
 
@@ -194,9 +194,8 @@ public class MoesifKeyRetriever {
 
     private String callDetailResource(String orgID) throws IOException, APICallException {
         StringBuffer response = new StringBuffer();
-        String url = MoesifMicroserviceConstants.DETAIL_URL + "?" + MoesifMicroserviceConstants.QUERY_PARAM + "=" +
-                orgID;
-        URL obj;
+        final String url = MoesifMicroserviceConstants.DETAIL_URL_WITH_QUERY + orgID;
+        final URL obj;
         String[] urlWhiteArr = {"example.com", "www.example.com"};
         List<String> urlWhiteList = Arrays.asList(urlWhiteArr);
 
