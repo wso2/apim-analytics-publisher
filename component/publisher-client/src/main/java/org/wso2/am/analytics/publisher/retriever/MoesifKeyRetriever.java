@@ -261,7 +261,7 @@ public class MoesifKeyRetriever {
         Gson gson = new Gson();
         String json = response;
 
-        Type collectionType = new innerTypeToken<Collection<MoesifKeyEntry>>().getType();
+        Type collectionType = new InnerTypeToken<Collection<MoesifKeyEntry>>().getType();
         Collection<MoesifKeyEntry> newKeys = gson.fromJson(json, collectionType);
 
         for (MoesifKeyEntry entry : newKeys) {
@@ -291,7 +291,12 @@ public class MoesifKeyRetriever {
         return moesifKeyClientMap.get(moesifKey);
     }
 
-    static class innerTypeToken<T> extends TypeToken<T> {
+    /**
+     * Named inner class for TypeToken protected class.
+     *
+     * @param <T>
+     */
+    static class InnerTypeToken<T> extends TypeToken<T> {
 
     }
 }
