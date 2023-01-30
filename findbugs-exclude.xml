@@ -58,4 +58,8 @@
         <Class name="org.wso2.am.analytics.publisher.auth.AuthProxyUtils"/>
         <Bug pattern="IMPROPER_UNICODE"/>
     </Match>
+    <Match>
+        <Class name="org.wso2.am.analytics.publisher.reporter.moesif.EventQueue"/>
+        <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"/>
+    </Match>
 </FindBugsFilter>
