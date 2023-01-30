@@ -124,9 +124,9 @@ public class MoesifClient {
                 int statusCode = context.getResponse().getStatusCode();
 
                 if (statusCode >= 400 && statusCode < 500) {
-                    log.error("Event publishing failed. Moesif returned " + statusCode);
+                    log.error("Event publishing failed. Moesif returned:", statusCode);
                 } else if (error != null) {
-                    log.error("Event publishing failed." + error);
+                    log.error("Event publishing failed.", error);
                 } else {
                     log.error("Event publishing failed. Retrying.");
                     doRetry(orgId, event);

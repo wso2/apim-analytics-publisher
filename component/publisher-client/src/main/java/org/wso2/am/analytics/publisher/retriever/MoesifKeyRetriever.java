@@ -91,7 +91,7 @@ public class MoesifKeyRetriever {
                 try {
                     callListResource();
                 } catch (IOException | APICallException e) {
-                    log.error("Retry attempt failed." + e);
+                    log.error("Retry attempt failed.", e);
                 }
             }
         }
@@ -122,7 +122,7 @@ public class MoesifKeyRetriever {
                     response = callDetailResource(orgID);
                     return response;
                 } catch (IOException | APICallException e) {
-                    log.error("Retry attempt failed." + e);
+                    log.error("Retry attempt failed.", e);
                 }
             }
             response = null;
@@ -152,7 +152,7 @@ public class MoesifKeyRetriever {
                 throw new MalformedURLException("Received a malformed url");
             }
         } catch (MalformedURLException ex) {
-            log.error("Event will be dropped. Getting" + ex);
+            log.error("Event will be dropped. Getting", ex);
             return;
         }
         String auth = gaAuthUsername + ":" + gaAuthPwd;
@@ -201,12 +201,12 @@ public class MoesifKeyRetriever {
         List<String> urlWhiteList = Arrays.asList(urlWhiteArr);
 
         try {
-            obj = new URL(MoesifMicroserviceConstants.LIST_URL);
+            obj = new URL(url);
             if (urlWhiteList.contains(obj.getHost())) {
                 throw new MalformedURLException("Received a malformed url");
             }
         } catch (MalformedURLException ex) {
-            log.error("Event will be dropped. Getting" + ex);
+            log.error("Event will be dropped. Getting", ex);
             return null;
         }
         String auth = gaAuthUsername + ":" + gaAuthPwd;
@@ -260,8 +260,8 @@ public class MoesifKeyRetriever {
     private void updateMap(String response) {
         Gson gson = new Gson();
         String json = response;
-        Type collectionType = new TypeToken<Collection<MoesifKeyEntry>>() {
-        }.getType();
+
+        Type collectionType = new innerTypeToken<Collection<MoesifKeyEntry>>().getType();
         Collection<MoesifKeyEntry> newKeys = gson.fromJson(json, collectionType);
 
         for (MoesifKeyEntry entry : newKeys) {
@@ -289,5 +289,9 @@ public class MoesifKeyRetriever {
      */
     public MoesifAPIClient getMoesifClient(String moesifKey) {
         return moesifKeyClientMap.get(moesifKey);
+    }
+
+    static class innerTypeToken<T> extends TypeToken<T> {
+
     }
 }
