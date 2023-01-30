@@ -143,14 +143,8 @@ public class MoesifKeyRetriever {
 
     private void callListResource() throws IOException, APICallException {
         final URL obj;
-        String[] urlWhiteArr = {"example.com", "www.example.com"};
-        List<String> urlWhiteList = Arrays.asList(urlWhiteArr);
-
         try {
             obj = new URL(MoesifMicroserviceConstants.LIST_URL);
-            if (urlWhiteList.contains(obj.getHost())) {
-                throw new MalformedURLException("Received a malformed url");
-            }
         } catch (MalformedURLException ex) {
             log.error("Event will be dropped. Getting", ex);
             return;
@@ -196,14 +190,9 @@ public class MoesifKeyRetriever {
         StringBuffer response = new StringBuffer();
         final String url = MoesifMicroserviceConstants.DETAIL_URL_WITH_QUERY + orgID;
         final URL obj;
-        String[] urlWhiteArr = {"example.com", "www.example.com"};
-        List<String> urlWhiteList = Arrays.asList(urlWhiteArr);
 
         try {
             obj = new URL(url);
-            if (urlWhiteList.contains(obj.getHost())) {
-                throw new MalformedURLException("Received a malformed url");
-            }
         } catch (MalformedURLException ex) {
             log.error("Event will be dropped. Getting", ex);
             return null;
@@ -260,7 +249,8 @@ public class MoesifKeyRetriever {
         Gson gson = new Gson();
         String json = response;
 
-        Type collectionType = new InnerTypeToken<Collection<MoesifKeyEntry>>().getType();
+        Type collectionType = new TypeToken<Collection<MoesifKeyEntry>>() {
+        }.getType();
         Collection<MoesifKeyEntry> newKeys = gson.fromJson(json, collectionType);
 
         for (MoesifKeyEntry entry : newKeys) {
@@ -290,12 +280,4 @@ public class MoesifKeyRetriever {
         return moesifKeyClientMap.get(moesifKey);
     }
 
-    /**
-     * Named inner class for TypeToken protected class.
-     *
-     * @param <T>
-     */
-    static class InnerTypeToken<T> extends TypeToken<T> {
-
-    }
 }
