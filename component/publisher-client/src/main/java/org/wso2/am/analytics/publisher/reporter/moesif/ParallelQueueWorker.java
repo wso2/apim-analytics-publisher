@@ -25,21 +25,20 @@ import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 /**
  * Will dequeue the events from queues and send then to the moesif client {@link MoesifClient}.
  */
 public class ParallelQueueWorker implements Runnable {
-    private  static  final Logger log = LoggerFactory.getLogger(ParallelQueueWorker.class);
+    private static final Logger log = LoggerFactory.getLogger(ParallelQueueWorker.class);
     private BlockingQueue<MetricEventBuilder> eventQueue;
     private MoesifKeyRetriever keyRetriever;
+    private MoesifClient client;
 
-
-    public ParallelQueueWorker(BlockingQueue<MetricEventBuilder> queue, MoesifKeyRetriever keyRetriever) {
+    public ParallelQueueWorker(BlockingQueue<MetricEventBuilder> queue, MoesifClient moesifClient) {
         this.eventQueue = queue;
-        this.keyRetriever = keyRetriever;
+        this.client = moesifClient;
     }
 
     public void run() {
@@ -49,9 +48,7 @@ public class ParallelQueueWorker implements Runnable {
             try {
                 eventBuilder = eventQueue.take();
                 if (eventBuilder != null) {
-                    MoesifClient client = new MoesifClient(keyRetriever);
-                    Map<String, Object> eventMap = eventBuilder.build();
-                    client.publish(eventMap);
+                    client.publish(eventBuilder);
                 }
             } catch (MetricReportingException e) {
                 log.error("Builder instance is not duly filled. Event building failed", e);

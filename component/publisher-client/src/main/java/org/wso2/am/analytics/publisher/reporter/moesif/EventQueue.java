@@ -19,6 +19,7 @@ package org.wso2.am.analytics.publisher.reporter.moesif;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.am.analytics.publisher.client.MoesifClient;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsThreadFactory;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
@@ -42,13 +43,13 @@ public class EventQueue {
 
     public EventQueue(int queueSize, int workerThreadCount, MoesifKeyRetriever moesifKeyRetriever) {
         this.moesifKeyRetriever = moesifKeyRetriever;
-
         publisherExecutorService = Executors.newFixedThreadPool(workerThreadCount,
                 new DefaultAnalyticsThreadFactory("Queue-Worker"));
+        MoesifClient moesifClient = new MoesifClient(moesifKeyRetriever);
         eventQueue = new LinkedBlockingQueue<>(queueSize);
         failureCount = new AtomicInteger(0);
         for (int i = 0; i < workerThreadCount; i++) {
-            publisherExecutorService.submit(new ParallelQueueWorker(eventQueue, moesifKeyRetriever));
+            publisherExecutorService.submit(new ParallelQueueWorker(eventQueue, moesifClient));
         }
     }
 
