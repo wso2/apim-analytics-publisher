@@ -30,9 +30,9 @@ import org.wso2.am.analytics.publisher.reporter.MetricSchema;
  */
 public class MoesifCounterMetric implements CounterMetric {
     private static final Logger log = LoggerFactory.getLogger(MoesifCounterMetric.class);
+    public static EventQueue queue;
     private String name;
     private MetricSchema schema;
-    private EventQueue queue;
 
 
     public MoesifCounterMetric(String name, EventQueue queue, MetricSchema schema) {
