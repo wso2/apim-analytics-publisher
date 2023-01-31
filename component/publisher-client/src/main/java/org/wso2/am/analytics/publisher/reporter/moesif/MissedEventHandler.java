@@ -5,9 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 
+import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.TimerTask;
+
 
 /**
  * Responsible for periodically calling the Moesif microservice and

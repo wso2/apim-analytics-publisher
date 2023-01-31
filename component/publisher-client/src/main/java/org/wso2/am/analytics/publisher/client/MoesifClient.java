@@ -41,11 +41,11 @@ import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Moesif Client is responsible for sending events to
