@@ -33,16 +33,19 @@ import com.moesif.api.models.EventResponseModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
+import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
+import org.wso2.am.analytics.publisher.reporter.moesif.MissedEventHandler;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Timer;
 
 /**
  * Moesif Client is responsible for sending events to
@@ -51,12 +54,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MoesifClient {
     private final Logger log = LoggerFactory.getLogger(MoesifClient.class);
     private final MoesifKeyRetriever keyRetriever;
+    private final MissedEventHandler missedEventHandler;
 
     public MoesifClient(MoesifKeyRetriever keyRetriever) {
         this.keyRetriever = keyRetriever;
+        this.missedEventHandler = new MissedEventHandler(keyRetriever);
+        // execute MissedEventHandler periodically.
+        Timer timer = new Timer();
+        timer.schedule(missedEventHandler, 0, MoesifMicroserviceConstants.PERIODIC_CALL_DELAY);
     }
 
-    private void doRetry(String orgId, Map<String, Object> event) {
+    private void doRetry(String orgId, MetricEventBuilder builder) {
         Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
 
         if (currentAttempt > 0) {
@@ -70,7 +78,7 @@ public class MoesifClient {
             MoesifClientContextHolder.PUBLISH_ATTEMPTS.set(currentAttempt);
             try {
                 Thread.sleep(MoesifMicroserviceConstants.TIME_TO_WAIT_PUBLISH);
-                publish(event);
+                publish(builder);
             } catch (MetricReportingException e) {
                 log.error("Failing retry attempt at Moesif client", e);
             } catch (InterruptedException e) {
@@ -85,22 +93,21 @@ public class MoesifClient {
      * publish method is responsible for checking the availability of relevant moesif key
      * and initiating moesif client sdk.
      */
-    public void publish(Map<String, Object> event) throws MetricReportingException {
+    public void publish(MetricEventBuilder builder) throws MetricReportingException {
+        Map<String, Object> event = builder.build();
         ConcurrentHashMap<String, String> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
-        if (orgIDMoesifKeyMap.isEmpty()) {
-            keyRetriever.initOrRefreshOrgIDMoesifKeyMap();
-        }
 
         String orgId = (String) event.get(Constants.ORGANIZATION_ID);
         String moesifKey;
         if (orgIDMoesifKeyMap.containsKey(orgId)) {
             moesifKey = orgIDMoesifKeyMap.get(orgId);
         } else {
-            moesifKey = keyRetriever.getMoesifKey(orgId);
-            if (moesifKey == null) {
-                throw new MetricReportingException(
-                        "Corresponding Moesif key for organization " + orgId + " can't be found.");
-            }
+            // store events with orgID that misses moesif keys,
+            // in the internal map inside a queueMissed.
+            // call the microservice when the scheduled time reaches.
+            // put the elements in queue missed to eventQueue.
+            missedEventHandler.putMissedEvent(builder);
+            return;
         }
 
         // init moesif api client
@@ -116,7 +123,7 @@ public class MoesifClient {
                     log.error("Event publishing failed. Moesif returned " + statusCode);
                 } else {
                     log.error("Event publishing failed.Retrying.");
-                    doRetry(orgId, event);
+                    doRetry(orgId, builder);
                 }
             }
 
@@ -129,7 +136,7 @@ public class MoesifClient {
                     log.error("Event publishing failed.", error);
                 } else {
                     log.error("Event publishing failed. Retrying.");
-                    doRetry(orgId, event);
+                    doRetry(orgId, builder);
                 }
 
             }
