@@ -33,5 +33,6 @@ public class MoesifMicroserviceConstants {
     public static final int NUM_RETRY_ATTEMPTS_PUBLISH = 3;
     public static final long TIME_TO_WAIT_PUBLISH = 10000;
     public static final int REQUEST_READ_TIMEOUT = 10000;
+    public static final long PERIODIC_CALL_DELAY = 300000;
 
 }
