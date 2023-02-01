@@ -31,7 +31,6 @@ public class MoesifKeyEntry {
     private String env;
 
     public MoesifKeyEntry() {
-
     }
 
     public String getMoesif_key() {
