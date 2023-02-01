@@ -115,7 +115,7 @@ public class MoesifClient {
                 } else if (statusCode >= 400 && statusCode < 500) {
                     log.error("Event publishing failed for organization: {}. Moesif returned {}.", orgId, statusCode);
                 } else {
-                    log.error("Event publishing failed for organization: {}. Moesif returned {}.", orgId, statusCode);
+                    log.error("Event publishing failed for organization: {}. Retrying.", orgId);
                     doRetry(orgId, builder);
                 }
             }
@@ -165,7 +165,6 @@ public class MoesifClient {
         rspHeaders.put("Expires", "-1");
         rspHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, "application/json; charset=utf-8");
         rspHeaders.put("Cache-Control", "no-cache");
-
 
         EventRequestModel eventReq = new EventRequestBuilder()
                 .time(new Date())
