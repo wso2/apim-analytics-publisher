@@ -192,7 +192,7 @@ public class MoesifKeyRetriever {
      * Retrieves moesif key of the given orgID by calling the microservice.
      *
      * @param orgID
-     * @return
+     * @return moesif key of the orgID
      * @throws IOException
      * @throws APICallException
      */
@@ -229,7 +229,7 @@ public class MoesifKeyRetriever {
                     return response.toString();
                 }
             } else if (responseCode >= 400 && responseCode < 500) {
-                log.error("Event will be dropped. Getting {}", responseCode);
+                log.error("Getting {} from the microservice.", responseCode);
                 return null;
             } else {
                 throw new APICallException("Getting " + responseCode + " from the microservice and retrying.");
