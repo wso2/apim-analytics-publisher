@@ -66,7 +66,6 @@ public class EventQueue {
         } catch (RejectedExecutionException e) {
             log.warn("Task submission failed. Task queue might be full", e);
         }
-
     }
 
     @Override
