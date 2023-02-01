@@ -132,7 +132,6 @@ public class MoesifClient {
                     log.error("Event publishing failed for organization: {}. Retrying.", orgId);
                     doRetry(orgId, builder);
                 }
-
             }
         };
         try {
@@ -140,7 +139,6 @@ public class MoesifClient {
         } catch (IOException e) {
             log.error("Analytics event sending failed. Event will be dropped", e);
         }
-
     }
 
     private EventModel buildEventResponse(Map<String, Object> data) throws IOException, MetricReportingException {

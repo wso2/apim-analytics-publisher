@@ -158,31 +158,33 @@ public class MoesifKeyRetriever {
         }
         String authHeaderValue = getAuthHeader(gaAuthUsername, gaAuthPwd);
         HttpsURLConnection con = null;
-        con = (HttpsURLConnection) obj.openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty("Authorization", authHeaderValue);
-        con.setRequestProperty("Content-Type", MoesifMicroserviceConstants.CONTENT_TYPE);
-        con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
-        int responseCode = con.getResponseCode();
-        if (responseCode == HttpsURLConnection.HTTP_OK) {
-            try (BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));) {
-                String inputLine;
-                StringBuffer response = new StringBuffer();
+        try {
+            con = (HttpsURLConnection) obj.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("Authorization", authHeaderValue);
+            con.setRequestProperty("Content-Type", MoesifMicroserviceConstants.CONTENT_TYPE);
+            con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
+            int responseCode = con.getResponseCode();
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                try (BufferedReader in = new BufferedReader(
+                        new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));) {
+                    String inputLine;
+                    StringBuffer response = new StringBuffer();
 
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    updateMap(response.toString());
                 }
-                updateMap(response.toString());
+            } else if (responseCode >= 400 && responseCode < 500) {
+                log.error("Getting {} from the microservice.", responseCode);
+            } else {
+                throw new APICallException("Getting " + responseCode + " from the microservice and retrying.");
             }
-        } else if (responseCode >= 400 && responseCode < 500) {
-            log.error("Getting {} from the microservice.", responseCode);
-        } else {
-            throw new APICallException("Getting " + responseCode + " from the microservice and retrying.");
-        }
-
-        if (con != null) {
-            con.disconnect();
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
         }
     }
 
@@ -207,32 +209,35 @@ public class MoesifKeyRetriever {
         }
         String authHeaderValue = getAuthHeader(gaAuthUsername, gaAuthPwd);
         HttpsURLConnection con = null;
-        con = (HttpsURLConnection) obj.openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty("Content-Type", MoesifMicroserviceConstants.CONTENT_TYPE);
-        con.setRequestProperty("Authorization", authHeaderValue);
-        con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
-        int responseCode = con.getResponseCode();
-        if (responseCode == HttpsURLConnection.HTTP_OK) {
-            try (BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));) {
+        try {
+            con = (HttpsURLConnection) obj.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("Content-Type", MoesifMicroserviceConstants.CONTENT_TYPE);
+            con.setRequestProperty("Authorization", authHeaderValue);
+            con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
+            int responseCode = con.getResponseCode();
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                try (BufferedReader in = new BufferedReader(
+                        new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));) {
 
-                String inputLine;
+                    String inputLine;
 
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    updateMoesifKey(response.toString());
+                    return response.toString();
                 }
-                updateMoesifKey(response.toString());
-                con.disconnect();
-                return response.toString();
+            } else if (responseCode >= 400 && responseCode < 500) {
+                log.error("Event will be dropped. Getting {}", responseCode);
+                return null;
+            } else {
+                throw new APICallException("Getting " + responseCode + " from the microservice and retrying.");
             }
-        } else if (responseCode >= 400 && responseCode < 500) {
-            log.error("Event will be dropped. Getting {}", responseCode);
-            con.disconnect();
-            return null;
-        } else {
-            con.disconnect();
-            throw new APICallException("Getting " + responseCode + " from the microservice and retrying.");
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
         }
     }
 
