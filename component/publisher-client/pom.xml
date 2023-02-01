@@ -28,6 +28,10 @@
     <name>APIM Analytics EventHub Client Implementation</name>
     <dependencies>
         <dependency>
+            <groupId>com.moesif.api</groupId>
+            <artifactId>moesifapi</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-messaging-eventhubs</artifactId>
         </dependency>
