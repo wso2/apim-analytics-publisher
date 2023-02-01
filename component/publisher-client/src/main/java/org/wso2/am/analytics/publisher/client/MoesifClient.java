@@ -181,14 +181,12 @@ public class MoesifClient {
                 .headers(rspHeaders)
                 .build();
 
-        EventModel eventModel = new EventBuilder()
+        return new EventBuilder()
                 .request(eventReq)
                 .response(eventRsp)
                 .userId((String) data.get("userName"))
                 .companyId((String) data.get(Constants.ORGANIZATION_ID))
                 .build();
-
-        return eventModel;
     }
 }
 
