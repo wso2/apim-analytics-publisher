@@ -17,6 +17,7 @@
  */
 
 package org.wso2.am.analytics.publisher.util;
+
 /**
  * Class to hold String constants.
  */

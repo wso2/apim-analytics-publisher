@@ -17,6 +17,10 @@
  */
 package org.wso2.am.analytics.publisher.client;
 
+<<<<<<< HEAD
+=======
+import com.google.gson.Gson;
+>>>>>>> origin/moesif-new
 import com.moesif.api.MoesifAPIClient;
 import com.moesif.api.controllers.APIController;
 import com.moesif.api.http.client.APICallBack;
@@ -67,6 +71,15 @@ public class MoesifClient {
         Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
 
         if (currentAttempt > 0) {
+<<<<<<< HEAD
+=======
+            if (currentAttempt == MoesifMicroserviceConstants.NUM_RETRY_ATTEMPTS_PUBLISH) {
+                // on failure remove the respective moesif key from the map.
+                // this will result in a call to the microservice to retrieve the key.
+                // This is enough to happen only at the first attempt.
+                keyRetriever.removeMoesifKeyFromMap(orgId);
+            }
+>>>>>>> origin/moesif-new
             currentAttempt -= 1;
             MoesifClientContextHolder.PUBLISH_ATTEMPTS.set(currentAttempt);
             try {
@@ -78,7 +91,11 @@ public class MoesifClient {
                 log.error("Failing retry attempt at Moesif client", e);
             }
         } else if (currentAttempt == 0) {
+<<<<<<< HEAD
             log.error("Failed all retrying attempts. Event will be dropped for organization {}", orgId);
+=======
+            log.error("Failed all retrying attempts. Event will be dropped");
+>>>>>>> origin/moesif-new
         }
     }
 
@@ -113,9 +130,15 @@ public class MoesifClient {
                 if (statusCode == 200) {
                     log.debug("Event successfully published.");
                 } else if (statusCode >= 400 && statusCode < 500) {
+<<<<<<< HEAD
                     log.error("Event publishing failed for organization: {}. Moesif returned {}.", orgId, statusCode);
                 } else {
                     log.error("Event publishing failed for organization: {}. Moesif returned {}.", orgId, statusCode);
+=======
+                    log.error("Event publishing failed. Moesif returned " + statusCode);
+                } else {
+                    log.error("Event publishing failed.Retrying.");
+>>>>>>> origin/moesif-new
                     doRetry(orgId, builder);
                 }
             }
@@ -124,12 +147,20 @@ public class MoesifClient {
                 int statusCode = context.getResponse().getStatusCode();
 
                 if (statusCode >= 400 && statusCode < 500) {
+<<<<<<< HEAD
                     log.error("Event publishing failed for organization: {}. Moesif returned {}.", orgId, statusCode);
                 } else if (error != null) {
                     log.error("Event publishing failed for organization: {}. Event publishing failed.", orgId,
                             error);
                 } else {
                     log.error("Event publishing failed for organization: {}. Retrying.", orgId);
+=======
+                    log.error("Event publishing failed. Moesif returned:", statusCode);
+                } else if (error != null) {
+                    log.error("Event publishing failed.", error);
+                } else {
+                    log.error("Event publishing failed. Retrying.");
+>>>>>>> origin/moesif-new
                     doRetry(orgId, builder);
                 }
 
@@ -138,12 +169,23 @@ public class MoesifClient {
         try {
             api.createEventAsync(buildEventResponse(event), callBack);
         } catch (IOException e) {
+<<<<<<< HEAD
             log.error("Analytics event sending failed. Event will be dropped.Failed for organization: {}", orgId, e);
+=======
+            log.error("Analytics event sending failed. Event will be dropped", e);
+>>>>>>> origin/moesif-new
         }
 
     }
 
     private EventModel buildEventResponse(Map<String, Object> data) throws IOException, MetricReportingException {
+<<<<<<< HEAD
+=======
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(data);
+        String reqBody = jsonString.replaceAll("[\r\n]", "");
+
+>>>>>>> origin/moesif-new
         //      Preprocessing data
         final URL uri = new URL((String) data.get(Constants.DESTINATION));
         final String hostName = uri.getHost();
@@ -152,9 +194,15 @@ public class MoesifClient {
 
         Map<String, String> reqHeaders = new HashMap<String, String>();
 
+<<<<<<< HEAD
         reqHeaders.put(Constants.MOESIF_USER_AGENT_KEY,
                 (String) data.getOrDefault(Constants.USER_AGENT_HEADER, Constants.UNKNOWN_VALUE));
         reqHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, Constants.MOESIF_CONTENT_TYPE_HEADER);
+=======
+        reqHeaders.put("User-Agent",
+                (String) data.getOrDefault(Constants.USER_AGENT_HEADER, Constants.UNKNOWN_VALUE));
+        reqHeaders.put("Content-Type", Constants.MOESIF_CONTENT_TYPE_HEADER);
+>>>>>>> origin/moesif-new
         reqHeaders.put("Host", hostName);
 
         Map<String, String> rspHeaders = new HashMap<String, String>();
@@ -162,17 +210,29 @@ public class MoesifClient {
         rspHeaders.put("Vary", "Accept-Encoding");
         rspHeaders.put("Pragma", "no-cache");
         rspHeaders.put("Expires", "-1");
+<<<<<<< HEAD
         rspHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, "application/json; charset=utf-8");
+=======
+        rspHeaders.put("Content-Type", "application/json; charset=utf-8");
+>>>>>>> origin/moesif-new
         rspHeaders.put("Cache-Control", "no-cache");
 
 
         EventRequestModel eventReq = new EventRequestBuilder()
+<<<<<<< HEAD
                 .time(new Date())
+=======
+                .time(new Date()) // See if you can parse request time stamp to date obj
+>>>>>>> origin/moesif-new
                 .uri(uri.toString())
                 .verb((String) data.get(Constants.API_METHOD))
                 .apiVersion((String) data.get(Constants.API_VERSION))
                 .ipAddress(userIP)
                 .headers(reqHeaders)
+<<<<<<< HEAD
+=======
+                .body(reqBody)
+>>>>>>> origin/moesif-new
                 .build();
 
 

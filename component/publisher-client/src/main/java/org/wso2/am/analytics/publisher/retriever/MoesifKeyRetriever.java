@@ -78,7 +78,11 @@ public class MoesifKeyRetriever {
             callListResource();
         } catch (IOException | APICallException ex) {
             // TODO: Separate retry logic to a separate class.
+<<<<<<< HEAD
             log.error("First attempt of refreshing internal map failed,retrying.", ex);
+=======
+            log.error("First attempt failed,retrying.", ex);
+>>>>>>> origin/moesif-new
             while (attempts > 0) {
                 attempts--;
                 try {
@@ -89,7 +93,11 @@ public class MoesifKeyRetriever {
                 try {
                     callListResource();
                 } catch (IOException | APICallException e) {
+<<<<<<< HEAD
                     log.error("Retry attempt to refresh internal map failed.", e);
+=======
+                    log.error("Retry attempt failed.", e);
+>>>>>>> origin/moesif-new
                 }
             }
         }
@@ -108,7 +116,11 @@ public class MoesifKeyRetriever {
             response = callDetailResource(orgID);
         } catch (IOException | APICallException ex) {
             // TODO: Separate retry logic to a separate class.
+<<<<<<< HEAD
             log.error("First attempt of single moesif key fetch failed, retrying.", ex);
+=======
+            log.error("First attempt failed,retrying.", ex);
+>>>>>>> origin/moesif-new
             while (attempts > 0) {
                 attempts--;
                 try {
@@ -144,7 +156,11 @@ public class MoesifKeyRetriever {
         try {
             obj = new URL(MoesifMicroserviceConstants.LIST_URL);
         } catch (MalformedURLException ex) {
+<<<<<<< HEAD
             log.error("Event will be dropped. Attempted to call url: {}", MoesifMicroserviceConstants.LIST_URL, ex);
+=======
+            log.error("Event will be dropped. Getting", ex);
+>>>>>>> origin/moesif-new
             return;
         }
         String auth = gaAuthUsername + ":" + gaAuthPwd;
@@ -169,7 +185,11 @@ public class MoesifKeyRetriever {
                 }
                 updateMap(response.toString());
             } else if (responseCode >= 400 && responseCode < 500) {
+<<<<<<< HEAD
                 log.error("Event will be dropped. Getting {}", responseCode);
+=======
+                log.error("Event will be dropped. Getting" + responseCode);
+>>>>>>> origin/moesif-new
             } else {
                 throw new APICallException("Getting " + responseCode + " from the microservice and retrying.");
             }
@@ -192,7 +212,11 @@ public class MoesifKeyRetriever {
         try {
             obj = new URL(url);
         } catch (MalformedURLException ex) {
+<<<<<<< HEAD
             log.error("Event will be dropped. Attempted to call url: {}", url, ex);
+=======
+            log.error("Event will be dropped. Getting", ex);
+>>>>>>> origin/moesif-new
             return null;
         }
         String auth = gaAuthUsername + ":" + gaAuthPwd;
@@ -217,7 +241,11 @@ public class MoesifKeyRetriever {
                 updateMoesifKey(response.toString());
                 return response.toString();
             } else if (responseCode >= 400 && responseCode < 500) {
+<<<<<<< HEAD
                 log.error("Event will be dropped. Getting {}", responseCode);
+=======
+                log.error("Event will be dropped. Getting " + responseCode);
+>>>>>>> origin/moesif-new
                 return null;
             } else {
                 throw new APICallException("Getting " + responseCode + " from the microservice and retrying.");
@@ -230,6 +258,10 @@ public class MoesifKeyRetriever {
                 con.disconnect();
             }
         }
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/moesif-new
     }
 
     private void updateMoesifKey(String response) {
