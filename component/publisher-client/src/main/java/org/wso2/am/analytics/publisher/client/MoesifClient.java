@@ -190,5 +190,5 @@ public class MoesifClient {
 
         return eventModel;
     }
-
 }
+
