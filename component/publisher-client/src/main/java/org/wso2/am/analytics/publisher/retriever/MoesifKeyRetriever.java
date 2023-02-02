@@ -153,7 +153,8 @@ public class MoesifKeyRetriever {
             obj = new URL(MoesifMicroserviceConstants.LIST_URL);
         } catch (MalformedURLException ex) {
             log.error("Failed calling Moesif microservice. Attempted to call url: {}",
-                    MoesifMicroserviceConstants.LIST_URL.replaceAll("[\r\n]", ""), ex.getMessage().replaceAll("[\r\n]", ""));
+                    MoesifMicroserviceConstants.LIST_URL.replaceAll("[\r\n]", ""),
+                    ex.getMessage().replaceAll("[\r\n]", ""));
             return;
         }
         String authHeaderValue = getAuthHeader(gaAuthUsername, gaAuthPwd);
@@ -204,7 +205,8 @@ public class MoesifKeyRetriever {
         try {
             obj = new URL(url);
         } catch (MalformedURLException ex) {
-            log.error("Failed calling Moesif microservice. Attempted to call url: {}", url.replaceAll("[\r\n]", ""), ex.getMessage().replaceAll("[\r\n]", ""));
+            log.error("Failed calling Moesif microservice. Attempted to call url: {}", url.replaceAll("[\r\n]", ""),
+                    ex.getMessage().replaceAll("[\r\n]", ""));
             return null;
         }
         String authHeaderValue = getAuthHeader(gaAuthUsername, gaAuthPwd);
