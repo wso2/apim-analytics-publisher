@@ -63,27 +63,11 @@
         <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"/>
     </Match>
     <Match>
-        <Class name="org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever"/>
+        <Class name="org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever$1"/>
         <Bug Pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
     </Match>
     <Match>
         <Class name="org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever"/>
-        <Bug Pattern="URLCONNECTION_SSRF_FD"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever"/>
-        <Bug Pattern="CRLF_INJECTION_LOGS"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.am.analytics.publisher.client.MoesifClient"/>
-        <Bug Pattern="URLCONNECTION_SSRF_FD"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.am.analytics.publisher.client.MoesifClient"/>
-        <Bug Pattern="CRLF_INJECTION_LOGS"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.am.analytics.publisher.reporter.moesif.ParallelQueueWorker"/>
         <Bug Pattern="URLCONNECTION_SSRF_FD"/>
     </Match>
 </FindBugsFilter>
