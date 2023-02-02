@@ -113,9 +113,9 @@ public class MoesifClient {
                 if (statusCode == 200) {
                     log.debug("Event successfully published.");
                 } else if (statusCode >= 400 && statusCode < 500) {
-                    log.error("Event publishing failed for organization: {}. Moesif returned {}.", orgId, statusCode);
+                    log.error("Event publishing failed for organization: {}. Moesif returned {}.", orgId.replaceAll("[\r\n]", ""), String.valueOf(statusCode).replaceAll("[\r\n]", ""));
                 } else {
-                    log.error("Event publishing failed for organization: {}. Retrying.", orgId);
+                    log.error("Event publishing failed for organization: {}. Retrying.", orgId.replaceAll("[\r\n]", ""));
                     doRetry(orgId, builder);
                 }
             }
@@ -124,12 +124,12 @@ public class MoesifClient {
                 int statusCode = context.getResponse().getStatusCode();
 
                 if (statusCode >= 400 && statusCode < 500) {
-                    log.error("Event publishing failed for organization: {}. Moesif returned {}.", orgId, statusCode);
+                    log.error("Event publishing failed for organization: {}. Moesif returned {}.", orgId.replaceAll("[\r\n]", ""), String.valueOf(statusCode).replaceAll("[\r\n]", ""));
                 } else if (error != null) {
-                    log.error("Event publishing failed for organization: {}. Event publishing failed.", orgId,
+                    log.error("Event publishing failed for organization: {}. Event publishing failed.", orgId.replaceAll("[\r\n]", ""),
                             error);
                 } else {
-                    log.error("Event publishing failed for organization: {}. Retrying.", orgId);
+                    log.error("Event publishing failed for organization: {}. Retrying.", orgId.replaceAll("[\r\n]", ""));
                     doRetry(orgId, builder);
                 }
             }
