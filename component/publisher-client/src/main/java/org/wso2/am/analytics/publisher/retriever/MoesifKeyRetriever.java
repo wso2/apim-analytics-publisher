@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.moesif.api.MoesifAPIClient;
 
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.APICallException;
@@ -199,9 +200,16 @@ public class MoesifKeyRetriever {
      */
     private String callDetailResource(String orgID) throws IOException, APICallException {
         StringBuffer response = new StringBuffer();
-        final String url = MoesifMicroserviceConstants.DETAIL_URL_WITH_QUERY + orgID;
+        String url = null;
+        // Protecting endpoint from SSRF.
+        if (!orgID.isEmpty()) {
+            url = MoesifMicroserviceConstants.DETAIL_URL + "?" + MoesifMicroserviceConstants.QUERY_PARAM + "=" +
+                    orgID;
+        } else {
+            log.error("Failed calling Moesif microservice. Organization ID cannot be empty");
+            return null;
+        }
         final URL obj;
-
         try {
             obj = new URL(url);
         } catch (MalformedURLException ex) {
@@ -244,7 +252,7 @@ public class MoesifKeyRetriever {
     }
 
     private String getAuthHeader(String gaAuthUsername, char[] gaAuthPwd) {
-        String auth = gaAuthUsername + ":" + gaAuthPwd;
+        String auth = gaAuthUsername + ":" + Arrays.toString(gaAuthPwd);
         String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
         String authHeaderValue = "Basic " + encodedAuth;
         return authHeaderValue;
