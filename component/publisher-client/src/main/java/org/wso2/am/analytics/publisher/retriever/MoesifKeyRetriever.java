@@ -242,7 +242,7 @@ public class MoesifKeyRetriever {
     }
 
     private String getAuthHeader(String gaAuthUsername, char[] gaAuthPwd) {
-        String auth = gaAuthUsername + ":" + gaAuthPwd.toString();
+        String auth = gaAuthUsername + ":" + gaAuthPwd;
         String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
         String authHeaderValue = "Basic " + encodedAuth;
         return authHeaderValue;
