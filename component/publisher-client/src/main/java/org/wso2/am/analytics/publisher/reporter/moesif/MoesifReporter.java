@@ -36,12 +36,10 @@ import java.util.Map;
  */
 public class MoesifReporter extends AbstractMetricReporter {
     private static final Logger log = LoggerFactory.getLogger(MoesifReporter.class);
-    private final Map<String, String> properties;
-    private final EventQueue eventQueue;
+    static EventQueue eventQueue;
 
     public MoesifReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
-        this.properties = properties;
         MoesifKeyRetriever keyRetriever =
                 MoesifKeyRetriever.getInstance(properties.get(MoesifMicroserviceConstants.GA_USERNAME_CONFIG_KEY),
                         properties.get(MoesifMicroserviceConstants.GA_PWD_CONFIG_KEY));
@@ -53,7 +51,11 @@ public class MoesifReporter extends AbstractMetricReporter {
         if (properties.get(Constants.WORKER_THREAD_COUNT) != null) {
             workerThreads = Integer.parseInt(properties.get(Constants.WORKER_THREAD_COUNT));
         }
-        eventQueue = new EventQueue(queueSize, workerThreads, keyRetriever);
+        MoesifReporter.setEventQueue(queueSize, workerThreads, keyRetriever);
+    }
+
+    private static void setEventQueue(int queueSize, int workerThreads, MoesifKeyRetriever keyRetriever) {
+        MoesifReporter.eventQueue = new EventQueue(queueSize, workerThreads, keyRetriever);
     }
 
     @Override

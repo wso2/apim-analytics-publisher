@@ -59,7 +59,7 @@ public class MissedEventHandler extends TimerTask {
         // to queue initiated at MoesifCounterMetric.
         for (MetricEventBuilder builder :
                 missedEventQueue) {
-            MoesifCounterMetric.queue.put(builder);
+            MoesifReporter.eventQueue.put(builder);
         }
     }
 }

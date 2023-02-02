@@ -39,10 +39,8 @@ public class EventQueue {
     private final BlockingQueue<MetricEventBuilder> eventQueue;
     private final ExecutorService publisherExecutorService;
     private final AtomicInteger failureCount;
-    private final MoesifKeyRetriever moesifKeyRetriever;
 
     public EventQueue(int queueSize, int workerThreadCount, MoesifKeyRetriever moesifKeyRetriever) {
-        this.moesifKeyRetriever = moesifKeyRetriever;
         publisherExecutorService = Executors.newFixedThreadPool(workerThreadCount,
                 new DefaultAnalyticsThreadFactory("Queue-Worker"));
         MoesifClient moesifClient = new MoesifClient(moesifKeyRetriever);

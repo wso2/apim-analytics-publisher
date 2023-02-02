@@ -78,7 +78,8 @@ public class MoesifClient {
                 log.error("Failing retry attempt at Moesif client", e);
             }
         } else if (currentAttempt == 0) {
-            log.error("Failed all retrying attempts. Event will be dropped for organization {}", orgId);
+            log.error("Failed all retrying attempts. Event will be dropped for organization {}",
+                    orgId.replaceAll("[\r\n]", ""));
         }
     }
 
@@ -131,7 +132,7 @@ public class MoesifClient {
                 } else if (error != null) {
                     log.error("Event publishing failed for organization: {}. Event publishing failed.",
                             orgId.replaceAll("[\r\n]", ""),
-                            error);
+                            error.getMessage().replaceAll("[\r\n]", ""));
                 } else {
                     log.error("Event publishing failed for organization: {}. Retrying.",
                             orgId.replaceAll("[\r\n]", ""));
