@@ -181,7 +181,7 @@ public class MoesifKeyRetriever {
             } else if (responseCode >= 400 && responseCode < 500) {
                 log.error("Getting {} from the microservice.", responseCode);
             } else {
-                throw new APICallException("Getting " + responseCode + " from the microservice and retrying.");
+                throw new APICallException("Getting " + responseCode + " from the Moesif microservice and retrying.");
             }
         } finally {
             if (con != null) {
@@ -239,10 +239,10 @@ public class MoesifKeyRetriever {
                     return response.toString();
                 }
             } else if (responseCode >= 400 && responseCode < 500) {
-                log.error("Getting {} from the microservice.", responseCode);
+                log.error("Getting {} from the Moesif microservice.", responseCode);
                 return null;
             } else {
-                throw new APICallException("Getting " + responseCode + " from the microservice and retrying.");
+                throw new APICallException("Getting " + responseCode + " from the Moesif microservice and retrying.");
             }
         } finally {
             if (con != null) {

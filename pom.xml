@@ -35,9 +35,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-            <groupId>com.moesif.api</groupId>
-            <artifactId>moesifapi</artifactId>
-            <version>${moesif.api.version}</version>
+                <groupId>com.moesif.api</groupId>
+                <artifactId>moesifapi</artifactId>
+                <version>${moesif.api.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.azure</groupId>
