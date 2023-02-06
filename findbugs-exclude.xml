@@ -58,4 +58,7 @@
         <Class name="org.wso2.am.analytics.publisher.auth.AuthProxyUtils"/>
         <Bug pattern="IMPROPER_UNICODE"/>
     </Match>
+    <Match>
+        <Bug pattern="CRLF_INJECTION_LOGS"/>
+    </Match>
 </FindBugsFilter>
