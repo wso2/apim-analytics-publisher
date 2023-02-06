@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.moesif.api.MoesifAPIClient;
 
+import java.net.HttpURLConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.APICallException;
@@ -38,7 +39,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.net.ssl.HttpsURLConnection;
+
 
 /**
  * Responsible for calling the Moesif microservice and refresh/init entire internal map(organization, moesif key) or
@@ -159,15 +160,15 @@ public class MoesifKeyRetriever {
             return;
         }
         String authHeaderValue = getAuthHeader(gaAuthUsername, gaAuthPwd);
-        HttpsURLConnection con = null;
+        HttpURLConnection con = null;
         try {
-            con = (HttpsURLConnection) obj.openConnection();
+            con = (HttpURLConnection) obj.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("Authorization", authHeaderValue);
             con.setRequestProperty("Content-Type", MoesifMicroserviceConstants.CONTENT_TYPE);
             con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
             int responseCode = con.getResponseCode();
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
+            if (responseCode == HttpURLConnection.HTTP_OK) {
                 try (BufferedReader in = new BufferedReader(
                         new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));) {
                     String inputLine;
@@ -218,15 +219,15 @@ public class MoesifKeyRetriever {
             return null;
         }
         String authHeaderValue = getAuthHeader(gaAuthUsername, gaAuthPwd);
-        HttpsURLConnection con = null;
+        HttpURLConnection con = null;
         try {
-            con = (HttpsURLConnection) obj.openConnection();
+            con = (HttpURLConnection) obj.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("Content-Type", MoesifMicroserviceConstants.CONTENT_TYPE);
             con.setRequestProperty("Authorization", authHeaderValue);
             con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
             int responseCode = con.getResponseCode();
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
+            if (responseCode == HttpURLConnection.HTTP_OK) {
                 try (BufferedReader in = new BufferedReader(
                         new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));) {
 
