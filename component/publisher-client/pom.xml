@@ -107,10 +107,6 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.moesif.api</groupId>
-            <artifactId>moesifapi</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -131,9 +127,12 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
                             org.wso2.am.analytics.publisher.reporter.cloud.*;version="${project.version}",
+                            org.wso2.am.analytics.publisher.reporter.moesif.*;version="${project.version}",
+                            org.wso2.am.analytics.publisher.reporter.moesif.util*;version="${project.version}",
                             !org.wso2.am.analytics.publisher.reporter.choreo;version="${project.version}",
                             org.wso2.am.analytics.publisher.client.*;version="${project.version}",
                             org.wso2.am.analytics.publisher.reporter.*;version="${project.version}",
+                            org.wso2.am.analytics.publisher.retriever.*;version="${project.version}",
                             org.wso2.am.analytics.publisher.exception.*;version="${project.version}",
                             org.wso2.am.analytics.publisher.auth.*;version="${project.version}",
                             org.wso2.am.analytics.publisher.util.*;version="${project.version}",
@@ -153,6 +152,7 @@
                             ua_parser.*;version="${ua_parser.import.version.range}",
                             com.microsoft.azure.proton.transport.*;version="${azure-qpid-proton-j-extensions.import.version.range}",
                             org.apache.http.*,
+                            com.moesif.api.*,
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>
