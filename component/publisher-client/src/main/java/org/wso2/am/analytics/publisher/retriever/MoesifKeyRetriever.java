@@ -19,9 +19,7 @@ package org.wso2.am.analytics.publisher.retriever;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.moesif.api.MoesifAPIClient;
 
-import java.net.HttpURLConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.APICallException;
@@ -32,10 +30,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,14 +42,11 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Responsible for calling the Moesif microservice and refresh/init entire internal map(organization, moesif key) or
  * retrieving single moesif key.
- * Also ease Moesif SDK client initiation by maintaining a map(moesif key, moesif sdk client {@link MoesifAPIClient}).
  */
 public class MoesifKeyRetriever {
     private static final Logger log = LoggerFactory.getLogger(MoesifKeyRetriever.class);
     private static MoesifKeyRetriever moesifKeyRetriever;
     private ConcurrentHashMap<String, String> orgIDMoesifKeyMap;
-
-    private ConcurrentHashMap<String, MoesifAPIClient> moesifKeyClientMap;
     private String gaAuthUsername;
     private char[] gaAuthPwd;
 
@@ -60,7 +55,6 @@ public class MoesifKeyRetriever {
         this.gaAuthUsername = authUsername;
         this.gaAuthPwd = authPwd.toCharArray();
         orgIDMoesifKeyMap = new ConcurrentHashMap();
-        moesifKeyClientMap = new ConcurrentHashMap();
     }
 
     public static synchronized MoesifKeyRetriever getInstance(String authUsername, String authPwd) {
@@ -139,8 +133,7 @@ public class MoesifKeyRetriever {
      * @param orgID
      */
     public void removeMoesifKeyFromMap(String orgID) {
-        String moesifKey = orgIDMoesifKeyMap.remove(orgID);
-        moesifKeyClientMap.remove(moesifKey);
+        orgIDMoesifKeyMap.remove(orgID);
     }
 
     /**
@@ -253,54 +246,52 @@ public class MoesifKeyRetriever {
     }
 
     private String getAuthHeader(String gaAuthUsername, char[] gaAuthPwd) {
-        String auth = gaAuthUsername + ":" + Arrays.toString(gaAuthPwd);
-        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+        String auth = gaAuthUsername + ":" + String.valueOf(gaAuthPwd);
+        String encodedAuth = Base64.getEncoder().withoutPadding().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
         String authHeaderValue = "Basic " + encodedAuth;
         return authHeaderValue;
     }
 
-    private void updateMoesifKey(String response) {
+    private synchronized void updateMoesifKey(String response) {
         Gson gson = new Gson();
         String json = response;
         MoesifKeyEntry newKey = gson.fromJson(json, MoesifKeyEntry.class);
         String orgID = newKey.getOrganization_id();
         String moesifKey = newKey.getMoesif_key();
         orgIDMoesifKeyMap.put(orgID, moesifKey);
-        moesifKeyClientMap.put(moesifKey, new MoesifAPIClient(moesifKey));
     }
 
-    private void updateMap(String response) {
+    private synchronized void updateMap(String response) {
         Gson gson = new Gson();
         String json = response;
 
-        Type collectionType = new TypeToken<Collection<MoesifKeyEntry>>() {
-        }.getType();
+        Type collectionType = new CustomType().getType();
         Collection<MoesifKeyEntry> newKeys = gson.fromJson(json, collectionType);
 
         for (MoesifKeyEntry entry : newKeys) {
             String orgID = entry.getOrganization_id();
             String moesifKey = entry.getMoesif_key();
             orgIDMoesifKeyMap.put(orgID, moesifKey);
-            moesifKeyClientMap.put(moesifKey, new MoesifAPIClient(moesifKey));
         }
     }
 
     /**
      * returning orgID-MoesifKey map.
      *
-     * @return
+     * @return orgIDMoesifKeyMap
      */
     public ConcurrentHashMap<String, String> getMoesifKeyMap() {
         return orgIDMoesifKeyMap;
     }
 
-    /**
-     * returning Moesif SDK client associated with the given Moesif key.
-     *
-     * @param moesifKey
-     * @return
-     */
-    public MoesifAPIClient getMoesifClient(String moesifKey) {
-        return moesifKeyClientMap.get(moesifKey);
+    public void clearMoesifKeyMap() {
+        if (!orgIDMoesifKeyMap.isEmpty()) {
+            orgIDMoesifKeyMap.clear();
+        }
     }
+
+    static class CustomType extends TypeToken<Collection<MoesifKeyEntry>> {
+        // nothing to add
+    }
+
 }
