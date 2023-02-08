@@ -29,6 +29,7 @@ import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.util.Map;
+import java.util.Timer;
 
 /**
  * Moesif Metric Reporter Implementation. This implementation is responsible for sending analytics data into Moesif
@@ -36,7 +37,7 @@ import java.util.Map;
  */
 public class MoesifReporter extends AbstractMetricReporter {
     private static final Logger log = LoggerFactory.getLogger(MoesifReporter.class);
-    static EventQueue eventQueue;
+    private final EventQueue eventQueue;
 
     public MoesifReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
@@ -51,11 +52,12 @@ public class MoesifReporter extends AbstractMetricReporter {
         if (properties.get(Constants.WORKER_THREAD_COUNT) != null) {
             workerThreads = Integer.parseInt(properties.get(Constants.WORKER_THREAD_COUNT));
         }
-        MoesifReporter.setEventQueue(queueSize, workerThreads, keyRetriever);
-    }
+        this.eventQueue = new EventQueue(queueSize, workerThreads, keyRetriever);
 
-    private static void setEventQueue(int queueSize, int workerThreads, MoesifKeyRetriever keyRetriever) {
-        MoesifReporter.eventQueue = new EventQueue(queueSize, workerThreads, keyRetriever);
+        MissedEventHandler missedEventHandler = new MissedEventHandler(keyRetriever);
+        // execute MissedEventHandler periodically.
+        Timer timer = new Timer();
+        timer.schedule(missedEventHandler, 0, MoesifMicroserviceConstants.PERIODIC_CALL_DELAY);
     }
 
     @Override
