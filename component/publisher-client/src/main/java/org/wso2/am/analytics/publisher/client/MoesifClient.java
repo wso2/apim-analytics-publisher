@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
-import org.wso2.am.analytics.publisher.reporter.moesif.MissedEventHandler;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 import org.wso2.am.analytics.publisher.util.Constants;
@@ -43,7 +42,6 @@ import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -53,14 +51,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MoesifClient {
     private final Logger log = LoggerFactory.getLogger(MoesifClient.class);
     private final MoesifKeyRetriever keyRetriever;
-    private final MissedEventHandler missedEventHandler;
 
     public MoesifClient(MoesifKeyRetriever keyRetriever) {
         this.keyRetriever = keyRetriever;
-        this.missedEventHandler = new MissedEventHandler(keyRetriever);
-        // execute MissedEventHandler periodically.
-        Timer timer = new Timer();
-        timer.schedule(missedEventHandler, 0, MoesifMicroserviceConstants.PERIODIC_CALL_DELAY);
     }
 
     private void doRetry(String orgId, MetricEventBuilder builder) {
@@ -96,22 +89,21 @@ public class MoesifClient {
         if (orgIDMoesifKeyMap.containsKey(orgId)) {
             moesifKey = orgIDMoesifKeyMap.get(orgId);
         } else {
-            // store events with orgID that misses moesif keys,
-            // in the internal map inside a queueMissed.
-            // call the microservice when the scheduled time reaches.
-            // put the elements in queue missed to eventQueue.
-            missedEventHandler.putMissedEvent(builder);
             return;
         }
 
         // init moesif api client
-        MoesifAPIClient client = keyRetriever.getMoesifClient(moesifKey);
+        MoesifAPIClient client = new MoesifAPIClient(moesifKey);
+
+        // api object is a singleton which will make calls to
+        // moesif endpoints with the latest MoesifAPI client being provided.
+        // Hence avoid maintaining a map of MoesifAPIClient against moesif keys.
         APIController api = client.getAPI();
 
         APICallBack<HttpResponse> callBack = new APICallBack<HttpResponse>() {
             public void onSuccess(HttpContext context, HttpResponse response) {
                 int statusCode = context.getResponse().getStatusCode();
-                if (statusCode == 200) {
+                if (statusCode == 200 || statusCode == 201 || statusCode == 202 || statusCode == 204) {
                     log.debug("Event successfully published.");
                 } else if (statusCode >= 400 && statusCode < 500) {
                     log.error("Event publishing failed for organization: {}. Moesif returned {}.",
