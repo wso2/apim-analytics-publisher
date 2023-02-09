@@ -17,6 +17,7 @@
  */
 
 package org.wso2.am.analytics.publisher.util;
+
 /**
  * Class to hold String constants.
  */
@@ -105,4 +106,9 @@ public class Constants {
     public static final int DEFAULT_WORKER_THREADS = 1;
     public static final int DEFAULT_FLUSHING_DELAY = 15;
     public static final int USER_AGENT_DEFAULT_CACHE_SIZE = 50;
+
+    // Moesif sdk related constants
+    public static final String MOESIF_CONTENT_TYPE_HEADER = "application/json";
+    public static final String MOESIF_CONTENT_TYPE_KEY = "Content-Type";
+    public static final String MOESIF_USER_AGENT_KEY = "User-Agent";
 }
