@@ -42,8 +42,8 @@ public class MoesifReporter extends AbstractMetricReporter {
     public MoesifReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
         MoesifKeyRetriever keyRetriever =
-                MoesifKeyRetriever.getInstance(properties.get(MoesifMicroserviceConstants.GA_USERNAME_CONFIG_KEY),
-                        properties.get(MoesifMicroserviceConstants.GA_PWD_CONFIG_KEY));
+                MoesifKeyRetriever.getInstance(properties.get(MoesifMicroserviceConstants.MS_USERNAME_CONFIG_KEY),
+                        properties.get(MoesifMicroserviceConstants.MS_PWD_CONFIG_KEY));
         int queueSize = Constants.DEFAULT_QUEUE_SIZE;
         int workerThreads = Constants.DEFAULT_WORKER_THREADS;
         if (properties.get(Constants.QUEUE_SIZE) != null) {
