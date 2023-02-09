@@ -17,6 +17,8 @@
  */
 package org.wso2.am.analytics.publisher.client;
 
+import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
+
 /**
  * Holds context of the Moesif client retry mechanism.
  */
@@ -24,7 +26,7 @@ public class MoesifClientContextHolder {
     public static final ThreadLocal<Integer> PUBLISH_ATTEMPTS = new ThreadLocal<Integer>() {
         @Override
         protected Integer initialValue() {
-            return Integer.valueOf(1);
+            return Integer.valueOf(MoesifMicroserviceConstants.NUM_RETRY_ATTEMPTS_PUBLISH);
         }
 
         @Override
