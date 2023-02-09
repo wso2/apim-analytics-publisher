@@ -23,9 +23,8 @@ package org.wso2.am.analytics.publisher.reporter.moesif.util;
 public class MoesifMicroserviceConstants {
     public static final String DETAIL_URL = "http://microservice:8080/moesif_key/";
     public static final String LIST_URL = "http://microservice:8080/moesif_key";
-    public static final String DETAIL_URL_WITH_QUERY = "http://microservice:8080/moesif_key/?org_id=";
-    public static final String GA_USERNAME_CONFIG_KEY = "gaAuthUsername";
-    public static final String GA_PWD_CONFIG_KEY = "gaAuthPwd";
+    public static final String MS_USERNAME_CONFIG_KEY = "msAuthUsername";
+    public static final String MS_PWD_CONFIG_KEY = "msAuthPwd";
     public static final String CONTENT_TYPE = "application/json";
     public static final String QUERY_PARAM = "org_id";
     public static final int NUM_RETRY_ATTEMPTS = 3;

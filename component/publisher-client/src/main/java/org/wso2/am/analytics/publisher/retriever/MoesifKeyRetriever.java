@@ -47,13 +47,15 @@ public class MoesifKeyRetriever {
     private static final Logger log = LoggerFactory.getLogger(MoesifKeyRetriever.class);
     private static MoesifKeyRetriever moesifKeyRetriever;
     private ConcurrentHashMap<String, String> orgIDMoesifKeyMap;
-    private String gaAuthUsername;
-    private char[] gaAuthPwd;
+    // username of Moesif microservice
+    private String msAuthUsername;
+    // password of Moesif microservice
+    private char[] msAuthPwd;
 
     private MoesifKeyRetriever(String authUsername, String authPwd) {
 
-        this.gaAuthUsername = authUsername;
-        this.gaAuthPwd = authPwd.toCharArray();
+        this.msAuthUsername = authUsername;
+        this.msAuthPwd = authPwd.toCharArray();
         orgIDMoesifKeyMap = new ConcurrentHashMap();
     }
 
@@ -152,7 +154,7 @@ public class MoesifKeyRetriever {
                     ex.getMessage().replaceAll("[\r\n]", ""));
             return;
         }
-        String authHeaderValue = getAuthHeader(gaAuthUsername, gaAuthPwd);
+        String authHeaderValue = getAuthHeader(msAuthUsername, msAuthPwd);
         HttpURLConnection con = null;
         try {
             con = (HttpURLConnection) obj.openConnection();
@@ -211,7 +213,7 @@ public class MoesifKeyRetriever {
                     ex.getMessage().replaceAll("[\r\n]", ""));
             return null;
         }
-        String authHeaderValue = getAuthHeader(gaAuthUsername, gaAuthPwd);
+        String authHeaderValue = getAuthHeader(msAuthUsername, msAuthPwd);
         HttpURLConnection con = null;
         try {
             con = (HttpURLConnection) obj.openConnection();
@@ -245,8 +247,8 @@ public class MoesifKeyRetriever {
         }
     }
 
-    private String getAuthHeader(String gaAuthUsername, char[] gaAuthPwd) {
-        String auth = gaAuthUsername + ":" + String.valueOf(gaAuthPwd);
+    private String getAuthHeader(String msAuthUsername, char[] msAuthPwd) {
+        String auth = msAuthUsername + ":" + String.valueOf(msAuthPwd);
         String encodedAuth = Base64.getEncoder().withoutPadding().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
         String authHeaderValue = "Basic " + encodedAuth;
         return authHeaderValue;
