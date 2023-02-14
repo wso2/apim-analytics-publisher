@@ -17,7 +17,6 @@
  */
 package org.wso2.am.analytics.publisher.reporter.moesif;
 
-import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;

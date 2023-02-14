@@ -42,7 +42,8 @@ public class MoesifMetricBuilderTestCase {
 
     @BeforeMethod
     public void createBuilder() throws MetricCreationException {
-        MoesifKeyRetriever keyRetriever = MoesifKeyRetriever.getInstance("some_username", "some_password");
+        MoesifKeyRetriever keyRetriever =
+                MoesifKeyRetriever.getInstance("some_username", "some_password", "dummyMoesifBasePath");
         EventQueue queue = new EventQueue(100, 1, keyRetriever);
         MoesifCounterMetric metric =
                 new MoesifCounterMetric("test.builder.metric", queue, MetricSchema.CHOREO_RESPONSE);
