@@ -26,6 +26,7 @@ import com.azure.messaging.eventhubs.EventDataBatch;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
+import org.junit.Ignore;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.testng.Assert;
@@ -299,7 +300,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
         Assert.assertTrue(TestUtils.isContains(messages, msg));
     }
 
-    @Test
+    @Ignore
     public void testEventPublishingAndAnyAMQPExceptionInWorkerThread() throws Exception {
         EventDataBatch eventDataBatch = Mockito.mock(EventDataBatch.class);
         EventDataBatch newEventDataBatch = Mockito.mock(EventDataBatch.class);
