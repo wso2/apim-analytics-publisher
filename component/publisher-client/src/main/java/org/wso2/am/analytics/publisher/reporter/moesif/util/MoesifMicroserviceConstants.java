@@ -21,8 +21,8 @@ package org.wso2.am.analytics.publisher.reporter.moesif.util;
  * Class for constants related to external Moesif microservice.
  */
 public class MoesifMicroserviceConstants {
-    public static final String DETAIL_URL = "http://moesif-service.choreo-system.svc.cluster.local/moesif_key/";
-    public static final String LIST_URL = "http://moesif-service.choreo-system.svc.cluster.local/moesif_key";
+    public static final String DETAIL_URL = "http://moesif-service.choreo-system.svc.cluster.local/ms/v1/moesif/moesif_key/";
+    public static final String LIST_URL = "http://moesif-service.choreo-system.svc.cluster.local/ms/v1/moesif/moesif_key";
     public static final String MS_USERNAME_CONFIG_KEY = "moesifMSAuthUsername";
     public static final String MS_PWD_CONFIG_KEY = "moesifMSAuthPwd";
     public static final String CONTENT_TYPE = "application/json";
