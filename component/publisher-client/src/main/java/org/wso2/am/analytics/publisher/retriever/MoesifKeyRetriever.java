@@ -51,17 +51,20 @@ public class MoesifKeyRetriever {
     private String msAuthUsername;
     // password of Moesif microservice
     private char[] msAuthPwd;
+    private String moesifBasePath;
 
-    private MoesifKeyRetriever(String authUsername, String authPwd) {
+    private MoesifKeyRetriever(String authUsername, String authPwd, String moesifBasePath) {
 
         this.msAuthUsername = authUsername;
         this.msAuthPwd = authPwd.toCharArray();
         orgIDMoesifKeyMap = new ConcurrentHashMap();
+        this.moesifBasePath = moesifBasePath;
     }
 
-    public static synchronized MoesifKeyRetriever getInstance(String authUsername, String authPwd) {
+    public static synchronized MoesifKeyRetriever getInstance(String authUsername, String authPwd,
+                                                              String moesifBasePath) {
         if (moesifKeyRetriever == null) {
-            return new MoesifKeyRetriever(authUsername, authPwd);
+            return new MoesifKeyRetriever(authUsername, authPwd, moesifBasePath);
         }
         return moesifKeyRetriever;
     }
@@ -146,11 +149,12 @@ public class MoesifKeyRetriever {
      */
     private void callListResource() throws IOException, APICallException {
         final URL obj;
+        String url = this.moesifBasePath + MoesifMicroserviceConstants.MOESIF_EP_COMMON_PATH;
         try {
-            obj = new URL(MoesifMicroserviceConstants.LIST_URL);
+            obj = new URL(url);
         } catch (MalformedURLException ex) {
             log.error("Failed calling Moesif microservice. Attempted to call url: {}",
-                    MoesifMicroserviceConstants.LIST_URL.replaceAll("[\r\n]", ""),
+                    url.replaceAll("[\r\n]", ""),
                     ex.getMessage().replaceAll("[\r\n]", ""));
             return;
         }
@@ -196,10 +200,10 @@ public class MoesifKeyRetriever {
      */
     private String callDetailResource(String orgID) throws IOException, APICallException {
         StringBuffer response = new StringBuffer();
-        String url = null;
+        String url = this.moesifBasePath + MoesifMicroserviceConstants.MOESIF_EP_COMMON_PATH;
         // Protecting endpoint from SSRF.
         if (!orgID.isEmpty()) {
-            url = MoesifMicroserviceConstants.DETAIL_URL + "?" + MoesifMicroserviceConstants.QUERY_PARAM + "=" +
+            url = url + "/" + "?" + MoesifMicroserviceConstants.QUERY_PARAM + "=" +
                     orgID;
         } else {
             log.error("Failed calling Moesif microservice. Organization ID cannot be empty");
