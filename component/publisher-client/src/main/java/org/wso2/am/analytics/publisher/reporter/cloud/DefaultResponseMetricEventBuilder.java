@@ -56,6 +56,11 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
     @Override
     public boolean validate() throws MetricReportingException {
         if (!isBuilt) {
+            eventMap.remove(Constants.USER_NAME);
+            Map<String, String> propertyMap = (Map<String, String>) eventMap.remove(Constants.PROPERTIES);
+            if (propertyMap != null) {
+                copyDefaultPropertiesToRootLevel(propertyMap);
+            }
             for (Map.Entry<String, Class> entry : requiredAttributes.entrySet()) {
                 Object attribute = eventMap.get(entry.getKey());
                 if (attribute == null) {
@@ -111,6 +116,13 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
         }
         eventMap.put(Constants.USER_AGENT, browser);
         eventMap.put(Constants.PLATFORM, platform);
+    }
+
+    private void copyDefaultPropertiesToRootLevel(Map<String, String> properties) {
+        String apiContext = properties.remove(Constants.API_CONTEXT);
+        properties.remove(Constants.USER_NAME);
+        eventMap.put(Constants.API_CONTEXT, apiContext);
+        eventMap.put(Constants.PROPERTIES, properties);
     }
 
 }

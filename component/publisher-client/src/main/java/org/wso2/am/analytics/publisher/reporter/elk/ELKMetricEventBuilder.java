@@ -62,10 +62,6 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
             if (userAgentHeader != null) {
                 setUserAgentProperties(userAgentHeader);
             }
-            Map<String, String> propertyMap = (Map<String, String>) eventMap.remove(Constants.PROPERTIES);
-            if (propertyMap != null) {
-                copyDefaultPropertiesToRootLevel(propertyMap);
-            }
             isBuilt = true;
         }
         return eventMap;
@@ -74,6 +70,10 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     @Override
     public boolean validate() throws MetricReportingException {
         if (!isBuilt) {
+            Map<String, String> propertyMap = (Map<String, String>) eventMap.remove(Constants.PROPERTIES);
+            if (propertyMap != null) {
+                copyDefaultPropertiesToRootLevel(propertyMap);
+            }
             for (Map.Entry<String, Class> entry : requiredAttributes.entrySet()) {
                 Object attribute = eventMap.get(entry.getKey());
                 if (attribute == null) {
@@ -115,8 +115,10 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     }
 
     private void copyDefaultPropertiesToRootLevel(Map<String, String> properties) {
-        // No need to put apiContext and userName to root level from the properties bag
-        // since the response schema is modified to have both userName and apiContext
+        String apiContext = properties.remove(Constants.API_CONTEXT);
+        String userName = properties.remove(Constants.USER_NAME);
+        eventMap.put(Constants.API_CONTEXT, apiContext);
+        eventMap.put(Constants.USER_NAME, userName);
         eventMap.put(Constants.PROPERTIES, properties);
     }
 }
