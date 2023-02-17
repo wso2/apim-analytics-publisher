@@ -152,7 +152,7 @@
                             ua_parser.*;version="${ua_parser.import.version.range}",
                             com.microsoft.azure.proton.transport.*;version="${azure-qpid-proton-j-extensions.import.version.range}",
                             org.apache.http.*,
-                            com.moesif.api.*,
+                            com.moesif.api.*;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>
