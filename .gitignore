@@ -25,6 +25,7 @@ hs_err_pid*
 #idea files
 .idea
 *.iml
+.vscode
 
 .DS_Store
 .settings

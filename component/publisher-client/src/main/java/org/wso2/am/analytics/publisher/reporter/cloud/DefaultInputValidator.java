@@ -23,6 +23,7 @@ import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,6 +50,7 @@ import static org.wso2.am.analytics.publisher.util.Constants.ERROR_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.GATEWAY_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.KEY_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.ORGANIZATION_ID;
+import static org.wso2.am.analytics.publisher.util.Constants.PROPERTIES;
 import static org.wso2.am.analytics.publisher.util.Constants.PROXY_RESPONSE_CODE;
 import static org.wso2.am.analytics.publisher.util.Constants.REGION_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.REQUEST_MEDIATION_LATENCY;
@@ -93,7 +95,8 @@ public class DefaultInputValidator {
             new AbstractMap.SimpleImmutableEntry<>(BACKEND_LATENCY, Long.class),
             new AbstractMap.SimpleImmutableEntry<>(REQUEST_MEDIATION_LATENCY, Long.class),
             new AbstractMap.SimpleImmutableEntry<>(RESPONSE_MEDIATION_LATENCY, Long.class),
-            new AbstractMap.SimpleImmutableEntry<>(USER_IP, String.class))
+            new AbstractMap.SimpleImmutableEntry<>(USER_IP, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(PROPERTIES, LinkedHashMap.class))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     private static final Map<String, Class> faultSchema = Stream.of(

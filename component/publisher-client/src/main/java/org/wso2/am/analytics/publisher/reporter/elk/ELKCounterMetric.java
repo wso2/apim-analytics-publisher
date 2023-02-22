@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
+import org.wso2.am.analytics.publisher.reporter.GenericInputValidator;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 
@@ -35,10 +36,12 @@ public class ELKCounterMetric implements CounterMetric {
     private static final Logger log = LoggerFactory.getLogger(ELKCounterMetric.class);
     private final String name;
     private final Gson gson;
+    private MetricSchema schema;
 
-    protected ELKCounterMetric(String name) {
+    protected ELKCounterMetric(String name, MetricSchema schema) {
         this.name = name;
         this.gson = new Gson();
+        this.schema = schema;
     }
 
     @Override
@@ -58,11 +61,26 @@ public class ELKCounterMetric implements CounterMetric {
 
     @Override
     public MetricSchema getSchema() {
-        return null;
+        return schema;
     }
 
     @Override
     public MetricEventBuilder getEventBuilder() {
-        return new ELKMetricEventBuilder();
+
+        switch (schema) {
+            case RESPONSE:
+            default:
+                return new ELKMetricEventBuilder(
+                        GenericInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE));
+            case ERROR:
+                return new ELKMetricEventBuilder(
+                        GenericInputValidator.getInstance().getEventProperties(MetricSchema.ERROR));
+            case CHOREO_RESPONSE:
+                return new ELKMetricEventBuilder(
+                        GenericInputValidator.getInstance().getEventProperties(MetricSchema.CHOREO_RESPONSE));
+            case CHOREO_ERROR:
+                return new ELKMetricEventBuilder(
+                        GenericInputValidator.getInstance().getEventProperties(MetricSchema.CHOREO_ERROR));
+        }
     }
 }
