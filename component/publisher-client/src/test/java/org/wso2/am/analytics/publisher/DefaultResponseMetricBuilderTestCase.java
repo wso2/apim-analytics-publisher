@@ -38,6 +38,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class DefaultResponseMetricBuilderTestCase {
@@ -95,6 +96,7 @@ public class DefaultResponseMetricBuilderTestCase {
                 .addAttribute(Constants.REQUEST_MEDIATION_LATENCY, "1000")
                 .addAttribute(Constants.RESPONSE_MEDIATION_LATENCY, 1000)
                 .addAttribute(Constants.USER_IP, "127.0.0.1")
+                .addAttribute(Constants.PROPERTIES, new LinkedHashMap<>())
                 .build();
     }
 
@@ -132,10 +134,11 @@ public class DefaultResponseMetricBuilderTestCase {
                 .addAttribute(Constants.REQUEST_MEDIATION_LATENCY, 1000L)
                 .addAttribute(Constants.RESPONSE_MEDIATION_LATENCY, 1000L)
                 .addAttribute(Constants.USER_IP, "127.0.0.1")
+                .addAttribute(Constants.PROPERTIES, new LinkedHashMap<>())
                 .build();
 
         Assert.assertFalse(eventMap.isEmpty());
-        Assert.assertEquals(eventMap.size(), 29, "Some attributes are missing from the resulting event map");
+        Assert.assertEquals(eventMap.size(), 30, "Some attributes are missing from the resulting event map");
         Assert.assertEquals(eventMap.get(Constants.EVENT_TYPE), "response", "Event type should be set to fault");
         Assert.assertEquals(eventMap.get(Constants.USER_AGENT), "Mobile Safari",
                 "User agent should be set to Mobile Safari");
