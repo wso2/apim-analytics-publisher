@@ -42,7 +42,7 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
 
 
     public ELKMetricEventBuilder() {
-        requiredAttributes = GenericInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
+        requiredAttributes = GenericInputValidator.getInstance().getEventProperties(MetricSchema.ELK_RESPONSE);
         eventMap = new HashMap<>();
     }
 
@@ -115,8 +115,8 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     }
 
     private void copyDefaultPropertiesToRootLevel(Map<String, String> properties) {
-        String apiContext = properties.remove(Constants.API_CONTEXT);
-        String userName = properties.remove(Constants.USER_NAME);
+        String apiContext = properties.get(Constants.API_CONTEXT);
+        String userName = properties.get(Constants.USER_NAME);
         eventMap.put(Constants.API_CONTEXT, apiContext);
         eventMap.put(Constants.USER_NAME, userName);
         eventMap.put(Constants.PROPERTIES, properties);
