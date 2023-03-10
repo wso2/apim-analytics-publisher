@@ -40,7 +40,6 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     private Map<String, Object> eventMap;
     private Boolean isBuilt = false;
 
-
     public ELKMetricEventBuilder() {
         requiredAttributes = GenericInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
         eventMap = new HashMap<>();
@@ -70,7 +69,7 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     @Override
     public boolean validate() throws MetricReportingException {
         if (!isBuilt) {
-            Map<String, String> propertyMap = (Map<String, String>) eventMap.remove(Constants.PROPERTIES);
+            Map<String, String> propertyMap = (Map<String, String>) eventMap.get(Constants.PROPERTIES);
             if (propertyMap != null) {
                 copyDefaultPropertiesToRootLevel(propertyMap);
             }
@@ -115,10 +114,12 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     }
 
     private void copyDefaultPropertiesToRootLevel(Map<String, String> properties) {
-        String apiContext = properties.remove(Constants.API_CONTEXT);
-        String userName = properties.remove(Constants.USER_NAME);
-        eventMap.put(Constants.API_CONTEXT, apiContext);
-        eventMap.put(Constants.USER_NAME, userName);
-        eventMap.put(Constants.PROPERTIES, properties);
+
+        if (properties.get(Constants.API_CONTEXT) != null) {
+            eventMap.put(Constants.API_CONTEXT, properties.get(Constants.API_CONTEXT));
+        }
+        if (properties.get(Constants.USER_NAME) != null) {
+            eventMap.put(Constants.USER_NAME, properties.get(Constants.USER_NAME));
+        }
     }
 }

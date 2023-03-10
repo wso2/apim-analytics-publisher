@@ -34,7 +34,6 @@ import java.util.Map;
 public class ELKMetricReporter extends AbstractMetricReporter {
     private static final Logger log = LoggerFactory.getLogger(ELKMetricReporter.class);
 
-
     public ELKMetricReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
         log.info("LogMetricReporter successfully initialized");
@@ -47,7 +46,7 @@ public class ELKMetricReporter extends AbstractMetricReporter {
 
     @Override
     protected CounterMetric createCounter(String name, MetricSchema schema) {
-        return new ELKCounterMetric(name);
+        return new ELKCounterMetric(name, schema);
     }
 
     @Override

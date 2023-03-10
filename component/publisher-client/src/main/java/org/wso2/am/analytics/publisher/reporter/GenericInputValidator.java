@@ -20,6 +20,7 @@ package org.wso2.am.analytics.publisher.reporter;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,6 +47,7 @@ import static org.wso2.am.analytics.publisher.util.Constants.ERROR_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.GATEWAY_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.KEY_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.ORGANIZATION_ID;
+import static org.wso2.am.analytics.publisher.util.Constants.PROPERTIES;
 import static org.wso2.am.analytics.publisher.util.Constants.PROXY_RESPONSE_CODE;
 import static org.wso2.am.analytics.publisher.util.Constants.REGION_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.REQUEST_MEDIATION_LATENCY;
@@ -96,6 +98,37 @@ public class GenericInputValidator {
                     new AbstractMap.SimpleImmutableEntry<>(RESPONSE_MEDIATION_LATENCY, Long.class),
                     new AbstractMap.SimpleImmutableEntry<>(USER_IP, String.class))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    private static final Map<String, Class> elkResponseEventSchema = Stream.of(
+            new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(CORRELATION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(KEY_TYPE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_TYPE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_NAME, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_VERSION, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_CREATION, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_METHOD, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_CONTEXT, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_RESOURCE_TEMPLATE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_CREATOR_TENANT_DOMAIN, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(DESTINATION, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(APPLICATION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(APPLICATION_NAME, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(APPLICATION_OWNER, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(REGION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(GATEWAY_TYPE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(USER_AGENT_HEADER, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(USER_NAME, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(PROXY_RESPONSE_CODE, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(RESPONSE_CACHE_HIT, Boolean.class),
+            new AbstractMap.SimpleImmutableEntry<>(RESPONSE_LATENCY, Long.class),
+            new AbstractMap.SimpleImmutableEntry<>(BACKEND_LATENCY, Long.class),
+            new AbstractMap.SimpleImmutableEntry<>(REQUEST_MEDIATION_LATENCY, Long.class),
+            new AbstractMap.SimpleImmutableEntry<>(RESPONSE_MEDIATION_LATENCY, Long.class),
+            new AbstractMap.SimpleImmutableEntry<>(USER_IP, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(PROPERTIES, LinkedHashMap.class))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     private static final Map<String, Class> defaultFaultEventSchema = Stream.of(
                     new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, String.class),
                     new AbstractMap.SimpleImmutableEntry<>(CORRELATION_ID, String.class),
@@ -116,6 +149,28 @@ public class GenericInputValidator {
                     new AbstractMap.SimpleImmutableEntry<>(GATEWAY_TYPE, String.class),
                     new AbstractMap.SimpleImmutableEntry<>(PROXY_RESPONSE_CODE, Integer.class),
                     new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    private static final Map<String, Class> elkFaultEventSchema = Stream.of(
+            new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(CORRELATION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(KEY_TYPE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(ERROR_TYPE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(ERROR_CODE, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(ERROR_MESSAGE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_TYPE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_NAME, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_VERSION, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_CREATION, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(API_CREATOR_TENANT_DOMAIN, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(APPLICATION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(APPLICATION_NAME, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(APPLICATION_OWNER, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(REGION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(GATEWAY_TYPE, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(PROXY_RESPONSE_CODE, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(PROPERTIES, LinkedHashMap.class))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     private static final Map<String, Class> choreoResponseEventSchema = Stream.of(
                     new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, String.class),
@@ -190,6 +245,10 @@ public class GenericInputValidator {
                 return choreoResponseEventSchema;
             case CHOREO_ERROR:
                 return choreoFaultEventSchema;
+            case ELK_RESPONSE:
+                return elkResponseEventSchema;
+            case ELK_ERROR:
+                return elkFaultEventSchema;
             default:
                 return new HashMap<>();
         }
