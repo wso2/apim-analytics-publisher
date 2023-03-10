@@ -69,7 +69,7 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     @Override
     public boolean validate() throws MetricReportingException {
         if (!isBuilt) {
-            Map<String, String> propertyMap = (Map<String, String>) eventMap.remove(Constants.PROPERTIES);
+            Map<String, String> propertyMap = (Map<String, String>) eventMap.get(Constants.PROPERTIES);
             if (propertyMap != null) {
                 copyDefaultPropertiesToRootLevel(propertyMap);
             }

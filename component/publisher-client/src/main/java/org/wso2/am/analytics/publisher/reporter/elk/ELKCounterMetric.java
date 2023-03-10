@@ -71,10 +71,10 @@ public class ELKCounterMetric implements CounterMetric {
             case RESPONSE:
             default:
                 return new ELKMetricEventBuilder(
-                        GenericInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE));
+                        GenericInputValidator.getInstance().getEventProperties(MetricSchema.ELK_RESPONSE));
             case ERROR:
                 return new ELKMetricEventBuilder(
-                        GenericInputValidator.getInstance().getEventProperties(MetricSchema.ERROR));
+                        GenericInputValidator.getInstance().getEventProperties(MetricSchema.ELK_ERROR));
             case CHOREO_RESPONSE:
                 return new ELKMetricEventBuilder(
                         GenericInputValidator.getInstance().getEventProperties(MetricSchema.CHOREO_RESPONSE));

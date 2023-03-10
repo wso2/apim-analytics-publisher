@@ -123,9 +123,6 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
         if (properties.get(Constants.API_CONTEXT) != null) {
             eventMap.put(Constants.API_CONTEXT, properties.get(Constants.API_CONTEXT));
         }
-        if (properties.get(Constants.USER_NAME) != null) {
-            eventMap.put(Constants.USER_NAME, properties.get(Constants.USER_NAME));
-        }
     }
 
 }

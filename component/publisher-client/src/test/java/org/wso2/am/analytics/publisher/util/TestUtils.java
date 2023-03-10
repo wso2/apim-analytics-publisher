@@ -23,7 +23,6 @@ import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -61,8 +60,7 @@ public class TestUtils {
                 .addAttribute(Constants.BACKEND_LATENCY, 3000L)
                 .addAttribute(Constants.REQUEST_MEDIATION_LATENCY, 1000L)
                 .addAttribute(Constants.RESPONSE_MEDIATION_LATENCY, 1000L)
-                .addAttribute(Constants.USER_IP, "127.0.0.1")
-                .addAttribute(Constants.PROPERTIES, new LinkedHashMap<>());
+                .addAttribute(Constants.USER_IP, "127.0.0.1");
     }
 
     public static boolean isContains(List<String> messages, String message) {
