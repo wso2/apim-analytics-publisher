@@ -121,11 +121,11 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
     private void copyDefaultPropertiesToRootLevel(Map<String, String> properties) {
 
         if (properties.get(Constants.API_CONTEXT) != null) {
-            String apiContext = properties.remove(Constants.API_CONTEXT);
-            eventMap.put(Constants.API_CONTEXT, apiContext);
+            eventMap.put(Constants.API_CONTEXT, properties.get(Constants.API_CONTEXT));
         }
-        properties.remove(Constants.USER_NAME);
-        eventMap.put(Constants.PROPERTIES, properties);
+        if (properties.get(Constants.USER_NAME) != null) {
+            eventMap.put(Constants.USER_NAME, properties.get(Constants.USER_NAME));
+        }
     }
 
 }

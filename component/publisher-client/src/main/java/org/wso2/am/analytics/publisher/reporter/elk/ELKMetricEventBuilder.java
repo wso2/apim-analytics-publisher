@@ -116,13 +116,10 @@ public class ELKMetricEventBuilder extends AbstractMetricEventBuilder {
     private void copyDefaultPropertiesToRootLevel(Map<String, String> properties) {
 
         if (properties.get(Constants.API_CONTEXT) != null) {
-            String apiContext = properties.remove(Constants.API_CONTEXT);
-            eventMap.put(Constants.API_CONTEXT, apiContext);
+            eventMap.put(Constants.API_CONTEXT, properties.get(Constants.API_CONTEXT));
         }
         if (properties.get(Constants.USER_NAME) != null) {
-            String apiVersion = properties.remove(Constants.USER_NAME);
-            eventMap.put(Constants.USER_NAME, apiVersion);
+            eventMap.put(Constants.USER_NAME, properties.get(Constants.USER_NAME));
         }
-        eventMap.put(Constants.PROPERTIES, properties);
     }
 }
