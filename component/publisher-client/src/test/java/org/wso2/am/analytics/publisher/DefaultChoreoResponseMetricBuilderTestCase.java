@@ -96,6 +96,7 @@ public class DefaultChoreoResponseMetricBuilderTestCase {
         builder.addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.ORGANIZATION_ID, "wso2.com")
+                .addAttribute(Constants.ENVIRONMENT_ID, "abcd-1234-5678-efgh")
                 .addAttribute(Constants.KEY_TYPE, "prod")
                 .addAttribute(Constants.API_ID, "9876-54f1")
                 .addAttribute(Constants.API_NAME, "PizzaShack")
@@ -134,6 +135,7 @@ public class DefaultChoreoResponseMetricBuilderTestCase {
                 .addAttribute(Constants.REQUEST_TIMESTAMP, OffsetDateTime.now(Clock.systemUTC()).toString())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.ORGANIZATION_ID, "wso2.com")
+                .addAttribute(Constants.ENVIRONMENT_ID, "abcd-1234-5678-efgh")
                 .addAttribute(Constants.KEY_TYPE, "prod")
                 .addAttribute(Constants.API_ID, "9876-54f1")
                 .addAttribute(Constants.API_TYPE, "HTTP")
@@ -163,7 +165,7 @@ public class DefaultChoreoResponseMetricBuilderTestCase {
                 .build();
 
         Assert.assertFalse(eventMap.isEmpty());
-        Assert.assertEquals(eventMap.size(), 30, "Some attributes are missing from the resulting event map");
+        Assert.assertEquals(eventMap.size(), 31, "Some attributes are missing from the resulting event map");
         Assert.assertEquals(eventMap.get(Constants.EVENT_TYPE), "response", "Event type should be set to fault");
         Assert.assertEquals(eventMap.get(Constants.USER_AGENT), "Mobile Safari",
                 "User agent should be set to Mobile Safari");

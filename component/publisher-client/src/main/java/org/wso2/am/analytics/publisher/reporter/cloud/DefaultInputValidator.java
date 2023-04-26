@@ -43,6 +43,7 @@ import static org.wso2.am.analytics.publisher.util.Constants.APPLICATION_OWNER;
 import static org.wso2.am.analytics.publisher.util.Constants.BACKEND_LATENCY;
 import static org.wso2.am.analytics.publisher.util.Constants.CORRELATION_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.DESTINATION;
+import static org.wso2.am.analytics.publisher.util.Constants.ENVIRONMENT_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.ERROR_CODE;
 import static org.wso2.am.analytics.publisher.util.Constants.ERROR_MESSAGE;
 import static org.wso2.am.analytics.publisher.util.Constants.ERROR_TYPE;
@@ -137,6 +138,7 @@ public class DefaultInputValidator {
             new AbstractMap.SimpleImmutableEntry<>(APPLICATION_OWNER, String.class),
             new AbstractMap.SimpleImmutableEntry<>(REGION_ID, String.class),
             new AbstractMap.SimpleImmutableEntry<>(ORGANIZATION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(ENVIRONMENT_ID, String.class),
             new AbstractMap.SimpleImmutableEntry<>(GATEWAY_TYPE, String.class),
             new AbstractMap.SimpleImmutableEntry<>(USER_AGENT_HEADER, String.class),
             new AbstractMap.SimpleImmutableEntry<>(PROXY_RESPONSE_CODE, Integer.class),
@@ -167,6 +169,7 @@ public class DefaultInputValidator {
             new AbstractMap.SimpleImmutableEntry<>(APPLICATION_OWNER, String.class),
             new AbstractMap.SimpleImmutableEntry<>(REGION_ID, String.class),
             new AbstractMap.SimpleImmutableEntry<>(ORGANIZATION_ID, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(ENVIRONMENT_ID, String.class),
             new AbstractMap.SimpleImmutableEntry<>(GATEWAY_TYPE, String.class),
             new AbstractMap.SimpleImmutableEntry<>(PROXY_RESPONSE_CODE, Integer.class),
             new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class))

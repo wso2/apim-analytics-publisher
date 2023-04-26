@@ -40,6 +40,7 @@ public class Constants {
     public static final String APPLICATION_OWNER = "applicationOwner";
     public static final String REGION_ID = "regionId";
     public static final String ORGANIZATION_ID = "organizationId";
+    public static final String ENVIRONMENT_ID = "environmentId";
     public static final String GATEWAY_TYPE = "gatewayType";
     public static final String USER_AGENT_HEADER = "userAgentHeader";
     public static final String USER_AGENT = "userAgent";
