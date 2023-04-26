@@ -86,6 +86,7 @@ public class MoesifMetricBuilderTestCase {
         builder.addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.ORGANIZATION_ID, "wso2.com")
+                .addAttribute(Constants.ENVIRONMENT_ID, "abcd-1234-5678-efgh")
                 .addAttribute(Constants.KEY_TYPE, "prod")
                 .addAttribute(Constants.API_ID, "9876-54f1")
                 .addAttribute(Constants.API_NAME, "PizzaShack")
@@ -124,6 +125,7 @@ public class MoesifMetricBuilderTestCase {
                 .addAttribute(Constants.REQUEST_TIMESTAMP, OffsetDateTime.now(Clock.systemUTC()).toString())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.ORGANIZATION_ID, "wso2.com")
+                .addAttribute(Constants.ENVIRONMENT_ID, "abcd-1234-5678-efgh")
                 .addAttribute(Constants.KEY_TYPE, "prod")
                 .addAttribute(Constants.API_ID, "9876-54f1")
                 .addAttribute(Constants.API_TYPE, "HTTP")
@@ -153,10 +155,10 @@ public class MoesifMetricBuilderTestCase {
                 .build();
 
         Assert.assertFalse(eventMap.isEmpty());
-        // We expect only 29 attributes in Moesif scenario unlike in choreo scenario.
+        // We expect only 30 attributes in Moesif scenario unlike in choreo scenario.
         // In choreo scenario we parse user agent header,
         // and build one additional attribute.
-        Assert.assertEquals(eventMap.size(), 29, "Some attributes are missing from the resulting event map");
+        Assert.assertEquals(eventMap.size(), 30, "Some attributes are missing from the resulting event map");
         Assert.assertEquals(eventMap.get(Constants.ORGANIZATION_ID), "wso2.com",
                 "Organization ID should be wso2.com");
     }

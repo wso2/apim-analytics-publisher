@@ -88,6 +88,7 @@ public class DefaultChoreoFaultMetricBuilderTestCase {
     public void testAttributesWithInvalidTypes() throws MetricCreationException, MetricReportingException {
         builder.addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
                 .addAttribute(Constants.ORGANIZATION_ID, "wso2.com")
+                .addAttribute(Constants.ENVIRONMENT_ID, "abcd-1234-5678-efgh")
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.KEY_TYPE, "prod")
                 .addAttribute(Constants.ERROR_TYPE, "backend")
@@ -115,6 +116,7 @@ public class DefaultChoreoFaultMetricBuilderTestCase {
                 .addAttribute(Constants.REQUEST_TIMESTAMP, OffsetDateTime.now(Clock.systemUTC()).toString())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.ORGANIZATION_ID, "wso2.com")
+                .addAttribute(Constants.ENVIRONMENT_ID, "abcd-1234-5678-efgh")
                 .addAttribute(Constants.KEY_TYPE, "prod")
                 .addAttribute(Constants.ERROR_TYPE, "backend")
                 .addAttribute(Constants.ERROR_CODE, 401)
@@ -136,7 +138,7 @@ public class DefaultChoreoFaultMetricBuilderTestCase {
                 .build();
 
         Assert.assertFalse(eventMap.isEmpty());
-        Assert.assertEquals(eventMap.size(), 22, "Some attributes are missing from the resulting event map");
+        Assert.assertEquals(eventMap.size(), 23, "Some attributes are missing from the resulting event map");
         Assert.assertEquals(eventMap.get(Constants.EVENT_TYPE), "fault", "Event type should be set to fault");
         Assert.assertEquals(eventMap.get(Constants.ORGANIZATION_ID), "wso2.com",
                 "Organization ID should be wso2.com");
