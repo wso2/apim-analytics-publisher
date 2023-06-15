@@ -22,7 +22,6 @@ import com.moesif.api.controllers.APIController;
 import com.moesif.api.http.client.APICallBack;
 import com.moesif.api.http.client.HttpContext;
 import com.moesif.api.http.response.HttpResponse;
-import com.moesif.api.models.EventBuilder;
 import com.moesif.api.models.EventModel;
 import com.moesif.api.models.EventRequestBuilder;
 import com.moesif.api.models.EventRequestModel;
@@ -38,7 +37,6 @@ import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -141,18 +139,17 @@ public class MoesifClient {
 
     private EventModel buildEventResponse(Map<String, Object> data) throws IOException, MetricReportingException {
         //      Preprocessing data
-        final URL uri = new URL((String) data.get(Constants.DESTINATION));
-        final String hostName = uri.getHost();
-
         final String userIP = (String) data.get(Constants.USER_IP);
+        final String userName = (String) data.get(Constants.USER_NAME);
+        final String apiContext = (String) data.get(Constants.API_CONTEXT);
+        final String apiResourceTemplate = (String) data.get(Constants.API_RESOURCE_TEMPLATE);
+        final String uri = apiContext + apiResourceTemplate;
 
         Map<String, String> reqHeaders = new HashMap<String, String>();
 
         reqHeaders.put(Constants.MOESIF_USER_AGENT_KEY,
                 (String) data.getOrDefault(Constants.USER_AGENT_HEADER, Constants.UNKNOWN_VALUE));
         reqHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, Constants.MOESIF_CONTENT_TYPE_HEADER);
-
-        reqHeaders.put("Host", hostName);
 
         Map<String, String> rspHeaders = new HashMap<String, String>();
 
@@ -164,7 +161,7 @@ public class MoesifClient {
 
         EventRequestModel eventReq = new EventRequestBuilder()
                 .time(new Date())
-                .uri(uri.toString())
+                .uri(uri)
                 .verb((String) data.get(Constants.API_METHOD))
                 .apiVersion((String) data.get(Constants.API_VERSION))
                 .ipAddress(userIP)
@@ -177,12 +174,21 @@ public class MoesifClient {
                 .headers(rspHeaders)
                 .build();
 
-        return new EventBuilder()
-                .request(eventReq)
-                .response(eventRsp)
-                .userId((String) data.get("userName"))
-                .companyId((String) data.get(Constants.ORGANIZATION_ID))
-                .build();
+        String modifiedUserName;
+
+        if (userName.contains("@carbon.super")) {
+            modifiedUserName = userName.replace("@carbon.super", "");
+        } else {
+            modifiedUserName = userName;
+        }
+
+        EventModel eventModel = new EventModel();
+
+        eventModel.setRequest(eventReq);
+        eventModel.setResponse(eventRsp);
+        eventModel.setUserId(modifiedUserName);
+        eventModel.setCompanyId(null);
+
+        return eventModel;
     }
 }
-
