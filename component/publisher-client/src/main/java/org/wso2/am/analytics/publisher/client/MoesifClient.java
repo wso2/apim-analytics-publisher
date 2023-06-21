@@ -160,7 +160,7 @@ public class MoesifClient {
         rspHeaders.put("Cache-Control", "no-cache");
 
         LinkedHashMap properties = (LinkedHashMap) data.get("properties");
-        String gwURL = (String) properties.get(Constants.X_ORIGINAL_GW_URL);
+        String gwURL = (String) properties.get(Constants.GATEWAY_URL);
         String uri = apiContext + apiResourceTemplate;
         if (gwURL != null) {
             uri = gwURL;
