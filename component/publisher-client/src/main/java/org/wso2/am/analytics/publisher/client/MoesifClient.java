@@ -39,6 +39,7 @@ import org.wso2.am.analytics.publisher.util.Constants;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -143,7 +144,6 @@ public class MoesifClient {
         final String userName = (String) data.get(Constants.USER_NAME);
         final String apiContext = (String) data.get(Constants.API_CONTEXT);
         final String apiResourceTemplate = (String) data.get(Constants.API_RESOURCE_TEMPLATE);
-        final String uri = apiContext + apiResourceTemplate;
 
         Map<String, String> reqHeaders = new HashMap<String, String>();
 
@@ -158,6 +158,13 @@ public class MoesifClient {
         rspHeaders.put("Expires", "-1");
         rspHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, "application/json; charset=utf-8");
         rspHeaders.put("Cache-Control", "no-cache");
+
+        LinkedHashMap properties = (LinkedHashMap) data.get("properties");
+        String gwURL = (String) properties.get(Constants.X_ORIGINAL_GW_URL);
+        String uri = apiContext + apiResourceTemplate;
+        if (gwURL != null) {
+            uri = gwURL;
+        }
 
         EventRequestModel eventReq = new EventRequestBuilder()
                 .time(new Date())

@@ -203,7 +203,8 @@ public class GenericInputValidator {
                     new AbstractMap.SimpleImmutableEntry<>(BACKEND_LATENCY, Long.class),
                     new AbstractMap.SimpleImmutableEntry<>(REQUEST_MEDIATION_LATENCY, Long.class),
                     new AbstractMap.SimpleImmutableEntry<>(RESPONSE_MEDIATION_LATENCY, Long.class),
-                    new AbstractMap.SimpleImmutableEntry<>(USER_IP, String.class))
+                    new AbstractMap.SimpleImmutableEntry<>(USER_IP, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(PROPERTIES, LinkedHashMap.class))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     private static final Map<String, Class> choreoFaultEventSchema = Stream.of(
                     new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, String.class),
