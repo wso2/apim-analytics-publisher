@@ -33,6 +33,7 @@ import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 import org.wso2.am.analytics.publisher.util.Constants;
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MoesifMetricBuilderTestCase {
@@ -121,6 +122,11 @@ public class MoesifMetricBuilderTestCase {
         String uaString = "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, "
                 + "like Gecko) Version/5.1 Mobile/9B206 Safari/7534.48.3";
 
+        LinkedHashMap values = new LinkedHashMap<>();
+        values.put("x-original-gw-url", "foo");
+        LinkedHashMap properties = new LinkedHashMap();
+        properties.put("properties", values);
+
         Map<String, Object> eventMap = builder
                 .addAttribute(Constants.REQUEST_TIMESTAMP, OffsetDateTime.now(Clock.systemUTC()).toString())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
@@ -152,13 +158,14 @@ public class MoesifMetricBuilderTestCase {
                 .addAttribute(Constants.REQUEST_MEDIATION_LATENCY, 1000L)
                 .addAttribute(Constants.RESPONSE_MEDIATION_LATENCY, 1000L)
                 .addAttribute(Constants.USER_IP, "127.0.0.1")
+                .addAttribute(Constants.PROPERTIES, properties)
                 .build();
 
         Assert.assertFalse(eventMap.isEmpty());
         // We expect only 30 attributes in Moesif scenario unlike in choreo scenario.
         // In choreo scenario we parse user agent header,
         // and build one additional attribute.
-        Assert.assertEquals(eventMap.size(), 30, "Some attributes are missing from the resulting event map");
+        Assert.assertEquals(eventMap.size(), 31, "Some attributes are missing from the resulting event map");
         Assert.assertEquals(eventMap.get(Constants.ORGANIZATION_ID), "wso2.com",
                 "Organization ID should be wso2.com");
     }
