@@ -82,12 +82,25 @@ public class MoesifClient {
     public void publish(MetricEventBuilder builder) throws MetricReportingException {
         Map<String, Object> event = builder.build();
         ConcurrentHashMap<String, String> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
+        ConcurrentHashMap<String, String> orgIdEnvMap = keyRetriever.getEnvMap();
+        LinkedHashMap properties = (LinkedHashMap) event.get("properties");
 
         String orgId = (String) event.get(Constants.ORGANIZATION_ID);
         String moesifKey;
+        String eventEnvironment = (String) properties.get(Constants.DEPLOYMENT_TYPE);
+        String userSelectedEnvironment;
         if (orgIDMoesifKeyMap.containsKey(orgId)) {
             moesifKey = orgIDMoesifKeyMap.get(orgId);
+            if (orgIdEnvMap.containsKey(orgId)) {
+                userSelectedEnvironment = orgIdEnvMap.get(orgId);
+            } else {
+                return;
+            }
         } else {
+            return;
+        }
+
+        if (userSelectedEnvironment.equals(Constants.PRODUCTION) && !eventEnvironment.equals(Constants.PRODUCTION)) {
             return;
         }
 
