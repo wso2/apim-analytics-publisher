@@ -47,6 +47,7 @@ public class MoesifKeyRetriever {
     private static final Logger log = LoggerFactory.getLogger(MoesifKeyRetriever.class);
     private static MoesifKeyRetriever moesifKeyRetriever;
     private ConcurrentHashMap<String, String> orgIDMoesifKeyMap;
+    private ConcurrentHashMap<String, String> orgIdEnvMap;
     // username of Moesif microservice
     private String msAuthUsername;
     // password of Moesif microservice
@@ -58,6 +59,7 @@ public class MoesifKeyRetriever {
         this.msAuthUsername = authUsername;
         this.msAuthPwd = authPwd.toCharArray();
         orgIDMoesifKeyMap = new ConcurrentHashMap();
+        orgIdEnvMap = new ConcurrentHashMap();
         this.moesifBasePath = moesifBasePath;
     }
 
@@ -264,7 +266,9 @@ public class MoesifKeyRetriever {
         MoesifKeyEntry newKey = gson.fromJson(json, MoesifKeyEntry.class);
         String orgID = newKey.getOrganization_id();
         String moesifKey = newKey.getMoesif_key();
+        String env = newKey.getEnv();
         orgIDMoesifKeyMap.put(orgID, moesifKey);
+        orgIdEnvMap.put(orgID, env);
     }
 
     private synchronized void updateMap(String response) {
@@ -276,8 +280,10 @@ public class MoesifKeyRetriever {
 
         for (MoesifKeyEntry entry : newKeys) {
             String orgID = entry.getOrganization_id();
+            String env = entry.getEnv();
             String moesifKey = entry.getMoesif_key();
             orgIDMoesifKeyMap.put(orgID, moesifKey);
+            orgIdEnvMap.put(orgID, env);
         }
     }
 
@@ -290,9 +296,19 @@ public class MoesifKeyRetriever {
         return orgIDMoesifKeyMap;
     }
 
+    public ConcurrentHashMap<String, String> getEnvMap() {
+        return orgIdEnvMap;
+    }
+
     public void clearMoesifKeyMap() {
         if (!orgIDMoesifKeyMap.isEmpty()) {
             orgIDMoesifKeyMap.clear();
+        }
+    }
+
+    public void clearEnvMap() {
+        if (!orgIdEnvMap.isEmpty()) {
+            orgIdEnvMap.clear();
         }
     }
 
