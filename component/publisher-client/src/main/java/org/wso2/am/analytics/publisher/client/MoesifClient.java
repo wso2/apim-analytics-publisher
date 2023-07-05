@@ -83,7 +83,7 @@ public class MoesifClient {
         Map<String, Object> event = builder.build();
         ConcurrentHashMap<String, String> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
         ConcurrentHashMap<String, String> orgIdEnvMap = keyRetriever.getEnvMap();
-        LinkedHashMap properties = (LinkedHashMap) event.get("properties");
+        LinkedHashMap properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
 
         String orgId = (String) event.get(Constants.ORGANIZATION_ID);
         String moesifKey;
@@ -100,7 +100,7 @@ public class MoesifClient {
             return;
         }
 
-        if (userSelectedEnvironment.equals(Constants.PRODUCTION) && !eventEnvironment.equals(Constants.PRODUCTION)) {
+        if (Constants.PRODUCTION.equals(userSelectedEnvironment) && !Constants.PRODUCTION.equals(eventEnvironment)) {
             return;
         }
 
@@ -172,7 +172,7 @@ public class MoesifClient {
         rspHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, "application/json; charset=utf-8");
         rspHeaders.put("Cache-Control", "no-cache");
 
-        LinkedHashMap properties = (LinkedHashMap) data.get("properties");
+        LinkedHashMap properties = (LinkedHashMap) data.get(Constants.PROPERTIES);
         String gwURL = (String) properties.get(Constants.GATEWAY_URL);
         String uri = apiContext + apiResourceTemplate;
         if (gwURL != null) {
