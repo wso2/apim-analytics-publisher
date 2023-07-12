@@ -157,6 +157,7 @@ public class MoesifClient {
         final String userName = (String) data.get(Constants.USER_NAME);
         final String apiContext = (String) data.get(Constants.API_CONTEXT);
         final String apiResourceTemplate = (String) data.get(Constants.API_RESOURCE_TEMPLATE);
+        final long responseLatency = (long) data.get(Constants.RESPONSE_LATENCY);
 
         Map<String, String> reqHeaders = new HashMap<String, String>();
 
@@ -189,7 +190,7 @@ public class MoesifClient {
                 .build();
 
         EventResponseModel eventRsp = new EventResponseBuilder()
-                .time(new Date(System.currentTimeMillis() + 1000))
+                .time(new Date(System.currentTimeMillis() + responseLatency))
                 .status((int) data.get(Constants.TARGET_RESPONSE_CODE))
                 .headers(rspHeaders)
                 .build();
