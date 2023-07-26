@@ -255,7 +255,7 @@ public class MoesifKeyRetriever {
 
     private String getAuthHeader(String msAuthUsername, char[] msAuthPwd) {
         String auth = msAuthUsername + ":" + String.valueOf(msAuthPwd);
-        String encodedAuth = Base64.getEncoder().withoutPadding().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
         String authHeaderValue = "Basic " + encodedAuth;
         return authHeaderValue;
     }
