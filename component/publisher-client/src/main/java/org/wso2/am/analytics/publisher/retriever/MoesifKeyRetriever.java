@@ -38,6 +38,8 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.net.ssl.HttpsURLConnection;
+
 
 /**
  * Responsible for calling the Moesif microservice and refresh/init entire internal map(organization, moesif key) or
@@ -163,7 +165,11 @@ public class MoesifKeyRetriever {
         String authHeaderValue = getAuthHeader(msAuthUsername, msAuthPwd);
         HttpURLConnection con = null;
         try {
-            con = (HttpURLConnection) obj.openConnection();
+            if (obj.getProtocol().equals("https")) {
+                con = (HttpsURLConnection) obj.openConnection();
+            } else {
+                con = (HttpURLConnection) obj.openConnection();
+            }
             con.setRequestMethod("GET");
             con.setRequestProperty("Authorization", authHeaderValue);
             con.setRequestProperty("Content-Type", MoesifMicroserviceConstants.CONTENT_TYPE);
