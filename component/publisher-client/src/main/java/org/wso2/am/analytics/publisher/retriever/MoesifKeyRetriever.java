@@ -18,6 +18,9 @@
 package org.wso2.am.analytics.publisher.retriever;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import org.slf4j.Logger;
@@ -279,10 +282,19 @@ public class MoesifKeyRetriever {
 
     private synchronized void updateMap(String response) {
         Gson gson = new Gson();
-        String json = response;
+        JsonParser jsonParser = new JsonParser();
+        JsonArray jsonArray;
+        JsonElement jsonElement = jsonParser.parse(response);
+
+        if (!jsonElement.isJsonArray()) {
+            jsonArray = new JsonArray();
+            jsonArray.add(jsonElement);
+        } else {
+            jsonArray = jsonElement.getAsJsonArray();
+        }
 
         Type collectionType = new CustomType().getType();
-        Collection<MoesifKeyEntry> newKeys = gson.fromJson(json, collectionType);
+        Collection<MoesifKeyEntry> newKeys = gson.fromJson(jsonArray, collectionType);
 
         for (MoesifKeyEntry entry : newKeys) {
             String orgID = entry.getOrganization_id();
