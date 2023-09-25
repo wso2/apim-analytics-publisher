@@ -309,7 +309,7 @@
         <google.gson.import.version.range>[2.8.0, 3.0.0)</google.gson.import.version.range>
         <feign.import.version.range>[11.0.0, 12.0.0)</feign.import.version.range>
         <apache.log4j.import.version.range>[2.17.0, 3.0.0)</apache.log4j.import.version.range>
-        <ua_parser.version>1.5.4.wso2v1</ua_parser.version>
+        <ua_parser.version>1.5.4.wso2v2</ua_parser.version>
         <ua_parser.import.version.range>[1.3.0,2)</ua_parser.import.version.range>
         <jacoco.version>0.8.6</jacoco.version>
         <apache.commons.lang3.version>3.10</apache.commons.lang3.version>
