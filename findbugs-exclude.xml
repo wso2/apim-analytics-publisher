@@ -59,7 +59,7 @@
         <Bug pattern="IMPROPER_UNICODE"/>
     </Match>
     <Match>
-        <Class name="org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever"/>
+        <Class name="org.wso2.am.analytics.publisher.retriever.MoesifKeyRetrieverChoreoClient"/>
         <Bug pattern="URLCONNECTION_SSRF_FD"/>
     </Match>
     <Match>

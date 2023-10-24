@@ -85,6 +85,7 @@ public class Constants {
     //Reporter constants
     public static final String DEFAULT_REPORTER = "default";
     public static final String ELK_REPORTER = "elk";
+    public static final String MOESIF_REPORTER = "moesif";
 
     //EventHub Client retry options constants
     public static final int DEFAULT_MAX_RETRIES = 2;
@@ -115,4 +116,10 @@ public class Constants {
     public static final String GATEWAY_URL = "x-original-gw-url";
     public static final String DEPLOYMENT_TYPE = "deployment-type";
     public static final String PRODUCTION = "PRODUCTION";
+
+    public static final String MOESIF_KEY_RETRIEVER_CLIENT_TYPE = "moesifKeyRetrieverClientType";
+
+    public static final String MOESIF_KEY_RETRIEVER_CHOREO_CLIENT = "Choreo";
+    public static final String MOESIF_KEY_VALUE = "moesifToken";
+    public static final String DEFAULT_ENVIRONMENT = "Default";
 }

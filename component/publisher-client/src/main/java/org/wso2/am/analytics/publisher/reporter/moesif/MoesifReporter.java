@@ -24,12 +24,11 @@ import org.wso2.am.analytics.publisher.reporter.AbstractMetricReporter;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import org.wso2.am.analytics.publisher.reporter.TimerMetric;
-import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
+import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetrieverFactory;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.util.Map;
-import java.util.Timer;
 
 /**
  * Moesif Metric Reporter Implementation. This implementation is responsible for sending analytics data into Moesif
@@ -41,12 +40,7 @@ public class MoesifReporter extends AbstractMetricReporter {
 
     public MoesifReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
-        String moesifBasePath = properties.get(MoesifMicroserviceConstants.MOESIF_PROTOCOL_WITH_FQDN_KEY) +
-                properties.get(MoesifMicroserviceConstants.MOESIF_MS_VERSIONING_KEY);
-        MoesifKeyRetriever keyRetriever =
-                MoesifKeyRetriever.getInstance(properties.get(MoesifMicroserviceConstants.MS_USERNAME_CONFIG_KEY),
-                        properties.get(MoesifMicroserviceConstants.MS_PWD_CONFIG_KEY), moesifBasePath
-                );
+        MoesifKeyRetriever keyRetriever  = MoesifKeyRetrieverFactory.getMoesifKeyRetriever(properties);
         int queueSize = Constants.DEFAULT_QUEUE_SIZE;
         int workerThreads = Constants.DEFAULT_WORKER_THREADS;
         if (properties.get(Constants.QUEUE_SIZE) != null) {
@@ -57,10 +51,6 @@ public class MoesifReporter extends AbstractMetricReporter {
         }
         this.eventQueue = new EventQueue(queueSize, workerThreads, keyRetriever);
 
-        MissedEventHandler missedEventHandler = new MissedEventHandler(keyRetriever);
-        // execute MissedEventHandler periodically.
-        Timer timer = new Timer();
-        timer.schedule(missedEventHandler, 0, MoesifMicroserviceConstants.PERIODIC_CALL_DELAY);
     }
 
     @Override
@@ -70,8 +60,8 @@ public class MoesifReporter extends AbstractMetricReporter {
 
     @Override
     public CounterMetric createCounter(String name, MetricSchema metricSchema) throws MetricCreationException {
-        MoesifCounterMetric counterMetric = new MoesifCounterMetric(name, eventQueue, metricSchema);
-        return counterMetric;
+
+        return new MoesifCounterMetric(name, eventQueue, metricSchema);
     }
 
     @Override

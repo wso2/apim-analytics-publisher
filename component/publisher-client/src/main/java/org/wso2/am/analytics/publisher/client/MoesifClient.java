@@ -27,7 +27,6 @@ import com.moesif.api.models.EventRequestBuilder;
 import com.moesif.api.models.EventRequestModel;
 import com.moesif.api.models.EventResponseBuilder;
 import com.moesif.api.models.EventResponseModel;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
@@ -37,25 +36,28 @@ import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Moesif Client is responsible for sending events to
  * Moesif Analytics Dashboard.
  */
 public class MoesifClient {
+
     private final Logger log = LoggerFactory.getLogger(MoesifClient.class);
     private final MoesifKeyRetriever keyRetriever;
 
     public MoesifClient(MoesifKeyRetriever keyRetriever) {
+
         this.keyRetriever = keyRetriever;
     }
 
     private void doRetry(String orgId, MetricEventBuilder builder) {
+
         Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
 
         if (currentAttempt > 0) {
@@ -80,29 +82,12 @@ public class MoesifClient {
      * and initiating moesif client sdk.
      */
     public void publish(MetricEventBuilder builder) throws MetricReportingException {
+
         Map<String, Object> event = builder.build();
-        ConcurrentHashMap<String, String> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
-        ConcurrentHashMap<String, String> orgIdEnvMap = keyRetriever.getEnvMap();
-        LinkedHashMap properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
 
         String orgId = (String) event.get(Constants.ORGANIZATION_ID);
-        String moesifKey;
-        String eventEnvironment = (String) properties.get(Constants.DEPLOYMENT_TYPE);
-        String userSelectedEnvironment;
-        if (orgIDMoesifKeyMap.containsKey(orgId)) {
-            moesifKey = orgIDMoesifKeyMap.get(orgId);
-            if (orgIdEnvMap.containsKey(orgId)) {
-                userSelectedEnvironment = orgIdEnvMap.get(orgId);
-            } else {
-                return;
-            }
-        } else {
-            return;
-        }
-
-        if (Constants.PRODUCTION.equals(userSelectedEnvironment) && !Constants.PRODUCTION.equals(eventEnvironment)) {
-            return;
-        }
+        String eventEnvironment = (String) event.getOrDefault(Constants.ENVIRONMENT_ID, Constants.DEFAULT_ENVIRONMENT);
+        String moesifKey = keyRetriever.getKey(orgId, eventEnvironment);
 
         // init moesif api client
         MoesifAPIClient client = new MoesifAPIClient(moesifKey);
@@ -114,6 +99,7 @@ public class MoesifClient {
 
         APICallBack<HttpResponse> callBack = new APICallBack<HttpResponse>() {
             public void onSuccess(HttpContext context, HttpResponse response) {
+
                 int statusCode = context.getResponse().getStatusCode();
                 if (statusCode == 200 || statusCode == 201 || statusCode == 202 || statusCode == 204) {
                     log.debug("Event successfully published.");
@@ -128,6 +114,7 @@ public class MoesifClient {
             }
 
             public void onFailure(HttpContext context, Throwable error) {
+
                 int statusCode = context.getResponse().getStatusCode();
 
                 if (statusCode >= 400 && statusCode < 500) {
@@ -158,7 +145,7 @@ public class MoesifClient {
         final String apiContext = (String) data.get(Constants.API_CONTEXT);
         final String apiResourceTemplate = (String) data.get(Constants.API_RESOURCE_TEMPLATE);
         final long responseLatency = (long) data.get(Constants.RESPONSE_LATENCY);
-
+        final String requestTimeStamp = (String) data.get(Constants.REQUEST_TIMESTAMP);
         Map<String, String> reqHeaders = new HashMap<String, String>();
 
         reqHeaders.put(Constants.MOESIF_USER_AGENT_KEY,
@@ -179,9 +166,10 @@ public class MoesifClient {
         if (gwURL != null) {
             uri = gwURL;
         }
-
+        Date requestDate = getDate(requestTimeStamp);
+        Date responseDate = new Date(requestDate.getTime() + responseLatency);
         EventRequestModel eventReq = new EventRequestBuilder()
-                .time(new Date())
+                .time(requestDate)
                 .uri(uri)
                 .verb((String) data.get(Constants.API_METHOD))
                 .apiVersion((String) data.get(Constants.API_VERSION))
@@ -190,26 +178,25 @@ public class MoesifClient {
                 .build();
 
         EventResponseModel eventRsp = new EventResponseBuilder()
-                .time(new Date(System.currentTimeMillis() + responseLatency))
-                .status((int) data.get(Constants.TARGET_RESPONSE_CODE))
+                .time(responseDate)
+                .status((int) data.get(Constants.PROXY_RESPONSE_CODE))
                 .headers(rspHeaders)
                 .build();
-
-        String modifiedUserName;
-
-        if (userName.contains("@carbon.super")) {
-            modifiedUserName = userName.replace("@carbon.super", "");
-        } else {
-            modifiedUserName = userName;
-        }
 
         EventModel eventModel = new EventModel();
 
         eventModel.setRequest(eventReq);
         eventModel.setResponse(eventRsp);
-        eventModel.setUserId(modifiedUserName);
+        eventModel.setUserId(userName);
         eventModel.setCompanyId(null);
 
         return eventModel;
+    }
+
+    private static Date getDate(String time) {
+
+        OffsetDateTime offsetDateTime = OffsetDateTime.parse(time);
+        long milliSecondsTime = offsetDateTime.toInstant().toEpochMilli();
+        return new Date(milliSecondsTime);
     }
 }

@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsMetricReporter;
 import org.wso2.am.analytics.publisher.reporter.elk.ELKMetricReporter;
+import org.wso2.am.analytics.publisher.reporter.moesif.MoesifReporter;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.lang.reflect.Constructor;
@@ -36,6 +37,7 @@ import java.util.Map;
  * Factory will return earlier requested instance.
  */
 public class MetricReporterFactory {
+
     private static final Logger log = LoggerFactory.getLogger(MetricReporterFactory.class);
     private static final MetricReporterFactory instance = new MetricReporterFactory();
     private static Map<String, MetricReporter> reporterRegistry = new HashMap<>();
@@ -46,6 +48,7 @@ public class MetricReporterFactory {
 
     public MetricReporter createMetricReporter(Map<String, String> properties)
             throws MetricCreationException {
+
         if (reporterRegistry.get(Constants.DEFAULT_REPORTER) == null) {
             synchronized (this) {
                 if (reporterRegistry.get(Constants.DEFAULT_REPORTER) == null) {
@@ -62,6 +65,7 @@ public class MetricReporterFactory {
     }
 
     public MetricReporter createLogMetricReporter(Map<String, String> properties) throws MetricCreationException {
+
         if (reporterRegistry.get(Constants.ELK_REPORTER) == null) {
             synchronized (this) {
                 if (reporterRegistry.get(Constants.ELK_REPORTER) == null) {
@@ -80,6 +84,7 @@ public class MetricReporterFactory {
 
     public MetricReporter createMetricReporter(String fullyQualifiedClassName, Map<String, String> properties)
             throws MetricCreationException {
+
         if (reporterRegistry.get(fullyQualifiedClassName) == null) {
             synchronized (this) {
                 if (reporterRegistry.get(fullyQualifiedClassName) == null) {
@@ -110,14 +115,30 @@ public class MetricReporterFactory {
         return reporterInstance;
     }
 
+    public MetricReporter createMetricReporterFromType(String type, Map<String, String> properties)
+            throws MetricCreationException {
+
+        String fullyQualifiedClassName = DefaultAnalyticsMetricReporter.class.getName();
+        if (Constants.ELK_REPORTER.equals(type)) {
+            fullyQualifiedClassName = ELKMetricReporter.class.getName();
+        } else if (Constants.DEFAULT_REPORTER.equals(type)) {
+            fullyQualifiedClassName = DefaultAnalyticsMetricReporter.class.getName();
+        } else if (Constants.MOESIF_REPORTER.equals(type)) {
+            fullyQualifiedClassName = MoesifReporter.class.getName();
+        }
+        return createMetricReporter(fullyQualifiedClassName , properties);
+    }
+
     /**
      * Reset the MetricReporterFactory registry. Only intended to be used in testing
      */
     public void reset() {
+
         reporterRegistry.clear();
     }
 
     public static MetricReporterFactory getInstance() {
+
         return instance;
     }
 }

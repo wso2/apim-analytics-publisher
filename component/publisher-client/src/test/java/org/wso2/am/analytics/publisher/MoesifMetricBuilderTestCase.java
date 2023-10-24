@@ -29,22 +29,32 @@ import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import org.wso2.am.analytics.publisher.reporter.moesif.EventQueue;
 import org.wso2.am.analytics.publisher.reporter.moesif.MoesifCounterMetric;
-import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
+import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
+import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetrieverChoreoClient;
 import org.wso2.am.analytics.publisher.util.Constants;
+
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MoesifMetricBuilderTestCase {
+
     private static final Logger log = LoggerFactory.getLogger(MoesifMetricBuilderTestCase.class);
 
     private MetricEventBuilder builder;
 
     @BeforeMethod
     public void createBuilder() throws MetricCreationException {
-        MoesifKeyRetriever keyRetriever =
-                MoesifKeyRetriever.getInstance("some_username", "some_password", "dummyMoesifBasePath");
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put(MoesifMicroserviceConstants.MS_USERNAME_CONFIG_KEY, "some_username");
+        properties.put(MoesifMicroserviceConstants.MS_PWD_CONFIG_KEY, "some_password");
+        properties.put(MoesifMicroserviceConstants.MOESIF_PROTOCOL_WITH_FQDN_KEY, "abcde");
+        properties.put(MoesifMicroserviceConstants.MOESIF_MS_VERSIONING_KEY, "aaa");
+        MoesifKeyRetrieverChoreoClient keyRetriever =
+                MoesifKeyRetrieverChoreoClient.getInstance(properties);
         EventQueue queue = new EventQueue(100, 1, keyRetriever);
         MoesifCounterMetric metric =
                 new MoesifCounterMetric("test.builder.metric", queue, MetricSchema.CHOREO_RESPONSE);
@@ -53,6 +63,7 @@ public class MoesifMetricBuilderTestCase {
 
     @Test(expectedExceptions = MetricReportingException.class)
     public void testMissingAttributes() throws MetricCreationException, MetricReportingException {
+
         builder.addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.KEY_TYPE, "prod")
@@ -84,6 +95,7 @@ public class MoesifMetricBuilderTestCase {
 
     @Test(expectedExceptions = MetricReportingException.class)
     public void testAttributesWithInvalidTypes() throws MetricCreationException, MetricReportingException {
+
         builder.addAttribute(Constants.REQUEST_TIMESTAMP, System.currentTimeMillis())
                 .addAttribute(Constants.CORRELATION_ID, "1234-4567")
                 .addAttribute(Constants.ORGANIZATION_ID, "wso2.com")
@@ -119,6 +131,7 @@ public class MoesifMetricBuilderTestCase {
 
     @Test
     public void testMetricBuilder() throws MetricCreationException, MetricReportingException {
+
         String uaString = "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, "
                 + "like Gecko) Version/5.1 Mobile/9B206 Safari/7534.48.3";
 

@@ -31,22 +31,26 @@ import java.util.Map;
  * Event builder for Moesif Metric Reporter. Default Event builder has response schema type.
  */
 public class MoesifMetricEventBuilder extends AbstractMetricEventBuilder {
+
     protected Map<String, Class> requiredAttributes;
     private Map<String, Object> eventMap;
     private Boolean isBuilt = false;
 
     public MoesifMetricEventBuilder() {
+
         requiredAttributes = GenericInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
         eventMap = new HashMap<>();
     }
 
     public MoesifMetricEventBuilder(Map<String, Class> requiredAttributes) {
+
         this.requiredAttributes = requiredAttributes;
         eventMap = new HashMap<>();
     }
 
     @Override
     protected Map<String, Object> buildEvent() {
+
         if (!isBuilt) {
             // util function to filter required attributes
             eventMap = EventMapAttributeFilter.getInstance().filter(eventMap, requiredAttributes);
@@ -58,6 +62,7 @@ public class MoesifMetricEventBuilder extends AbstractMetricEventBuilder {
 
     @Override
     public boolean validate() throws MetricReportingException {
+
         if (!isBuilt) {
             for (Map.Entry<String, Class> entry : requiredAttributes.entrySet()) {
                 Object attribute = eventMap.get(entry.getKey());
@@ -76,6 +81,7 @@ public class MoesifMetricEventBuilder extends AbstractMetricEventBuilder {
 
     @Override
     public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
+
         eventMap.put(key, value);
         return this;
     }
