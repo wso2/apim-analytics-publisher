@@ -37,6 +37,10 @@ import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -152,58 +156,90 @@ public class MoesifClient {
     }
 
     private EventModel buildEventResponse(Map<String, Object> data) throws IOException, MetricReportingException {
-        //      Preprocessing data
-        final String userIP = (String) data.get(Constants.USER_IP);
-        final String userName = (String) data.get(Constants.USER_NAME);
-        final String apiContext = (String) data.get(Constants.API_CONTEXT);
-        final String apiResourceTemplate = (String) data.get(Constants.API_RESOURCE_TEMPLATE);
-        final long responseLatency = (long) data.get(Constants.RESPONSE_LATENCY);
+        Map<String, String> reqHeaders = new HashMap<>();
+        Map<String, String> rspHeaders = new HashMap<>();
 
-        Map<String, String> reqHeaders = new HashMap<String, String>();
+        populateHeaders(data, reqHeaders, rspHeaders);
 
-        reqHeaders.put(Constants.MOESIF_USER_AGENT_KEY,
-                (String) data.getOrDefault(Constants.USER_AGENT_HEADER, Constants.UNKNOWN_VALUE));
-        reqHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, Constants.MOESIF_CONTENT_TYPE_HEADER);
-
-        Map<String, String> rspHeaders = new HashMap<String, String>();
-
-        rspHeaders.put("Vary", "Accept-Encoding");
-        rspHeaders.put("Pragma", "no-cache");
-        rspHeaders.put("Expires", "-1");
-        rspHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, "application/json; charset=utf-8");
-        rspHeaders.put("Cache-Control", "no-cache");
-
-        LinkedHashMap properties = (LinkedHashMap) data.get(Constants.PROPERTIES);
-        String gwURL = (String) properties.get(Constants.GATEWAY_URL);
-        String uri = apiContext + apiResourceTemplate;
-        if (gwURL != null) {
-            uri = gwURL;
-        }
-
-        EventRequestModel eventReq = new EventRequestBuilder()
-                .time(new Date())
-                .uri(uri)
-                .verb((String) data.get(Constants.API_METHOD))
-                .apiVersion((String) data.get(Constants.API_VERSION))
-                .ipAddress(userIP)
-                .headers(reqHeaders)
-                .build();
-
-        EventResponseModel eventRsp = new EventResponseBuilder()
-                .time(new Date(System.currentTimeMillis() + responseLatency))
-                .status((int) data.get(Constants.TARGET_RESPONSE_CODE))
-                .headers(rspHeaders)
-                .build();
-
+        EventRequestModel eventReq;
+        EventResponseModel eventRsp;
+        EventModel eventModel = new EventModel();
         String modifiedUserName;
 
-        if (userName.contains("@carbon.super")) {
-            modifiedUserName = userName.replace("@carbon.super", "");
-        } else {
-            modifiedUserName = userName;
-        }
+        if (!data.containsKey(Constants.ERROR_CODE)) {
+            final String userIP = (String) data.get(Constants.USER_IP);
+            final String userName = (String) data.get(Constants.USER_NAME);
+            final String apiContext = (String) data.get(Constants.API_CONTEXT);
+            final String apiResourceTemplate = (String) data.get(Constants.API_RESOURCE_TEMPLATE);
+            final long responseLatency = (long) data.get(Constants.RESPONSE_LATENCY);
 
-        EventModel eventModel = new EventModel();
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
+            Instant requestTimestamp = Instant.
+                    from(dateTimeFormatter.parse((String) data.get(Constants.REQUEST_TIMESTAMP)));
+            Instant responseTimestamp = requestTimestamp.plusMillis(responseLatency);
+
+            LinkedHashMap properties = (LinkedHashMap) data.get(Constants.PROPERTIES);
+            String gwURL = (String) properties.get(Constants.GATEWAY_URL);
+            String uri = apiContext + apiResourceTemplate;
+            if (gwURL != null) {
+                uri = gwURL;
+            }
+
+            eventReq = new EventRequestBuilder()
+                    .time(Date.from(requestTimestamp))
+                    .uri(uri)
+                    .verb((String) data.get(Constants.API_METHOD))
+                    .apiVersion((String) data.get(Constants.API_VERSION))
+                    .ipAddress(userIP)
+                    .headers(reqHeaders)
+                    .build();
+
+            eventRsp = new EventResponseBuilder()
+                    .time(Date.from(responseTimestamp))
+                    .status((int) data.get(Constants.TARGET_RESPONSE_CODE))
+                    .headers(rspHeaders)
+                    .build();
+
+            if (userName.contains("@carbon.super")) {
+                modifiedUserName = userName.replace("@carbon.super", "");
+            } else {
+                modifiedUserName = userName;
+            }
+
+        } else {
+            LinkedHashMap properties = (LinkedHashMap) data.get(Constants.PROPERTIES);
+
+            modifiedUserName = (String) data.get(Constants.API_CREATION);
+            String apiContext = (String) data.get(Constants.API_CONTEXT);
+            String gwURL = (String) properties.get(Constants.GATEWAY_URL);
+
+            if (gwURL != null) {
+                apiContext = gwURL;
+            }
+
+            Date errorRequestTimestamp = new Date();
+
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                errorRequestTimestamp = dateFormat.parse((String) data.get(Constants.REQUEST_TIMESTAMP));
+            } catch (ParseException e) {
+                log.error("Error parsing error request timestamp", e);
+            }
+
+            eventReq = new EventRequestBuilder()
+                    .time(errorRequestTimestamp)
+                    .uri(apiContext)
+                    .verb((String) properties.get(Constants.API_METHOD))
+                    .apiVersion((String) data.get(Constants.API_VERSION))
+                    .headers(reqHeaders)
+                    .build();
+
+            eventRsp = new EventResponseBuilder()
+                    .time(new Date())
+                    .status((int) data.get(Constants.PROXY_RESPONSE_CODE))
+                    .headers(rspHeaders)
+                    .build();
+        }
 
         eventModel.setRequest(eventReq);
         eventModel.setResponse(eventRsp);
@@ -211,5 +247,18 @@ public class MoesifClient {
         eventModel.setCompanyId(null);
 
         return eventModel;
+    }
+
+    private static void populateHeaders(Map<String, Object> data, Map<String, String> reqHeaders,
+            Map<String, String> rspHeaders) {
+        reqHeaders.put(Constants.MOESIF_USER_AGENT_KEY,
+                (String) data.getOrDefault(Constants.USER_AGENT_HEADER, Constants.UNKNOWN_VALUE));
+        reqHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, Constants.MOESIF_CONTENT_TYPE_HEADER);
+
+        rspHeaders.put("Vary", "Accept-Encoding");
+        rspHeaders.put("Pragma", "no-cache");
+        rspHeaders.put("Expires", "-1");
+        rspHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, "application/json; charset=utf-8");
+        rspHeaders.put("Cache-Control", "no-cache");
     }
 }
