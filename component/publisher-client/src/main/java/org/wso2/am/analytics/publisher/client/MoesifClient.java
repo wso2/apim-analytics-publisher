@@ -210,11 +210,14 @@ public class MoesifClient {
             LinkedHashMap properties = (LinkedHashMap) data.get(Constants.PROPERTIES);
 
             modifiedUserName = (String) data.get(Constants.API_CREATION);
+
             String apiContext = (String) data.get(Constants.API_CONTEXT);
             String gwURL = (String) properties.get(Constants.GATEWAY_URL);
+            String apiResourceTemplate = (String) data.get(Constants.API_RESOURCE_TEMPLATE);
+            String uri = apiContext + apiResourceTemplate;
 
             if (gwURL != null) {
-                apiContext = gwURL;
+                uri = gwURL;
             }
 
             Date errorRequestTimestamp = new Date();
@@ -228,7 +231,7 @@ public class MoesifClient {
 
             eventReq = new EventRequestBuilder()
                     .time(errorRequestTimestamp)
-                    .uri(apiContext)
+                    .uri(uri)
                     .verb((String) properties.get(Constants.API_METHOD))
                     .apiVersion((String) data.get(Constants.API_VERSION))
                     .headers(reqHeaders)
