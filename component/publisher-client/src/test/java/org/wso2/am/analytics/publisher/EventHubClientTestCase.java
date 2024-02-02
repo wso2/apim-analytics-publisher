@@ -48,7 +48,10 @@ import org.wso2.am.analytics.publisher.util.Constants;
 import org.wso2.am.analytics.publisher.util.TestUtils;
 import org.wso2.am.analytics.publisher.util.UnitTestAppender;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 import static org.mockito.ArgumentMatchers.any;

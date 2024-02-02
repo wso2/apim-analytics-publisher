@@ -56,13 +56,9 @@ public class ErrorHandlingTestCase {
         MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configMap);
         CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
         List<String> messages = appender.getMessages();
-        boolean isContains = TestUtils.isContains(messages, "Unrecoverable error occurred when creating Eventhub "
-                + "Client");
-        for (String message : messages) {
-            System.out.println("***Received messages*** " + message);
-        }
-        Assert.assertTrue(isContains, "Expected error hasn't logged in the "
-                + "EventHubClientClass");
+        Assert.assertTrue(TestUtils.isContains(messages, "Unrecoverable error occurred when creating Eventhub "
+                                                         + "Client"), "Expected error hasn't logged in the "
+                                  + "EventHubClientClass");
     }
 
     @Test(dependsOnMethods = {"testConnectionInvalidURL"})
