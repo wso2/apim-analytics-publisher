@@ -48,7 +48,11 @@ import org.wso2.am.analytics.publisher.util.Constants;
 import org.wso2.am.analytics.publisher.util.TestUtils;
 import org.wso2.am.analytics.publisher.util.UnitTestAppender;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -167,7 +171,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
         verify(eventDataBatch, timeout(10000).times(2)).tryAdd(any(EventData.class));
 
         // verify worker thread has already identified the FLUSHING_FAILED state
-        messages = appender.getMessages();
+        List<String> messages = new ArrayList<String>(appender.getMessages());
         Assert.assertTrue(TestUtils.isContains(messages, "client status is FLUSHING_FAILED. Producer client "
                 + "will be re-initialized retaining the Event Data Batch"));
     }
@@ -200,7 +204,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
         String msg = "Unrecoverable error occurred when event flushing. Analytics event flushing will be disabled "
                 + "until issue is rectified. Reason: org.wso2.am.analytics.publisher.exception."
                 + "ConnectionUnrecoverableException: ConnectionUnrecoverableException";
-        messages = appender.getMessages();
+        List<String> messages = new ArrayList<String>(appender.getMessages());
         Assert.assertTrue(TestUtils.isContains(messages, msg));
 
         // try to publish another event
@@ -261,7 +265,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
         // verify worker thread has already identified the Unrecoverable error
         String msg = "Authentication issue happened. Producer client will be re-initialized retaining the Event Data "
                 + "Batch";
-        messages = appender.getMessages();
+        List<String> messages = new ArrayList<String>(appender.getMessages());
         Assert.assertTrue(TestUtils.isContains(messages, msg));
     }
 
@@ -293,7 +297,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
         // verify worker thread has already identified the Resource limit exceeded error
         String msg = "Resource limit exceeded when publishing Event Data Batch. Operation will be retried after "
                 + "constant delay";
-        messages = appender.getMessages();
+        List<String> messages = new ArrayList<String>(appender.getMessages());
         Assert.assertTrue(TestUtils.isContains(messages, msg));
     }
 
@@ -328,7 +332,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
         // verify worker thread has already identified the amqp exception
         String msg = "AMQP error occurred while publishing Event Data Batch. Producer client will be re-initialized. "
                 + "Events may be lost in the process.";
-        messages = appender.getMessages();
+        List<String> messages = new ArrayList<String>(appender.getMessages());
         Assert.assertTrue(TestUtils.isContains(messages, msg));
     }
 
@@ -360,7 +364,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
         // verify worker thread has already identified the Timeout exception
         String msg = "Timeout occurred after retrying 2 times with an timeout of 30 seconds while trying to publish "
                 + "Event Data Batch. Next retry cycle will begin shortly.";
-        messages = appender.getMessages();
+        List<String> messages = new ArrayList<String>(appender.getMessages());
         Assert.assertTrue(TestUtils.isContains(messages, msg));
     }
 
@@ -395,7 +399,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
         // verify worker thread has already identified the runtime exception
         String msg = "Unknown error occurred while publishing Event Data Batch. Producer client will be re-initialized."
                 + " Events may be lost in the process.";
-        messages = appender.getMessages();
+        List<String> messages = new ArrayList<String>(appender.getMessages());
         Assert.assertTrue(TestUtils.isContains(messages, msg));
     }
 }
