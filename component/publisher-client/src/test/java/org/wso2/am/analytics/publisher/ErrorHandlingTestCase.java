@@ -37,6 +37,7 @@ import org.wso2.am.analytics.publisher.util.Constants;
 import org.wso2.am.analytics.publisher.util.TestUtils;
 import org.wso2.am.analytics.publisher.util.UnitTestAppender;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +56,7 @@ public class ErrorHandlingTestCase {
         configMap.put(Constants.AUTH_API_TOKEN, "some_token");
         MetricReporter metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configMap);
         CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
-        List<String> messages = appender.getMessages();
+        List<String> messages = new ArrayList<String>(appender.getMessages());
         Assert.assertTrue(TestUtils.isContains(messages, "Unrecoverable error occurred when creating Eventhub "
                                                          + "Client"), "Expected error hasn't logged in the "
                                   + "EventHubClientClass");
@@ -76,7 +77,8 @@ public class ErrorHandlingTestCase {
         factory.reset();
         MetricReporter metricReporter = factory.createMetricReporter(configMap);
         CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
-        List<String> messages = appender.getMessages();
+        List<String> messages = new ArrayList<String>(appender.getMessages());
+
         Thread.sleep(1000);
         Assert.assertTrue(TestUtils.isContains(messages, "Recoverable error occurred when creating Eventhub Client. "
                                                          + "Retry attempts will be made"));
@@ -87,7 +89,7 @@ public class ErrorHandlingTestCase {
         TestUtils.populateBuilder(builder);
         metric.incrementCount(builder);
         Thread.sleep(1000);
-        messages = appender.getMessages();
+        messages = new ArrayList<String>(appender.getMessages());
         Assert.assertTrue(TestUtils.isContains(messages, "will be parked as EventHub Client is inactive."), "Thread "
                 + "waiting log entry has not printed.");
     }
