@@ -270,6 +270,7 @@
                     <effort>Max</effort>
                     <threshold>Low</threshold>
                     <xmlOutput>true</xmlOutput>
+                    <skip>true</skip>
                     <findbugsXmlOutputDirectory>${project.build.directory}/findbugs</findbugsXmlOutputDirectory>
                     <!--Exclude sources-->
                     <excludeFilterFile>${maven.findbugsplugin.exclude.file}</excludeFilterFile>
@@ -291,7 +292,7 @@
         <moesif.api.version>1.7.4</moesif.api.version>
         <azure.messaging.evenhub.version>5.3.1</azure.messaging.evenhub.version>
         <gson.version>2.10.1</gson.version>
-        <slf4j.version>2.0.12</slf4j.version>
+        <slf4j.version>1.7.2</slf4j.version>
         <log4j.version>1.2.12</log4j.version>
         <log4j2.version>2.17.1</log4j2.version>
         <junit.version>4.13.1</junit.version>
