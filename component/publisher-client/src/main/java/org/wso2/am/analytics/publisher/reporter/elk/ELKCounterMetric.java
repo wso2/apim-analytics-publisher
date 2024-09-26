@@ -19,8 +19,8 @@
 package org.wso2.am.analytics.publisher.reporter.elk;
 
 import com.google.gson.Gson;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.GenericInputValidator;
@@ -33,7 +33,7 @@ import java.util.Map;
  * Log Counter Metrics class, This class can be used to log analytics event to a separate log file.
  */
 public class ELKCounterMetric implements CounterMetric {
-    private static final Logger log = LoggerFactory.getLogger(ELKCounterMetric.class);
+    private static final Logger log = LogManager.getLogger(ELKCounterMetric.class);
     private final String name;
     private final Gson gson;
     private MetricSchema schema;

@@ -23,8 +23,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.APICallException;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifKeyEntry;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
@@ -49,7 +49,7 @@ import javax.net.ssl.HttpsURLConnection;
  * retrieving single moesif key.
  */
 public class MoesifKeyRetriever {
-    private static final Logger log = LoggerFactory.getLogger(MoesifKeyRetriever.class);
+    private static final Logger log = LogManager.getLogger(MoesifKeyRetriever.class);
     private static MoesifKeyRetriever moesifKeyRetriever;
     private ConcurrentHashMap<String, String> orgIDMoesifKeyMap;
     private ConcurrentHashMap<String, String> orgIdEnvMap;

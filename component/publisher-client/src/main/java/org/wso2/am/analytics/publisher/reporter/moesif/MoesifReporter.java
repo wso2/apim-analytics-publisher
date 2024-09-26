@@ -17,8 +17,8 @@
  */
 package org.wso2.am.analytics.publisher.reporter.moesif;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricReporter;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
@@ -36,7 +36,7 @@ import java.util.Timer;
  * dashboard in a secure and reliable way.
  */
 public class MoesifReporter extends AbstractMetricReporter {
-    private static final Logger log = LoggerFactory.getLogger(MoesifReporter.class);
+    private static final Logger log = LogManager.getLogger(MoesifReporter.class);
     private final EventQueue eventQueue;
 
     public MoesifReporter(Map<String, String> properties) throws MetricCreationException {

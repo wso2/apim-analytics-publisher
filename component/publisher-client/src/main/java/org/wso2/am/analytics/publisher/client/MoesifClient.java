@@ -28,8 +28,8 @@ import com.moesif.api.models.EventRequestModel;
 import com.moesif.api.models.EventResponseBuilder;
 import com.moesif.api.models.EventResponseModel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
@@ -52,7 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Moesif Analytics Dashboard.
  */
 public class MoesifClient {
-    private final Logger log = LoggerFactory.getLogger(MoesifClient.class);
+    private final Logger log = LogManager.getLogger(MoesifClient.class);
     private final MoesifKeyRetriever keyRetriever;
 
     public MoesifClient(MoesifKeyRetriever keyRetriever) {

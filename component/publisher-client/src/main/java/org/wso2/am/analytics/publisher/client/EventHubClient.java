@@ -23,8 +23,8 @@ import com.azure.core.amqp.exception.AmqpException;
 import com.azure.messaging.eventhubs.EventData;
 import com.azure.messaging.eventhubs.EventDataBatch;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.ConnectionRecoverableException;
 import org.wso2.am.analytics.publisher.exception.ConnectionUnrecoverableException;
 import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsThreadFactory;
@@ -51,7 +51,7 @@ import javax.xml.bind.DatatypeConverter;
  * Azure Event Hub.
  */
 public class EventHubClient implements Cloneable {
-    private static final Logger log = LoggerFactory.getLogger(EventHubClient.class);
+    private static final Logger log = LogManager.getLogger(EventHubClient.class);
     private static final String TOKEN_HASH_USER_PROP = "token-hash";
     private final String authEndpoint;
     private final String authToken;
