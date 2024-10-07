@@ -36,8 +36,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.HttpClientException;
 import org.wso2.am.analytics.publisher.util.Constants;
 
@@ -62,7 +62,7 @@ import static org.wso2.am.analytics.publisher.util.Constants.KEYSTORE_TYPE;
  */
 public class AuthProxyUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthProxyUtils.class);
+    private static final Logger log = LogManager.getLogger(AuthProxyUtils.class);
 
     public static Client getClient(Map<String, String> properties) {
         return getFeignHttpClient(properties);

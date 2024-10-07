@@ -17,8 +17,8 @@
  */
 package org.wso2.am.analytics.publisher.reporter.moesif;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 
 import java.util.TimerTask;
@@ -28,7 +28,7 @@ import java.util.TimerTask;
  * refreshing the internal map.
  */
 public class MissedEventHandler extends TimerTask {
-    private static final Logger log = LoggerFactory.getLogger(MissedEventHandler.class);
+    private static final Logger log = LogManager.getLogger(MissedEventHandler.class);
     private final MoesifKeyRetriever keyRetriever;
 
     public MissedEventHandler(MoesifKeyRetriever keyRetriever) {

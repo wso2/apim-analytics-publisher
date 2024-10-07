@@ -17,8 +17,8 @@
  */
 package org.wso2.am.analytics.publisher.reporter.moesif;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.am.analytics.publisher.client.MoesifClient;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsThreadFactory;
@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Bounded concurrent queue wrapping for Moesif reporter{@link java.util.concurrent.ArrayBlockingQueue}.
  */
 public class EventQueue {
-    private static final Logger log = LoggerFactory.getLogger(EventQueue.class);
+    private static final Logger log = LogManager.getLogger(EventQueue.class);
     private final BlockingQueue<MetricEventBuilder> eventQueue;
     private final ExecutorService publisherExecutorService;
     private final AtomicInteger failureCount;

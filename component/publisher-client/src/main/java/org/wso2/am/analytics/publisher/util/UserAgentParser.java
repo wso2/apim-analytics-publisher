@@ -18,8 +18,8 @@
 
 package org.wso2.am.analytics.publisher.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ua_parser.Client;
 import ua_parser.Parser;
 
@@ -30,7 +30,7 @@ import java.util.Map;
  * User agent parser util class.
  */
 public class UserAgentParser {
-    private static final Logger log = LoggerFactory.getLogger(UserAgentParser.class);
+    private static final Logger log = LogManager.getLogger(UserAgentParser.class);
     private static final UserAgentParser INSTANCE = new UserAgentParser();
     private boolean isInitialized = false;
     private Parser uaParser;

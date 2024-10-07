@@ -18,8 +18,8 @@
 package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import com.google.gson.Gson;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.am.analytics.publisher.client.EventHubClient;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
@@ -34,7 +34,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class QueueWorker implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(QueueWorker.class);
+    private static final Logger log = LogManager.getLogger(QueueWorker.class);
     private BlockingQueue<MetricEventBuilder> eventQueue;
     private ExecutorService executorService;
     private EventHubClient client;
