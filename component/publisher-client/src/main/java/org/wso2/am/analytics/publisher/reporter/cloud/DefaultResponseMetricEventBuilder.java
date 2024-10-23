@@ -18,6 +18,7 @@
 
 package org.wso2.am.analytics.publisher.reporter.cloud;
 
+import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
@@ -57,9 +58,12 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
     public boolean validate() throws MetricReportingException {
         if (!isBuilt) {
             eventMap.remove(Constants.USER_NAME);
-            Map<String, String> propertyMap = (Map<String, String>) eventMap.remove(Constants.PROPERTIES);
+            Map<String, Object> propertyMap = (Map<String, Object>) eventMap.remove(Constants.PROPERTIES);
             if (propertyMap != null) {
                 copyDefaultPropertiesToRootLevel(propertyMap);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Prepared event for publish to Choreo Analytics: " + new Gson().toJson(eventMap));
             }
             for (Map.Entry<String, Class> entry : requiredAttributes.entrySet()) {
                 Object attribute = eventMap.get(entry.getKey());
@@ -118,10 +122,26 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
         eventMap.put(Constants.PLATFORM, platform);
     }
 
-    private void copyDefaultPropertiesToRootLevel(Map<String, String> properties) {
+    private void copyDefaultPropertiesToRootLevel(Map<String, Object> properties) {
         if (properties.get(Constants.API_CONTEXT) != null) {
-            String apiContext = properties.remove(Constants.API_CONTEXT);
+            String apiContext = (String) properties.remove(Constants.API_CONTEXT);
             eventMap.put(Constants.API_CONTEXT, apiContext);
+        }
+        if (properties.get(Constants.AI_METADATA) != null) {
+            Object aiMetadata = properties.remove(Constants.AI_METADATA);
+            eventMap.put(Constants.AI_METADATA, aiMetadata);
+        }
+        if (properties.get(Constants.AI_TOKEN_USAGE) != null) {
+            Object aiTokenUsage = properties.remove(Constants.AI_TOKEN_USAGE);
+            eventMap.put(Constants.AI_TOKEN_USAGE, aiTokenUsage);
+        }
+        if (properties.get(Constants.IS_EGRESS) != null) {
+            boolean isEgress = (boolean) properties.remove(Constants.IS_EGRESS);
+            eventMap.put(Constants.IS_EGRESS, isEgress);
+        }
+        if (properties.get(Constants.SUBTYPE) != null) {
+            String subType = (String) properties.remove(Constants.SUBTYPE);
+            eventMap.put(Constants.SUBTYPE, subType);
         }
         properties.remove(Constants.USER_NAME);
         eventMap.put(Constants.PROPERTIES, properties);

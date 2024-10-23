@@ -60,6 +60,10 @@ public class Constants {
     public static final String ERROR_CODE = "errorCode";
     public static final String ERROR_MESSAGE = "errorMessage";
     public static final String PROPERTIES = "properties";
+    public static final String AI_METADATA = "aiMetadata";
+    public static final String AI_TOKEN_USAGE = "aiTokenUsage";
+    public static final String IS_EGRESS = "isEgress";
+    public static final String SUBTYPE = "subtype";
 
     //Builder event types
     public static final String RESPONSE_EVENT_TYPE = "response";
