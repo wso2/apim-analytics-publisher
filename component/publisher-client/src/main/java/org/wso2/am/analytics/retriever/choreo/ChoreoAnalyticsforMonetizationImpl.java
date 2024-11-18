@@ -11,10 +11,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wso2.apim.analytics.impl.model.GraphQLClient;
-import org.wso2.apim.analytics.impl.model.GraphqlQueryModel;
-import org.wso2.apim.analytics.impl.model.QueryAPIAccessTokenInterceptor;
-import org.wso2.apim.analytics.impl.model.graphQLResponseClient;
+import org.wso2.am.analytics.retriever.choreo.model.GraphQLClient;
+import org.wso2.am.analytics.retriever.choreo.model.GraphqlQueryModel;
+import org.wso2.am.analytics.retriever.choreo.model.graphQLResponseClient;
+import org.wso2.am.analytics.retriever.choreo.model.QueryAPIAccessTokenInterceptor;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -39,7 +39,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.wso2.apim.analytics.impl.ChoreoAnalyticsConstants.*;
+import static org.wso2.am.analytics.retriever.choreo.ChoreoAnalyticsConstants.*;
 
 
 public class ChoreoAnalyticsforMonetizationImpl implements AnalyticsforMonetization {
