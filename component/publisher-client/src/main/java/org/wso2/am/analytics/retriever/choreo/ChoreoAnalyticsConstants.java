@@ -17,7 +17,6 @@ public class ChoreoAnalyticsConstants {
     public static final String ON_PREM_KEY = "onPremKey";
     public static final String AT = "@";
     public static final String PRODUCTS = "products";
-    public static final String COUNT = "count";
     public static final String GET_USAGE_BY_APPLICATION = "getSuccessAPIsUsageByApplications";
     public static final String GET_USAGE_BY_APPLICATION_WITH_ON_PREM_KEY = "getSuccessAPIsUsageByApplicationsWithOnPremKey";
     public static final String API_NAME = "apiName";
@@ -26,4 +25,8 @@ public class ChoreoAnalyticsConstants {
     public static final String TENANT_DOMAIN = "apiCreatorTenantDomain";
     public static final String APPLICATION_NAME = "applicationName";
     public static final String APPLICATION_OWNER = "applicationOwner";
+    public static final String COUNT = "count";
+    public static final String DEPTH = "depth";
+    public static final String COMPLEXITY = "complexity";
+    public static final String PAYLOAD_SIZE = "payloadSize";
 }
