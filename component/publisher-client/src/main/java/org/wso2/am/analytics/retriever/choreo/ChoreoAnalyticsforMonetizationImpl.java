@@ -66,6 +66,9 @@ public class ChoreoAnalyticsforMonetizationImpl implements AnalyticsforMonetizat
         String applicationName = null;
         String applicationOwner = null;
         Long requestCount = 0L;
+        Long depth = 0L;
+        Long complexity = 0L;
+        Long payloadSize = 0L;
 
         Date dateobj = new Date();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(ChoreoAnalyticsConstants.TIME_FORMAT);
@@ -163,8 +166,13 @@ public class ChoreoAnalyticsforMonetizationImpl implements AnalyticsforMonetizat
                         applicationName = apiUsageData.get(ChoreoAnalyticsConstants.APPLICATION_NAME);
                         applicationOwner = apiUsageData.get(ChoreoAnalyticsConstants.APPLICATION_OWNER);
                         requestCount = Long.parseLong(apiUsageData.get(ChoreoAnalyticsConstants.COUNT));
+                        depth = Long.parseLong(apiUsageData.get(ChoreoAnalyticsConstants.DEPTH));
+                        complexity = Long.parseLong(apiUsageData.get(ChoreoAnalyticsConstants.COMPLEXITY));
+                        payloadSize = Long.parseLong(apiUsageData.get(ChoreoAnalyticsConstants.PAYLOAD_SIZE));
 
-                        MonetizationUsageInfo usageInfo = new MonetizationUsageInfo(currentTimestamp, apiUuid, apiName, apiVersion, tenantDomain, applicationName, applicationOwner, null, requestCount);
+                        MonetizationUsageInfo usageInfo = new MonetizationUsageInfo(payloadSize, complexity, depth,
+                                requestCount, null, applicationOwner, applicationName, tenantDomain,
+                                apiVersion, apiName, apiUuid, currentTimestamp);
                         monetizationInfo.add(usageInfo);
                     }
                 }
