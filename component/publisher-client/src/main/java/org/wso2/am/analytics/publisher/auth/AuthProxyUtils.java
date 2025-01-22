@@ -124,8 +124,12 @@ public class AuthProxyUtils {
         String keyStorePath = properties.get(Constants.KEYSTORE_LOCATION);
         try {
             KeyStore trustStore = KeyStore.getInstance(KEYSTORE_TYPE);
-            trustStore.load(Files.newInputStream(Paths.get(keyStorePath)), keyStorePassword.toCharArray());
-            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
+            if (keyStorePath != null && keyStorePassword != null) {
+                trustStore.load(Files.newInputStream(Paths.get(keyStorePath)), keyStorePassword.toCharArray());
+                sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
+            } else {
+                sslContext = SSLContexts.createDefault();
+            }
             return new SSLConnectionSocketFactory(sslContext, new DefaultHostnameVerifier());
         } catch (KeyStoreException e) {
             throw new HttpClientException("Failed to read from Key Store", e);
