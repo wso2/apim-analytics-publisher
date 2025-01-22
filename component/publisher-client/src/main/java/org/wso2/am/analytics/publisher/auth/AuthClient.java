@@ -66,7 +66,7 @@ public class AuthClient {
                             + ".auth_token in configuration and restart the instance", e);
         } catch (RetryableException e) {
             throw new ConnectionRecoverableException("Provided authentication endpoint " + authEndpoint + " is not "
-                                                             + "reachable.");
+                                                             + "reachable.", e);
         } catch (IllegalArgumentException e) {
             throw new ConnectionUnrecoverableException("Invalid apim.analytics configurations provided. Please update "
                                                                + "configurations and restart the instance.");
