@@ -19,6 +19,9 @@
 package org.wso2.am.analytics.publisher.reporter.cloud;
 
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
+import org.wso2.am.analytics.publisher.properties.AIMetadata;
+import org.wso2.am.analytics.publisher.properties.AITokenUsage;
+import org.wso2.am.analytics.publisher.properties.Properties;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
@@ -46,6 +49,10 @@ public class DefaultFaultMetricEventBuilder extends AbstractMetricEventBuilder {
 
     @Override
     public boolean validate() throws MetricReportingException {
+        Map<String, Object> propertyMap = (Map<String, Object>) eventMap.remove(Constants.PROPERTIES);
+        if (propertyMap != null) {
+            extractPropertyObject(propertyMap);
+        }
         for (Map.Entry<String, Class> entry : requiredAttributes.entrySet()) {
             Object attribute = eventMap.get(entry.getKey());
             if (attribute == null) {
@@ -60,6 +67,27 @@ public class DefaultFaultMetricEventBuilder extends AbstractMetricEventBuilder {
         return true;
     }
 
+    private void extractPropertyObject(Map<String, Object> properties) {
+        Properties propertyObject = new Properties();
+        if (properties.get(Constants.AI_METADATA) != null) {
+            Map<String, Object> aiMetadata = (Map<String, Object>) properties.remove(Constants.AI_METADATA);
+            propertyObject.setAiMetadata(new AIMetadata(aiMetadata));
+        }
+        if (properties.get(Constants.AI_TOKEN_USAGE) != null) {
+            Map<String, Object> aiTokenUsage = (Map<String, Object>) properties.remove(Constants.AI_TOKEN_USAGE);
+            propertyObject.setAiTokenUsage(new AITokenUsage(aiTokenUsage));
+        }
+        if (properties.get(Constants.IS_EGRESS) != null) {
+            boolean isEgress = (boolean) properties.remove(Constants.IS_EGRESS);
+            propertyObject.setEgress(isEgress);
+        }
+        if (properties.get(Constants.SUBTYPE) != null) {
+            String subType = (String) properties.remove(Constants.SUBTYPE);
+            propertyObject.setSubType(subType);
+        }
+        eventMap.put(Constants.PROPERTIES, propertyObject);
+    }
+
     @Override
     public MetricEventBuilder addAttribute(String key, Object value) throws MetricReportingException {
         //all validation is moved to validate method to reduce analytics data processing latency
@@ -70,8 +98,6 @@ public class DefaultFaultMetricEventBuilder extends AbstractMetricEventBuilder {
     @Override
     protected Map<String, Object> buildEvent() {
         eventMap.put(Constants.EVENT_TYPE, Constants.FAULT_EVENT_TYPE);
-        // properties object is not required and removing
-        eventMap.remove(Constants.PROPERTIES);
         return eventMap;
     }
 }

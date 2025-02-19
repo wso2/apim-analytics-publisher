@@ -140,6 +140,7 @@
                             org.wso2.am.analytics.publisher.exception.*;version="${project.version}",
                             org.wso2.am.analytics.publisher.auth.*;version="${project.version}",
                             org.wso2.am.analytics.publisher.util.*;version="${project.version}",
+                            org.wso2.am.analytics.publisher.properties.*;version="${project.version}",
                         </Export-Package>
                         <Private-Package>
                         </Private-Package>

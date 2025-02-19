@@ -18,6 +18,7 @@
 
 package org.wso2.am.analytics.publisher.reporter.cloud;
 
+import org.wso2.am.analytics.publisher.properties.Properties;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 
 import java.util.AbstractMap;
@@ -50,6 +51,7 @@ import static org.wso2.am.analytics.publisher.util.Constants.ERROR_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.GATEWAY_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.KEY_TYPE;
 import static org.wso2.am.analytics.publisher.util.Constants.ORGANIZATION_ID;
+import static org.wso2.am.analytics.publisher.util.Constants.PROPERTIES;
 import static org.wso2.am.analytics.publisher.util.Constants.PROXY_RESPONSE_CODE;
 import static org.wso2.am.analytics.publisher.util.Constants.REGION_ID;
 import static org.wso2.am.analytics.publisher.util.Constants.REQUEST_MEDIATION_LATENCY;
@@ -94,7 +96,8 @@ public class DefaultInputValidator {
             new AbstractMap.SimpleImmutableEntry<>(BACKEND_LATENCY, Long.class),
             new AbstractMap.SimpleImmutableEntry<>(REQUEST_MEDIATION_LATENCY, Long.class),
             new AbstractMap.SimpleImmutableEntry<>(RESPONSE_MEDIATION_LATENCY, Long.class),
-            new AbstractMap.SimpleImmutableEntry<>(USER_IP, String.class))
+            new AbstractMap.SimpleImmutableEntry<>(USER_IP, String.class),
+            new AbstractMap.SimpleImmutableEntry<>(PROPERTIES, Properties.class))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     private static final Map<String, Class> faultSchema = Stream.of(
@@ -116,7 +119,8 @@ public class DefaultInputValidator {
             new AbstractMap.SimpleImmutableEntry<>(REGION_ID, String.class),
             new AbstractMap.SimpleImmutableEntry<>(GATEWAY_TYPE, String.class),
             new AbstractMap.SimpleImmutableEntry<>(PROXY_RESPONSE_CODE, Integer.class),
-            new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class))
+            new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class),
+            new AbstractMap.SimpleImmutableEntry<>(PROPERTIES, Properties.class))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     private static final Map<String, Class> choreoResponseSchema = Stream.of(
