@@ -18,6 +18,8 @@
 
 package org.wso2.am.analytics.publisher.properties;
 
+import org.wso2.am.analytics.publisher.util.Constants;
+
 import java.util.Map;
 
 /**
@@ -40,9 +42,9 @@ public class AITokenUsage {
      * Constructor to initialize from a Map
      */
     public AITokenUsage(Map<String, Object> map) {
-        this.promptTokens = (int) map.get("promptTokens");
-        this.totalTokens = (int) map.get("totalTokens");
-        this.completionTokens = (int) map.get("completionTokens");
+        this.promptTokens = (int) map.get(Constants.AI_PROMPT_TOKEN_USAGE);
+        this.totalTokens = (int) map.get(Constants.AI_TOTAL_TOKEN_USAGE);
+        this.completionTokens = (int) map.get(Constants.AI_COMPLETION_TOKEN_USAGE);
     }
 
 
@@ -98,14 +100,5 @@ public class AITokenUsage {
      */
     public void setCompletionTokens(int completionTokens) {
         this.completionTokens = completionTokens;
-    }
-
-    @Override
-    public String toString() {
-        return "AITokenUsage{" +
-                "promptTokens=" + promptTokens +
-                ", totalTokens=" + totalTokens +
-                ", completionTokens=" + completionTokens +
-                '}';
     }
 }

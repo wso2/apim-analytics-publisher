@@ -18,6 +18,8 @@
 
 package org.wso2.am.analytics.publisher.properties;
 
+import org.wso2.am.analytics.publisher.util.Constants;
+
 import java.util.Map;
 
 /**
@@ -39,9 +41,9 @@ public class AIMetadata {
      * Constructor to initialize from a Map
      */
     public AIMetadata(Map<String, Object> map) {
-        this.vendorName = (String) map.get("vendorName");
-        this.model = (String) map.get("model");
-        this.vendorVersion = (String) map.get("vendorVersion");
+        this.vendorName = (String) map.get(Constants.AI_VENDOR_NAME);
+        this.model = (String) map.get(Constants.AI_MODEL);
+        this.vendorVersion = (String) map.get(Constants.AI_VENDOR_VERSION);
     }
 
     /**
@@ -96,14 +98,5 @@ public class AIMetadata {
      */
     public void setVendorVersion(String vendorVersion) {
         this.vendorVersion = vendorVersion;
-    }
-
-    @Override
-    public String toString() {
-        return "AIMetadata{" +
-                "vendorName='" + vendorName + '\'' +
-                ", model='" + model + '\'' +
-                ", vendorVersion='" + vendorVersion + '\'' +
-                '}';
     }
 }

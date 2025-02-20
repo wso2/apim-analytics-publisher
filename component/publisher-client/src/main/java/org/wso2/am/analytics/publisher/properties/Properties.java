@@ -105,14 +105,4 @@ public class Properties {
     public void setAiTokenUsage(AITokenUsage aiTokenUsage) {
         this.aiTokenUsage = aiTokenUsage;
     }
-
-    @Override
-    public String toString() {
-        return "Properties{" +
-                "isEgress=" + isEgress +
-                ", subType='" + subType + '\'' +
-                ", aiMetadata=" + aiMetadata +
-                ", aiTokenUsage=" + aiTokenUsage +
-                '}';
-    }
 }
