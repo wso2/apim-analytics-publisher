@@ -22,6 +22,9 @@ import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
+import org.wso2.am.analytics.publisher.properties.AIMetadata;
+import org.wso2.am.analytics.publisher.properties.AITokenUsage;
+import org.wso2.am.analytics.publisher.properties.Properties;
 import org.wso2.am.analytics.publisher.reporter.AbstractMetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
@@ -61,6 +64,7 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
             Map<String, Object> propertyMap = (Map<String, Object>) eventMap.remove(Constants.PROPERTIES);
             if (propertyMap != null) {
                 copyDefaultPropertiesToRootLevel(propertyMap);
+                extractPropertyObject(propertyMap);
             }
             if (log.isDebugEnabled()) {
                 log.debug("Prepared event for publish to Choreo Analytics: " + new Gson().toJson(eventMap));
@@ -78,6 +82,27 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
             }
         }
         return true;
+    }
+
+    private void extractPropertyObject(Map<String, Object> properties) {
+        Properties propertyObject = new Properties();
+        if (properties.get(Constants.AI_METADATA) != null) {
+            Map<String, Object> aiMetadata = (Map<String, Object>) properties.remove(Constants.AI_METADATA);
+            propertyObject.setAiMetadata(new AIMetadata(aiMetadata));
+        }
+        if (properties.get(Constants.AI_TOKEN_USAGE) != null) {
+            Map<String, Object> aiTokenUsage = (Map<String, Object>) properties.remove(Constants.AI_TOKEN_USAGE);
+            propertyObject.setAiTokenUsage(new AITokenUsage(aiTokenUsage));
+        }
+        if (properties.get(Constants.IS_EGRESS) != null) {
+            boolean isEgress = (boolean) properties.remove(Constants.IS_EGRESS);
+            propertyObject.setEgress(isEgress);
+        }
+        if (properties.get(Constants.SUBTYPE) != null) {
+            String subType = (String) properties.remove(Constants.SUBTYPE);
+            propertyObject.setSubType(subType);
+        }
+        eventMap.put(Constants.PROPERTIES, propertyObject);
     }
 
     @Override
@@ -127,24 +152,7 @@ public class DefaultResponseMetricEventBuilder extends AbstractMetricEventBuilde
             String apiContext = (String) properties.remove(Constants.API_CONTEXT);
             eventMap.put(Constants.API_CONTEXT, apiContext);
         }
-        if (properties.get(Constants.AI_METADATA) != null) {
-            Object aiMetadata = properties.remove(Constants.AI_METADATA);
-            eventMap.put(Constants.AI_METADATA, aiMetadata);
-        }
-        if (properties.get(Constants.AI_TOKEN_USAGE) != null) {
-            Object aiTokenUsage = properties.remove(Constants.AI_TOKEN_USAGE);
-            eventMap.put(Constants.AI_TOKEN_USAGE, aiTokenUsage);
-        }
-        if (properties.get(Constants.IS_EGRESS) != null) {
-            boolean isEgress = (boolean) properties.remove(Constants.IS_EGRESS);
-            eventMap.put(Constants.IS_EGRESS, isEgress);
-        }
-        if (properties.get(Constants.SUBTYPE) != null) {
-            String subType = (String) properties.remove(Constants.SUBTYPE);
-            eventMap.put(Constants.SUBTYPE, subType);
-        }
         properties.remove(Constants.USER_NAME);
-        eventMap.put(Constants.PROPERTIES, properties);
     }
 
 }

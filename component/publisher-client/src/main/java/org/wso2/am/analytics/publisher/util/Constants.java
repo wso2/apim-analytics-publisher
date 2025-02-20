@@ -64,6 +64,12 @@ public class Constants {
     public static final String AI_TOKEN_USAGE = "aiTokenUsage";
     public static final String IS_EGRESS = "isEgress";
     public static final String SUBTYPE = "subtype";
+    public static final String AI_VENDOR_NAME = "vendorName";
+    public static final String AI_VENDOR_VERSION = "vendorVersion";
+    public static final String AI_MODEL = "model";
+    public static final String AI_PROMPT_TOKEN_USAGE = "promptTokens";
+    public static final String AI_COMPLETION_TOKEN_USAGE = "completionTokens";
+    public static final String AI_TOTAL_TOKEN_USAGE = "totalTokens";
 
     //Builder event types
     public static final String RESPONSE_EVENT_TYPE = "response";

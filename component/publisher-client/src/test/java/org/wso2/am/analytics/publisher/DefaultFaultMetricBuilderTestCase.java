@@ -112,10 +112,11 @@ public class DefaultFaultMetricBuilderTestCase {
                 .addAttribute(Constants.GATEWAY_TYPE, "Synapse")
                 .addAttribute(Constants.PROXY_RESPONSE_CODE, 401)
                 .addAttribute(Constants.TARGET_RESPONSE_CODE, 401)
+                .addAttribute(Constants.PROPERTIES, new HashMap<String, Object>())
                 .build();
 
         Assert.assertFalse(eventMap.isEmpty());
-        Assert.assertEquals(eventMap.size(), 21, "Some attributes are missing from the resulting event map");
+        Assert.assertEquals(eventMap.size(), 22, "Some attributes are missing from the resulting event map");
         Assert.assertEquals(eventMap.get(Constants.EVENT_TYPE), "fault", "Event type should be set to fault");
         Assert.assertEquals(eventMap.get(Constants.API_TYPE), "HTTP", "API type should be set to HTTP");
     }
