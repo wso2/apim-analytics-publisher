@@ -18,13 +18,7 @@ import org.wso2.am.analytics.publisher.util.Constants;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Simple Moesif client implementation for publishing events from APIM
@@ -44,6 +38,18 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         Map<String, Object> event = builder.build();
 
         APICallBack<HttpResponse> callBack = new APICallBack<HttpResponse>() {
+            /**
+             * Callback method invoked when the event publishing request receives a response from Moesif.
+             * This method handles the response based on the HTTP status code:
+             *   If the status code is 200, 201, 202, or 204, the event is considered successfully published and a debug log is written.
+             *   If the status code is in the 4xx range, it logs an error indicating a client-side failure.
+             *   For all other status codes (typically 5xx or unexpected values), it logs the error and initiates a
+             *   retry using {@code doRetry(builder)}.
+             *
+             * @param context  the HTTP context containing metadata about the request and response
+             * @param response the HTTP response received from the Moesif API
+             */
+
             public void onSuccess(HttpContext context, HttpResponse response) {
                 int statusCode = context.getResponse().getStatusCode();
                 if (statusCode == 200 || statusCode == 201 || statusCode == 202 || statusCode == 204) {
@@ -52,11 +58,23 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
                     log.error("Event publishing failed. Moesif returned {}.",
                             String.valueOf(statusCode).replaceAll("[\r\n]", ""));
                 } else {
-                    log.error("Event publishing failed. Retrying.");
+                    log.error("Event publishing failed. Retrying ..");
                     doRetry(builder);
                 }
             }
-
+            /**
+             * Callback method invoked when the event publishing to Moesif fails.
+             *
+             * This method handles the failure response based on the HTTP status code and any thrown exception.
+             * If the response status code is in the 4xx range, it logs an error and does not retry,
+             * since these are considered client-side errors (e.g., 401 Unauthorized, 404 Not Found).
+             * If an exception occurred (e.g., network error), it logs the failure without retrying.
+             * If there is no exception and the status code is not in the 4xx range, it assumes a
+             * retryable failure (e.g., server error or network timeout) and attempts to retry the event publishing.
+             *
+             * @param context the HTTP context containing the response from the Moesif API
+             * @param error   the Throwable indicating the cause of the failure, or {@code null} if no exception occurred
+             */
             public void onFailure(HttpContext context, Throwable error) {
                 int statusCode = context.getResponse().getStatusCode();
 
@@ -64,7 +82,7 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
                     log.error("Event publishing failed. Moesif returned {}.",
                             String.valueOf(statusCode).replaceAll("[\r\n]", ""));
                 } else if (error != null) {
-                    log.error("Event publishing failed. Event publishing failed.");
+                    log.error("Event publishing failed");
                 } else {
                     log.error("Event publishing failed. Retrying.");
                     doRetry(builder);
@@ -162,7 +180,36 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
 
         return eventModel;
     }
+    /**
+     * Populates the metadata map with required analytics fields from the source data.
+     *
+     * This method filters and transfers specific analytics-related fields from the source
+     * data map to the metadata map, ensuring only required fields with non-null values
+     * are included. All values are converted to String format for consistent metadata handling.
+     *@param data     The source data map containing various analytics fields and values.
+     *@param metadata The target metadata map to be populated with filtered analytics data.
+     **/
+    private void populateMetadata(Map<String, Object> data, Map<String, String> metadata) {
+        Set<String> requiredKeys = new HashSet<>(Arrays.asList(
+                Constants.API_ID, Constants.API_METHOD, Constants.API_NAME,
+                Constants.API_TYPE, Constants.APPLICATION_ID, Constants.APPLICATION_NAME, Constants.APPLICATION_OWNER,
+                Constants.BACKEND_LATENCY, Constants.GATEWAY_TYPE, Constants.KEY_TYPE, Constants.EVENT_TYPE,
+                Constants.DESTINATION, Constants.ERROR_CODE, Constants.ERROR_MESSAGE, Constants.ERROR_TYPE
+        ));
 
+        data.entrySet().stream().filter(entry -> requiredKeys.contains(entry.getKey()))
+                .filter(entry -> entry.getValue() != null)
+                .forEach(entry -> metadata.put(entry.getKey(), String.valueOf(entry.getValue())));
+
+    }
+
+    /**
+     * Retries publishing the event using the provided `MetricEventBuilder` if retry attempts are available.
+     * Decrements the retry attempt count and waits for a specified duration before retrying.
+     * Logs errors if the retry attempt fails or if all retry attempts are exhausted.
+     *
+     * @param builder The `MetricEventBuilder` containing the event data to be published.
+     */
     private void doRetry(MetricEventBuilder builder) {
         Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
 
@@ -180,19 +227,5 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         } else if (currentAttempt == 0) {
             log.error("Failed all retrying attempts. Event will be dropped");
         }
-    }
-
-    private void populateMetadata(Map<String, Object> data, Map<String, String> metadata) {
-        Set<String> requiredKeys = new HashSet<>(Arrays.asList(
-                Constants.API_ID, Constants.API_METHOD, Constants.API_NAME,
-                Constants.API_TYPE, Constants.APPLICATION_ID, Constants.APPLICATION_NAME, Constants.APPLICATION_OWNER,
-                Constants.BACKEND_LATENCY, Constants.GATEWAY_TYPE, Constants.KEY_TYPE, Constants.EVENT_TYPE,
-                Constants.DESTINATION, Constants.ERROR_CODE, Constants.ERROR_MESSAGE, Constants.ERROR_TYPE
-        ));
-
-        data.entrySet().stream().filter(entry -> requiredKeys.contains(entry.getKey()))
-                .filter(entry -> entry.getValue() != null)
-                .forEach(entry -> metadata.put(entry.getKey(), String.valueOf(entry.getValue())));
-
     }
 }

@@ -9,6 +9,8 @@ import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,6 +23,20 @@ public abstract class AbstractMoesifClient {
      * Publish method is responsible for publishing events to Moesif.
      */
     public abstract void publish(MetricEventBuilder builder) throws MetricReportingException;
+    public void publishBatch(List<MetricEventBuilder> builders) {
+        if (builders == null || builders.isEmpty()) {
+            return;
+        }
+
+        List<Map<String, Object>> events = new ArrayList<>();
+        for (MetricEventBuilder builder : builders) {
+            try {
+                this.publish(builder);
+            } catch (MetricReportingException e) {
+                log.error("Builder instance is not duly filled. Event building failed", e);
+            }
+        }
+    }
 
     public abstract EventModel buildEventResponse(Map<String, Object> data)
             throws IOException, MetricReportingException;
