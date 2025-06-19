@@ -72,7 +72,7 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             }
         };
         try {
-            this.api.createEventAsync(buildEventResponse(event), callBack);
+            api.createEventAsync(buildEventResponse(event), callBack);
         } catch (IOException e) {
             log.error("Analytics event sending failed. Event will be dropped", e);
         }
