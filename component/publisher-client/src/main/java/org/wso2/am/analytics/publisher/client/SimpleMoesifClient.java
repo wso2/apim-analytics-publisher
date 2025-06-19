@@ -18,7 +18,13 @@ import org.wso2.am.analytics.publisher.util.Constants;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Simple Moesif client implementation for publishing events from APIM
@@ -41,7 +47,8 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             /**
              * Callback method invoked when the event publishing request receives a response from Moesif.
              * This method handles the response based on the HTTP status code:
-             *   If the status code is 200, 201, 202, or 204, the event is considered successfully published and a debug log is written.
+             *   If the status code is 200, 201, 202, or 204, the event is considered successfully
+             *   published and a debug log is written.
              *   If the status code is in the 4xx range, it logs an error indicating a client-side failure.
              *   For all other status codes (typically 5xx or unexpected values), it logs the error and initiates a
              *   retry using {@code doRetry(builder)}.
@@ -73,7 +80,8 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
              * retryable failure (e.g., server error or network timeout) and attempts to retry the event publishing.
              *
              * @param context the HTTP context containing the response from the Moesif API
-             * @param error   the Throwable indicating the cause of the failure, or {@code null} if no exception occurred
+             * @param error   the Throwable indicating the cause of the failure, or {@code null}
+             *               if no exception occurred
              */
             public void onFailure(HttpContext context, Throwable error) {
                 int statusCode = context.getResponse().getStatusCode();
