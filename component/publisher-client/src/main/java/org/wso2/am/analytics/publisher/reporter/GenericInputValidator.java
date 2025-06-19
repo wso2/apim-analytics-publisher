@@ -233,6 +233,57 @@ public class GenericInputValidator {
                     new AbstractMap.SimpleImmutableEntry<>(API_RESOURCE_TEMPLATE, String.class),
                     new AbstractMap.SimpleImmutableEntry<>(API_CONTEXT, String.class))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    private static final Map<String, Class> moesifResponseEventSchema = Stream.of(
+                    new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(CORRELATION_ID, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(KEY_TYPE, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_ID, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_TYPE, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_NAME, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_VERSION, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_CREATION, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_METHOD, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_RESOURCE_TEMPLATE, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_CREATOR_TENANT_DOMAIN, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(DESTINATION, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(APPLICATION_ID, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(APPLICATION_NAME, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(APPLICATION_OWNER, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(GATEWAY_TYPE, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(USER_AGENT_HEADER, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(USER_NAME, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(PROXY_RESPONSE_CODE, Integer.class),
+                    new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class),
+                    new AbstractMap.SimpleImmutableEntry<>(RESPONSE_CACHE_HIT, Boolean.class),
+                    new AbstractMap.SimpleImmutableEntry<>(RESPONSE_LATENCY, Long.class),
+                    new AbstractMap.SimpleImmutableEntry<>(BACKEND_LATENCY, Long.class),
+                    new AbstractMap.SimpleImmutableEntry<>(REQUEST_MEDIATION_LATENCY, Long.class),
+                    new AbstractMap.SimpleImmutableEntry<>(RESPONSE_MEDIATION_LATENCY, Long.class),
+                    new AbstractMap.SimpleImmutableEntry<>(USER_IP, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(PROPERTIES, LinkedHashMap.class))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    private static final Map<String, Class> moesifFaultEventSchema = Stream.of(
+                    new AbstractMap.SimpleImmutableEntry<>(REQUEST_TIMESTAMP, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(CORRELATION_ID, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(KEY_TYPE, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(ERROR_TYPE, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(ERROR_CODE, Integer.class),
+                    new AbstractMap.SimpleImmutableEntry<>(ERROR_MESSAGE, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_ID, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_TYPE, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_NAME, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_VERSION, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_CREATION, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_METHOD, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_RESOURCE_TEMPLATE, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_CREATOR_TENANT_DOMAIN, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(APPLICATION_ID, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(APPLICATION_NAME, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(APPLICATION_OWNER, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(GATEWAY_TYPE, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class),
+                    new AbstractMap.SimpleImmutableEntry<>(PROPERTIES, LinkedHashMap.class))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     private static final List<String> configProperties = new ArrayList<>();
 
     private GenericInputValidator() {
@@ -257,6 +308,10 @@ public class GenericInputValidator {
                 return elkResponseEventSchema;
             case ELK_ERROR:
                 return elkFaultEventSchema;
+            case MOESIF_RESPONSE:
+                return moesifResponseEventSchema;
+            case MOESIF_ERROR:
+                return moesifFaultEventSchema;
             default:
                 return new HashMap<>();
         }

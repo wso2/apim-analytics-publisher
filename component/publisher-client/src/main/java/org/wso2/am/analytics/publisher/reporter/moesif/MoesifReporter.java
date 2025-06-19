@@ -41,12 +41,6 @@ public class MoesifReporter extends AbstractMetricReporter {
 
     public MoesifReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
-        String moesifBasePath = properties.get(MoesifMicroserviceConstants.MOESIF_PROTOCOL_WITH_FQDN_KEY) +
-                properties.get(MoesifMicroserviceConstants.MOESIF_MS_VERSIONING_KEY);
-        MoesifKeyRetriever keyRetriever =
-                MoesifKeyRetriever.getInstance(properties.get(MoesifMicroserviceConstants.MS_USERNAME_CONFIG_KEY),
-                        properties.get(MoesifMicroserviceConstants.MS_PWD_CONFIG_KEY), moesifBasePath
-                );
         int queueSize = Constants.DEFAULT_QUEUE_SIZE;
         int workerThreads = Constants.DEFAULT_WORKER_THREADS;
         if (properties.get(Constants.QUEUE_SIZE) != null) {
@@ -55,12 +49,24 @@ public class MoesifReporter extends AbstractMetricReporter {
         if (properties.get(Constants.WORKER_THREAD_COUNT) != null) {
             workerThreads = Integer.parseInt(properties.get(Constants.WORKER_THREAD_COUNT));
         }
-        this.eventQueue = new EventQueue(queueSize, workerThreads, keyRetriever);
+        if (properties.get("type").equals("moesif")) {
+            String moesifKey = properties.get("moesifKey");
+            this.eventQueue = new EventQueue(queueSize, workerThreads, moesifKey);
+        } else {
+            String moesifBasePath = properties.get(
+                    MoesifMicroserviceConstants.MOESIF_PROTOCOL_WITH_FQDN_KEY) + properties.get(
+                    MoesifMicroserviceConstants.MOESIF_MS_VERSIONING_KEY);
+            MoesifKeyRetriever keyRetriever = MoesifKeyRetriever.getInstance(
+                    properties.get(MoesifMicroserviceConstants.MS_USERNAME_CONFIG_KEY),
+                    properties.get(MoesifMicroserviceConstants.MS_PWD_CONFIG_KEY), moesifBasePath);
 
-        MissedEventHandler missedEventHandler = new MissedEventHandler(keyRetriever);
-        // execute MissedEventHandler periodically.
-        Timer timer = new Timer();
-        timer.schedule(missedEventHandler, 0, MoesifMicroserviceConstants.PERIODIC_CALL_DELAY);
+            this.eventQueue = new EventQueue(queueSize, workerThreads, keyRetriever);
+
+            MissedEventHandler missedEventHandler = new MissedEventHandler(keyRetriever);
+            // execute MissedEventHandler periodically.
+            Timer timer = new Timer();
+            timer.schedule(missedEventHandler, 0, MoesifMicroserviceConstants.PERIODIC_CALL_DELAY);
+        }
     }
 
     @Override

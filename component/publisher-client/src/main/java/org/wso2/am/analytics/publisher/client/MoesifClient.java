@@ -48,10 +48,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Moesif Client is responsible for sending events to
- * Moesif Analytics Dashboard.
+ * This client is responsible for publishing events from choreo backend
+ * to Moesif Analytics dahsboard
  */
-public class MoesifClient {
+public class MoesifClient extends AbstractMoesifClient {
     private final Logger log = LogManager.getLogger(MoesifClient.class);
     private final MoesifKeyRetriever keyRetriever;
 
@@ -83,6 +83,7 @@ public class MoesifClient {
      * publish method is responsible for checking the availability of relevant moesif key
      * and initiating moesif client sdk.
      */
+    @Override
     public void publish(MetricEventBuilder builder) throws MetricReportingException {
         Map<String, Object> event = builder.build();
         ConcurrentHashMap<String, String> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
@@ -155,7 +156,8 @@ public class MoesifClient {
         }
     }
 
-    private EventModel buildEventResponse(Map<String, Object> data) throws IOException, MetricReportingException {
+    @Override
+    public EventModel buildEventResponse(Map<String, Object> data) throws IOException, MetricReportingException {
         Map<String, String> reqHeaders = new HashMap<>();
         Map<String, String> rspHeaders = new HashMap<>();
 
@@ -250,18 +252,5 @@ public class MoesifClient {
         eventModel.setCompanyId(null);
 
         return eventModel;
-    }
-
-    private static void populateHeaders(Map<String, Object> data, Map<String, String> reqHeaders,
-            Map<String, String> rspHeaders) {
-        reqHeaders.put(Constants.MOESIF_USER_AGENT_KEY,
-                (String) data.getOrDefault(Constants.USER_AGENT_HEADER, Constants.UNKNOWN_VALUE));
-        reqHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, Constants.MOESIF_CONTENT_TYPE_HEADER);
-
-        rspHeaders.put("Vary", "Accept-Encoding");
-        rspHeaders.put("Pragma", "no-cache");
-        rspHeaders.put("Expires", "-1");
-        rspHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, "application/json; charset=utf-8");
-        rspHeaders.put("Cache-Control", "no-cache");
     }
 }

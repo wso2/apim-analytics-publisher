@@ -36,7 +36,7 @@ public class MoesifMetricEventBuilder extends AbstractMetricEventBuilder {
     private Boolean isBuilt = false;
 
     public MoesifMetricEventBuilder() {
-        requiredAttributes = GenericInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE);
+        requiredAttributes = GenericInputValidator.getInstance().getEventProperties(MetricSchema.MOESIF_RESPONSE);
         eventMap = new HashMap<>();
     }
 

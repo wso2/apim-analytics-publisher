@@ -20,23 +20,21 @@ package org.wso2.am.analytics.publisher.reporter.moesif;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.wso2.am.analytics.publisher.client.MoesifClient;
+import org.wso2.am.analytics.publisher.client.AbstractMoesifClient;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
-import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 
 import java.util.concurrent.BlockingQueue;
 
 /**
- * Will dequeue the events from queues and send then to the moesif client {@link MoesifClient}.
+ * Will dequeue the events from queues and send then to the moesif client.
  */
 public class ParallelQueueWorker implements Runnable {
     private static final Logger log = LogManager.getLogger(ParallelQueueWorker.class);
     private BlockingQueue<MetricEventBuilder> eventQueue;
-    private MoesifKeyRetriever keyRetriever;
-    private MoesifClient client;
+    private AbstractMoesifClient client;
 
-    public ParallelQueueWorker(BlockingQueue<MetricEventBuilder> queue, MoesifClient moesifClient) {
+    public ParallelQueueWorker(BlockingQueue<MetricEventBuilder> queue, AbstractMoesifClient moesifClient) {
         this.eventQueue = queue;
         this.client = moesifClient;
     }
