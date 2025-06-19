@@ -44,6 +44,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -154,6 +155,11 @@ public class MoesifClient extends AbstractMoesifClient {
         } catch (IOException e) {
             log.error("Analytics event sending failed. Event will be dropped", e);
         }
+    }
+
+    @Override
+    public void publishBatch(List<MetricEventBuilder> builders) {
+
     }
 
     @Override
