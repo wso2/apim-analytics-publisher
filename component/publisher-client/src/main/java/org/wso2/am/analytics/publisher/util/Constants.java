@@ -129,5 +129,9 @@ public class Constants {
     public static final String PRAGMA_HEADER = "Pragma";
     public static final String EXPIRES_HEADER = "Expires";
     public static final String CACHE_CONTROL_HEADER = "Cache-Control";
+    public static final String ACCEPT_ENCODING_VALUE = "Accept-Encoding";
+    public static final String NO_CACHE_VALUE = "no-cache";
+    public static final String EXPIRES_VALUE = "-1";
+    public static final String APPLICATION_JSON_UTF8_VALUE = "application/json; charset=utf-8";
 
 }

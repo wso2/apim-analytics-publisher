@@ -51,11 +51,11 @@ public abstract class AbstractMoesifClient {
                 (String) data.getOrDefault(Constants.USER_AGENT_HEADER, Constants.UNKNOWN_VALUE));
         reqHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, Constants.MOESIF_CONTENT_TYPE_HEADER);
 
-        rspHeaders.put(Constants.VARY_HEADER, "Accept-Encoding");
-        rspHeaders.put(Constants.PRAGMA_HEADER, "no-cache");
-        rspHeaders.put(Constants.EXPIRES_HEADER, "-1");
-        rspHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, "application/json; charset=utf-8");
-        rspHeaders.put(Constants.CACHE_CONTROL_HEADER, "no-cache");
+        rspHeaders.put(Constants.VARY_HEADER, Constants.ACCEPT_ENCODING_VALUE);
+        rspHeaders.put(Constants.PRAGMA_HEADER, Constants.NO_CACHE_VALUE);
+        rspHeaders.put(Constants.EXPIRES_HEADER, Constants.EXPIRES_VALUE);
+        rspHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, Constants.APPLICATION_JSON_UTF8_VALUE);
+        rspHeaders.put(Constants.CACHE_CONTROL_HEADER, Constants.NO_CACHE_VALUE);
     }
 
     protected List<EventModel> buidEventsfromBuilders(List<MetricEventBuilder> builders) {
