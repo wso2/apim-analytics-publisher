@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.am.analytics.publisher.client;
 
 import com.moesif.api.MoesifAPIClient;
@@ -14,6 +31,7 @@ import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
 import org.wso2.am.analytics.publisher.util.Constants;
+import org.wso2.am.analytics.publisher.util.HttpStatusHelper;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -53,7 +71,7 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
              *   published and a debug log is written.
              *   If the status code is in the 4xx range, it logs an error indicating a client-side failure.
              *   For all other status codes (typically 5xx or unexpected values), it logs the error and initiates a
-             *   retry using {@code doRetry(builder)}.
+             *   retry using {@code doRetry(builders)}.
              *
              * @param context  the HTTP context containing metadata about the request and response
              * @param response the HTTP response received from the Moesif API
@@ -61,25 +79,29 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
 
             public void onSuccess(HttpContext context, HttpResponse response) {
                 int statusCode = context.getResponse().getStatusCode();
-                if (statusCode == 200 || statusCode == 201 || statusCode == 202 || statusCode == 204) {
+                if (HttpStatusHelper.isSuccess(statusCode)) {
                     log.debug("Event successfully published.");
-                } else if (statusCode >= 400 && statusCode < 500) {
-                    log.error("Event publishing failed. Moesif returned {}.",
-                            String.valueOf(statusCode).replaceAll("[\r\n]", ""));
-                } else {
-                    log.error("Event publishing failed. Retrying ..");
+                } else if (HttpStatusHelper.shouldRetry(statusCode)) {
+                    log.error("Event publishing failed. Moesif returned {}. Response: {}",
+                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
+                            response.getRawBody());
                     doRetry(builder);
+                } else {
+                    log.error("Event publishing failed. Moesif returned {}. Response: {}",
+                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
+                            response.getRawBody());
                 }
             }
             /**
              * Callback method invoked when the event publishing to Moesif fails.
              *
              * This method handles the failure response based on the HTTP status code and any thrown exception.
+             * If the response status code is in 5xx or error codes such as 408 or 429, it assumes that the
+             * failure is retryable and retry to event publishing
              * If the response status code is in the 4xx range, it logs an error and does not retry,
              * since these are considered client-side errors (e.g., 401 Unauthorized, 404 Not Found).
-             * If an exception occurred (e.g., network error), it logs the failure without retrying.
-             * If there is no exception and the status code is not in the 4xx range, it assumes a
-             * retryable failure (e.g., server error or network timeout) and attempts to retry the event publishing.
+             * If there is no status code and an exception occurred (e.g., network error),
+             * it logs the failure without retrying.
              *
              * @param context the HTTP context containing the response from the Moesif API
              * @param error   the Throwable indicating the cause of the failure, or {@code null}
@@ -88,14 +110,15 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             public void onFailure(HttpContext context, Throwable error) {
                 int statusCode = context.getResponse().getStatusCode();
 
-                if (statusCode >= 400 && statusCode < 500) {
-                    log.error("Event publishing failed. Moesif returned {}.",
+                if (HttpStatusHelper.shouldRetry(statusCode)) {
+                    log.error("Event publishing failed. Moesif returned {}. Retrying..",
                             String.valueOf(statusCode).replaceAll("[\r\n]", ""));
-                } else if (error != null) {
-                    log.error("Event publishing failed");
-                } else {
-                    log.error("Event publishing failed. Retrying.");
                     doRetry(builder);
+                } else if (HttpStatusHelper.isClientError(statusCode)) {
+                    log.error("Event publishing failed. Moesif returned {} due to an error: {}", statusCode,
+                            error.getMessage());
+                } else {
+                    log.error("Event publishing failed due to an error: {}", error.getMessage());
                 }
             }
         };
@@ -111,15 +134,7 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         if (builders == null || builders.isEmpty()) {
             return;
         }
-        List<EventModel> events = new ArrayList<>();
-        for (MetricEventBuilder builder : builders) {
-            try {
-                Map<String, Object> event = builder.build();
-                events.add(buildEventResponse(event));
-            } catch (MetricReportingException | IOException e) {
-                log.error("Builder instance is not duly filled. Event building failed", e);
-            }
-        }
+        List<EventModel> events = buidEventsfromBuilders(builders);
 
         APICallBack<HttpResponse> callBack = new APICallBack<HttpResponse>() {
             /**
@@ -129,7 +144,7 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
              *   published and a debug log is written.
              *   If the status code is in the 4xx range, it logs an error indicating a client-side failure.
              *   For all other status codes (typically 5xx or unexpected values), it logs the error and initiates a
-             *   retry using {@code doRetry(builder)}.
+             *   retry using {@code doRetry(builders)}.
              *
              * @param context  the HTTP context containing metadata about the request and response
              * @param response the HTTP response received from the Moesif API
@@ -137,25 +152,29 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
 
             public void onSuccess(HttpContext context, HttpResponse response) {
                 int statusCode = context.getResponse().getStatusCode();
-                if (statusCode == 200 || statusCode == 201 || statusCode == 202 || statusCode == 204) {
+                if (HttpStatusHelper.isSuccess(statusCode)) {
                     log.debug("Event successfully published.");
-                } else if (statusCode >= 400 && statusCode < 500) {
-                    log.error("Event publishing failed. Moesif returned {}.",
-                            String.valueOf(statusCode).replaceAll("[\r\n]", ""));
-                } else {
-                    log.error("Event publishing failed. Retrying ..");
+                } else if (HttpStatusHelper.shouldRetry(statusCode)) {
+                    log.error("Event publishing failed. Moesif returned {}. Response: {}",
+                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
+                            response.getRawBody());
                     doRetry(builders);
+                } else {
+                    log.error("Event publishing failed. Moesif returned {}. Response: {}",
+                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
+                            response.getRawBody());
                 }
             }
             /**
              * Callback method invoked when the event publishing to Moesif fails.
              *
              * This method handles the failure response based on the HTTP status code and any thrown exception.
+             * If the response status code is in 5xx or error codes such as 408 or 429, it assumes that the
+             * failure is retryable and retry to event publishing
              * If the response status code is in the 4xx range, it logs an error and does not retry,
              * since these are considered client-side errors (e.g., 401 Unauthorized, 404 Not Found).
-             * If an exception occurred (e.g., network error), it logs the failure without retrying.
-             * If there is no exception and the status code is not in the 4xx range, it assumes a
-             * retryable failure (e.g., server error or network timeout) and attempts to retry the event publishing.
+             * If there is no status code and an exception occurred (e.g., network error),
+             * it logs the failure without retrying.
              *
              * @param context the HTTP context containing the response from the Moesif API
              * @param error   the Throwable indicating the cause of the failure, or {@code null}
@@ -164,14 +183,14 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             public void onFailure(HttpContext context, Throwable error) {
                 int statusCode = context.getResponse().getStatusCode();
 
-                if (statusCode >= 400 && statusCode < 500) {
-                    log.error("Event publishing failed. Moesif returned {}.",
+                if (HttpStatusHelper.shouldRetry(statusCode)) {
+                    log.error("Event publishing failed. Moesif returned {}. Retrying..",
                             String.valueOf(statusCode).replaceAll("[\r\n]", ""));
-                } else if (error != null) {
-                    log.error("Event publishing failed");
-                } else {
-                    log.error("Event publishing failed. Retrying.");
                     doRetry(builders);
+                } else if (HttpStatusHelper.isClientError(statusCode)) {
+                    log.error("Event publishing failed. Moesif returned {} due to an error: {}", statusCode, error.getMessage());
+                } else {
+                    log.error("Event publishing failed due to an error: {}", error.getMessage());
                 }
             }
         };
@@ -183,7 +202,7 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
     }
 
     @Override
-    public EventModel buildEventResponse(Map<String, Object> data) throws IOException, MetricReportingException {
+    public EventModel buildEventResponse(Map<String, Object> data) throws IOException {
         Map<String, String> reqHeaders = new HashMap<>();
         Map<String, String> rspHeaders = new HashMap<>();
 
@@ -290,7 +309,8 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
     }
 
     /**
-     * Retries publishing the event using the provided `MetricEventBuilder` if retry attempts are available.
+     * Retries publishing the Batch of events using the provided List of `MetricEventBuilder`
+     * if retry attempts are available.
      * Decrements the retry attempt count and waits for a specified duration before retrying.
      * Logs errors if the retry attempt fails or if all retry attempts are exhausted.
      *
@@ -312,7 +332,13 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             log.error("Failed all retrying attempts. Event will be dropped");
         }
     }
-
+    /**
+     * Retries publishing the event using the provided `MetricEventBuilder` if retry attempts are available.
+     * Decrements the retry attempt count and waits for a specified duration before retrying.
+     * Logs errors if the retry attempt fails or if all retry attempts are exhausted.
+     *
+     * @param builder The List of `MetricEventBuilder` containing the event data to be published.
+     */
     private void doRetry(MetricEventBuilder builder) {
         Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
 

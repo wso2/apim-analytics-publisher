@@ -41,11 +41,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -58,26 +54,6 @@ public class MoesifClient extends AbstractMoesifClient {
 
     public MoesifClient(MoesifKeyRetriever keyRetriever) {
         this.keyRetriever = keyRetriever;
-    }
-
-    private void doRetry(String orgId, MetricEventBuilder builder) {
-        Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
-
-        if (currentAttempt > 0) {
-            currentAttempt -= 1;
-            MoesifClientContextHolder.PUBLISH_ATTEMPTS.set(currentAttempt);
-            try {
-                Thread.sleep(MoesifMicroserviceConstants.TIME_TO_WAIT_PUBLISH);
-                publish(builder);
-            } catch (MetricReportingException e) {
-                log.error("Failing retry attempt at Moesif client", e);
-            } catch (InterruptedException e) {
-                log.error("Failing retry attempt at Moesif client", e);
-            }
-        } else if (currentAttempt == 0) {
-            log.error("Failed all retrying attempts. Event will be dropped for organization {}",
-                    orgId.replaceAll("[\r\n]", ""));
-        }
     }
 
     /**
@@ -258,5 +234,41 @@ public class MoesifClient extends AbstractMoesifClient {
         eventModel.setCompanyId(null);
 
         return eventModel;
+    }
+    private void doRetry(String orgId, List<MetricEventBuilder> builders) {
+        Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
+
+        if (currentAttempt > 0) {
+            currentAttempt -= 1;
+            MoesifClientContextHolder.PUBLISH_ATTEMPTS.set(currentAttempt);
+            try {
+                Thread.sleep(MoesifMicroserviceConstants.TIME_TO_WAIT_PUBLISH);
+                publishBatch(builders);
+            } catch (InterruptedException e) {
+                log.error("Failing retry attempt at Moesif client", e);
+            }
+        } else if (currentAttempt == 0) {
+            log.error("Failed all retrying attempts. Event will be dropped for organization {}",
+                    orgId.replaceAll("[\r\n]", ""));
+        }
+    }
+    private void doRetry(String orgId, MetricEventBuilder builder) {
+        Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
+
+        if (currentAttempt > 0) {
+            currentAttempt -= 1;
+            MoesifClientContextHolder.PUBLISH_ATTEMPTS.set(currentAttempt);
+            try {
+                Thread.sleep(MoesifMicroserviceConstants.TIME_TO_WAIT_PUBLISH);
+                publish(builder);
+            } catch (MetricReportingException e) {
+                log.error("Failing retry attempt at Moesif client", e);
+            } catch (InterruptedException e) {
+                log.error("Failing retry attempt at Moesif client", e);
+            }
+        } else if (currentAttempt == 0) {
+            log.error("Failed all retrying attempts. Event will be dropped for organization {}",
+                    orgId.replaceAll("[\r\n]", ""));
+        }
     }
 }
