@@ -36,7 +36,6 @@ import org.wso2.am.analytics.publisher.util.HttpStatusHelper;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;

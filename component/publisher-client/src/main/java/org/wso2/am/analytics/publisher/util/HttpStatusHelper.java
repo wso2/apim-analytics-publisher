@@ -18,7 +18,11 @@
 package org.wso2.am.analytics.publisher.util;
 
 import java.util.Set;
-
+/**
+ * Utility class for handling HTTP status codes.
+ * Provides methods to determine the type of HTTP response (success, client error, server error)
+ * and whether a request should be retried based on the status code.
+ */
 public class HttpStatusHelper {
     // HTTP Status Code Ranges
     public static final int SUCCESS_RANGE_START = 200;

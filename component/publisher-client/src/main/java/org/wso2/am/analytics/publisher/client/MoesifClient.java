@@ -42,7 +42,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -328,7 +333,6 @@ public class MoesifClient extends AbstractMoesifClient {
             try {
                 Map<String, Object> event = builder.build();
 
-                // Apply environment filtering
                 if (isValidForEnvironment(event, userSelectedEnvironment)) {
                     validEvents.add(buildEventResponse(event));
                 } else {
@@ -388,7 +392,6 @@ public class MoesifClient extends AbstractMoesifClient {
         LinkedHashMap properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
         String eventEnvironment = (String) properties.get(Constants.DEPLOYMENT_TYPE);
 
-        // Skip non-production events when user selected production environment
         return !(Constants.PRODUCTION.equals(userSelectedEnvironment) &&
                 !Constants.PRODUCTION.equals(eventEnvironment));
     }
