@@ -35,6 +35,7 @@ import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 import org.wso2.am.analytics.publisher.util.Constants;
+import org.wso2.am.analytics.publisher.util.HttpStatusHelper;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -94,38 +95,8 @@ public class MoesifClient extends AbstractMoesifClient {
         // Hence avoid maintaining a map of MoesifAPIClient against moesif keys.
         APIController api = client.getAPI();
 
-        APICallBack<HttpResponse> callBack = new APICallBack<HttpResponse>() {
-            public void onSuccess(HttpContext context, HttpResponse response) {
-                int statusCode = context.getResponse().getStatusCode();
-                if (statusCode == 200 || statusCode == 201 || statusCode == 202 || statusCode == 204) {
-                    log.debug("Event successfully published.");
-                } else if (statusCode >= 400 && statusCode < 500) {
-                    log.error("Event publishing failed for organization: {}. Moesif returned {}.",
-                            orgId.replaceAll("[\r\n]", ""), String.valueOf(statusCode).replaceAll("[\r\n]", ""));
-                } else {
-                    log.error("Event publishing failed for organization: {}. Retrying.",
-                            orgId.replaceAll("[\r\n]", ""));
-                    doRetry(orgId, builder);
-                }
-            }
-
-            public void onFailure(HttpContext context, Throwable error) {
-                int statusCode = context.getResponse().getStatusCode();
-
-                if (statusCode >= 400 && statusCode < 500) {
-                    log.error("Event publishing failed for organization: {}. Moesif returned {}.",
-                            orgId.replaceAll("[\r\n]", ""), String.valueOf(statusCode).replaceAll("[\r\n]", ""));
-                } else if (error != null) {
-                    log.error("Event publishing failed for organization: {}. Event publishing failed.",
-                            orgId.replaceAll("[\r\n]", ""),
-                            error.getMessage().replaceAll("[\r\n]", ""));
-                } else {
-                    log.error("Event publishing failed for organization: {}. Retrying.",
-                            orgId.replaceAll("[\r\n]", ""));
-                    doRetry(orgId, builder);
-                }
-            }
-        };
+        APICallBack<HttpResponse> callBack = createMoesifCallBack(() -> doRetry(orgId, builder),
+                "Single event", orgId);
         try {
             api.createEventAsync(buildEventResponse(event), callBack);
         } catch (IOException e) {
@@ -135,7 +106,23 @@ public class MoesifClient extends AbstractMoesifClient {
 
     @Override
     public void publishBatch(List<MetricEventBuilder> builders) {
+        if (builders == null || builders.isEmpty()) {
+            log.debug("No events to publish in batch");
+            return;
+        }
 
+        Map<String, List<MetricEventBuilder>> eventsByOrg = groupEventsByOrganization(builders);
+
+        for (Map.Entry<String, List<MetricEventBuilder>> entry : eventsByOrg.entrySet()) {
+            String orgId = entry.getKey();
+            List<MetricEventBuilder> orgEvents = entry.getValue();
+
+            try {
+                publishBatchForOrganization(orgId, orgEvents);
+            } catch (Exception e) {
+                log.error("Error while processing events for organization: {}", orgId, e);
+            }
+        }
     }
 
     @Override
@@ -235,6 +222,51 @@ public class MoesifClient extends AbstractMoesifClient {
 
         return eventModel;
     }
+    private APICallBack<HttpResponse> createMoesifCallBack(
+            Runnable retryAction, String eventType, String orgId) {
+        return new APICallBack<HttpResponse>() {
+            public void onSuccess(HttpContext context, HttpResponse response) {
+                int statusCode = context.getResponse().getStatusCode();
+                if (HttpStatusHelper.isSuccess(statusCode)) {
+                    log.debug("{} successfully published.", eventType);
+                } else if (HttpStatusHelper.shouldRetry(statusCode)) {
+                    log.error("{} publishing failed for organization: {}. Moesif returned {}. Response {}",
+                            eventType,
+                            orgId.replaceAll("[\r\n]", ""),
+                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
+                            response.getRawBody());
+                    retryAction.run();
+                } else {
+                    log.error("{} Event publishing failed for organization: {}. Response {}.",
+                            eventType,
+                            orgId.replaceAll("[\r\n]", ""),
+                            response.getRawBody());
+                }
+            }
+
+            public void onFailure(HttpContext context, Throwable error) {
+                int statusCode = context.getResponse().getStatusCode();
+
+                if (HttpStatusHelper.shouldRetry(statusCode)) {
+                    log.error("{} publishing failed for organization: {}. Moesif returned {}. Retrying",
+                            eventType,
+                            orgId.replaceAll("[\r\n]", ""),
+                            String.valueOf(statusCode).replaceAll("[\r\n]", ""));
+                    retryAction.run();
+                } else if (HttpStatusHelper.isClientError(statusCode)) {
+                    log.error("{} publishing failed for organization: {} due to error: {}",
+                            eventType,
+                            orgId.replaceAll("[\r\n]", ""),
+                            error.getMessage().replaceAll("[\r\n]", ""));
+                } else {
+                    log.error("{} publishing failed for organization: {}. Retrying.",
+                            eventType,
+                            orgId.replaceAll("[\r\n]", ""));
+                    retryAction.run();
+                }
+            }
+        };
+    }
     private void doRetry(String orgId, List<MetricEventBuilder> builders) {
         Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
 
@@ -270,5 +302,94 @@ public class MoesifClient extends AbstractMoesifClient {
             log.error("Failed all retrying attempts. Event will be dropped for organization {}",
                     orgId.replaceAll("[\r\n]", ""));
         }
+    }
+    /**
+     * Publishes a batch of events for a specific organization using true batch API.
+     */
+    private void publishBatchForOrganization(String orgId, List<MetricEventBuilder> builders) {
+        ConcurrentHashMap<String, String> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
+        ConcurrentHashMap<String, String> orgIdEnvMap = keyRetriever.getEnvMap();
+
+        if (!orgIDMoesifKeyMap.containsKey(orgId)) {
+            log.warn("No Moesif key found for organization: {}. Skipping {} events", orgId, builders.size());
+            return;
+        }
+
+        if (!orgIdEnvMap.containsKey(orgId)) {
+            log.warn("No environment config found for organization: {}. Skipping {} events", orgId, builders.size());
+            return;
+        }
+
+        String moesifKey = orgIDMoesifKeyMap.get(orgId);
+        String userSelectedEnvironment = orgIdEnvMap.get(orgId);
+
+        List<EventModel> validEvents = new ArrayList<>();
+        for (MetricEventBuilder builder : builders) {
+            try {
+                Map<String, Object> event = builder.build();
+
+                // Apply environment filtering
+                if (isValidForEnvironment(event, userSelectedEnvironment)) {
+                    validEvents.add(buildEventResponse(event));
+                } else {
+                    log.debug("Event filtered out due to environment mismatch for org: {}", orgId);
+                }
+            } catch (Exception e) {
+                log.error("Failed to build event for batch processing", e);
+            }
+        }
+
+        if (validEvents.isEmpty()) {
+            log.debug("No valid events to publish for organization: {}", orgId);
+            return;
+        }
+        MoesifAPIClient client = new MoesifAPIClient(moesifKey);
+        APIController api = client.getAPI();
+
+        APICallBack<HttpResponse> callBack = createMoesifCallBack(() -> doRetry(orgId, builders),
+                "Batch event", orgId);
+
+        try {
+            if (validEvents.size() == 1) {
+                api.createEventAsync(validEvents.get(0), callBack);
+            } else {
+                api.createEventsBatchAsync(validEvents, callBack);
+            }
+        } catch (IOException e) {
+            log.error("Analytics event sending failed for organization {}", orgId);
+        }
+    }
+    /**
+     * Groups events by organization ID for batch processing efficiency.
+     * Events from the same organization can be processed together.
+     */
+    private Map<String, List<MetricEventBuilder>> groupEventsByOrganization(List<MetricEventBuilder> builders) {
+        Map<String, List<MetricEventBuilder>> eventsByOrg = new HashMap<>();
+        for (MetricEventBuilder builder : builders) {
+            try {
+                Map<String, Object> event = builder.build();
+                String orgId = (String) event.get(Constants.ORGANIZATION_ID);
+                if (orgId == null || orgId.isEmpty()) {
+                    log.warn("Skipping event with no organization ID");
+                    continue;
+                }
+                eventsByOrg.computeIfAbsent(orgId, k -> new ArrayList<>()).add(builder);
+            } catch (Exception e) {
+                log.error("Failed to extract organization ID from event, skipping", e);
+            }
+        }
+        return eventsByOrg;
+    }
+
+    /**
+     * Validates if event should be published based on environment settings.
+     */
+    private boolean isValidForEnvironment(Map<String, Object> event, String userSelectedEnvironment) {
+        LinkedHashMap properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
+        String eventEnvironment = (String) properties.get(Constants.DEPLOYMENT_TYPE);
+
+        // Skip non-production events when user selected production environment
+        return !(Constants.PRODUCTION.equals(userSelectedEnvironment) &&
+                !Constants.PRODUCTION.equals(eventEnvironment));
     }
 }

@@ -63,65 +63,8 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
     public void publish(MetricEventBuilder builder) throws MetricReportingException {
         Map<String, Object> event = builder.build();
 
-        APICallBack<HttpResponse> callBack = new APICallBack<HttpResponse>() {
-            /**
-             * Callback method invoked when the event publishing request receives a response from Moesif.
-             * This method handles the response based on the HTTP status code:
-             *   If the status code is 200, 201, 202, or 204, the event is considered successfully
-             *   published and a debug log is written.
-             *   If the status code is in the 4xx range, it logs an error indicating a client-side failure.
-             *   For all other status codes (typically 5xx or unexpected values), it logs the error and initiates a
-             *   retry using {@code doRetry(builders)}.
-             *
-             * @param context  the HTTP context containing metadata about the request and response
-             * @param response the HTTP response received from the Moesif API
-             */
-
-            public void onSuccess(HttpContext context, HttpResponse response) {
-                int statusCode = context.getResponse().getStatusCode();
-                if (HttpStatusHelper.isSuccess(statusCode)) {
-                    log.debug("Event successfully published.");
-                } else if (HttpStatusHelper.shouldRetry(statusCode)) {
-                    log.error("Event publishing failed. Moesif returned {}. Response: {}",
-                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
-                            response.getRawBody());
-                    doRetry(builder);
-                } else {
-                    log.error("Event publishing failed. Moesif returned {}. Response: {}",
-                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
-                            response.getRawBody());
-                }
-            }
-            /**
-             * Callback method invoked when the event publishing to Moesif fails.
-             *
-             * This method handles the failure response based on the HTTP status code and any thrown exception.
-             * If the response status code is in 5xx or error codes such as 408 or 429, it assumes that the
-             * failure is retryable and retry to event publishing
-             * If the response status code is in the 4xx range, it logs an error and does not retry,
-             * since these are considered client-side errors (e.g., 401 Unauthorized, 404 Not Found).
-             * If there is no status code and an exception occurred (e.g., network error),
-             * it logs the failure without retrying.
-             *
-             * @param context the HTTP context containing the response from the Moesif API
-             * @param error   the Throwable indicating the cause of the failure, or {@code null}
-             *               if no exception occurred
-             */
-            public void onFailure(HttpContext context, Throwable error) {
-                int statusCode = context.getResponse().getStatusCode();
-
-                if (HttpStatusHelper.shouldRetry(statusCode)) {
-                    log.error("Event publishing failed. Moesif returned {}. Retrying..",
-                            String.valueOf(statusCode).replaceAll("[\r\n]", ""));
-                    doRetry(builder);
-                } else if (HttpStatusHelper.isClientError(statusCode)) {
-                    log.error("Event publishing failed. Moesif returned {} due to an error: {}", statusCode,
-                            error.getMessage());
-                } else {
-                    log.error("Event publishing failed due to an error: {}", error.getMessage());
-                }
-            }
-        };
+        APICallBack<HttpResponse> callBack = createMoesifCallback(() -> doRetry(builder),
+                "Single event");
         try {
             api.createEventAsync(buildEventResponse(event), callBack);
         } catch (IOException e) {
@@ -136,64 +79,8 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         }
         List<EventModel> events = buidEventsfromBuilders(builders);
 
-        APICallBack<HttpResponse> callBack = new APICallBack<HttpResponse>() {
-            /**
-             * Callback method invoked when the event publishing request receives a response from Moesif.
-             * This method handles the response based on the HTTP status code:
-             *   If the status code is 200, 201, 202, or 204, the event is considered successfully
-             *   published and a debug log is written.
-             *   If the status code is in the 4xx range, it logs an error indicating a client-side failure.
-             *   For all other status codes (typically 5xx or unexpected values), it logs the error and initiates a
-             *   retry using {@code doRetry(builders)}.
-             *
-             * @param context  the HTTP context containing metadata about the request and response
-             * @param response the HTTP response received from the Moesif API
-             */
-
-            public void onSuccess(HttpContext context, HttpResponse response) {
-                int statusCode = context.getResponse().getStatusCode();
-                if (HttpStatusHelper.isSuccess(statusCode)) {
-                    log.debug("Event successfully published.");
-                } else if (HttpStatusHelper.shouldRetry(statusCode)) {
-                    log.error("Event publishing failed. Moesif returned {}. Response: {}",
-                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
-                            response.getRawBody());
-                    doRetry(builders);
-                } else {
-                    log.error("Event publishing failed. Moesif returned {}. Response: {}",
-                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
-                            response.getRawBody());
-                }
-            }
-            /**
-             * Callback method invoked when the event publishing to Moesif fails.
-             *
-             * This method handles the failure response based on the HTTP status code and any thrown exception.
-             * If the response status code is in 5xx or error codes such as 408 or 429, it assumes that the
-             * failure is retryable and retry to event publishing
-             * If the response status code is in the 4xx range, it logs an error and does not retry,
-             * since these are considered client-side errors (e.g., 401 Unauthorized, 404 Not Found).
-             * If there is no status code and an exception occurred (e.g., network error),
-             * it logs the failure without retrying.
-             *
-             * @param context the HTTP context containing the response from the Moesif API
-             * @param error   the Throwable indicating the cause of the failure, or {@code null}
-             *               if no exception occurred
-             */
-            public void onFailure(HttpContext context, Throwable error) {
-                int statusCode = context.getResponse().getStatusCode();
-
-                if (HttpStatusHelper.shouldRetry(statusCode)) {
-                    log.error("Event publishing failed. Moesif returned {}. Retrying..",
-                            String.valueOf(statusCode).replaceAll("[\r\n]", ""));
-                    doRetry(builders);
-                } else if (HttpStatusHelper.isClientError(statusCode)) {
-                    log.error("Event publishing failed. Moesif returned {} due to an error: {}", statusCode, error.getMessage());
-                } else {
-                    log.error("Event publishing failed due to an error: {}", error.getMessage());
-                }
-            }
-        };
+        APICallBack<HttpResponse> callBack = createMoesifCallback(() -> doRetry(builders),
+                "Batch of " + builders.size() + " events");
         try {
             api.createEventsBatchAsync(events, callBack);
         } catch (IOException e) {
@@ -356,5 +243,55 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         } else if (currentAttempt == 0) {
             log.error("Failed all retrying attempts. Event will be dropped");
         }
+    }
+    private APICallBack<HttpResponse> createMoesifCallback(Runnable retryAction, String operationType) {
+        return new APICallBack<HttpResponse>() {
+            /**
+             * Handles successful HTTP response from Moesif API.
+             */
+            @Override
+            public void onSuccess(HttpContext httpContext, HttpResponse response) {
+                int statusCode = httpContext.getResponse().getStatusCode();
+                if (HttpStatusHelper.isSuccess(statusCode)) {
+                    log.debug("{} successfully published. Status: {}", operationType, statusCode);
+                } else if (HttpStatusHelper.shouldRetry(statusCode)) {
+                    log.error("{} publishing failed. Moesif returned {}. Response: {}. Retrying...",
+                            operationType,
+                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
+                            response.getRawBody());
+                    retryAction.run();
+                } else {
+                    log.error("{} publishing failed. Moesif returned {}. Response: {}. No retry.",
+                            operationType,
+                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
+                            response.getRawBody());
+                }
+            }
+            /**
+             * Handles failed HTTP responses from Moesif API.
+             * Processes failures based on status code and error details.
+             */
+            @Override
+            public void onFailure(HttpContext httpContext, Throwable error) {
+                int statusCode = httpContext.getResponse().getStatusCode();
+                String errorMessage = error != null ? error.getMessage() : "Unknown error";
+
+                if (HttpStatusHelper.shouldRetry(statusCode)) {
+                    log.error("{} publishing failed. Moesif returned {}. Retrying...",
+                            operationType,
+                            String.valueOf(statusCode).replaceAll("[\r\n]", ""));
+                    retryAction.run();
+                } else if (HttpStatusHelper.isClientError(statusCode)) {
+                    log.error("{} publishing failed. Moesif returned {} due to error: {}",
+                            operationType,
+                            statusCode,
+                            errorMessage.replaceAll("[\r\n]", ""));
+                } else {
+                    log.error("{} publishing failed due to error: {}",
+                            operationType,
+                            errorMessage.replaceAll("[\r\n]", ""));
+                }
+            }
+        };
     }
 }
