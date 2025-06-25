@@ -150,13 +150,11 @@
                             org.wso2.am.analytics.publisher.util.*;version="${project.version}",
                             org.wso2.am.analytics.publisher.properties.*;version="${project.version}",
                         </Export-Package>
-                        <Embed-Dependency>
-                            moesifapi;scope=compile|runtime;inline=false,
-                            unirest-java;scope=compile|runtime;inline=false,
-                            httpasyncclient;scope=compile|runtime;inline=false,
-                        </Embed-Dependency>
-                        <Embed-Transitive>true</Embed-Transitive>
                         <Private-Package>
+                            com.moesif.api.*;version="${moesif.api.version}",
+                            com.mashape.unirest.*,
+                            org.apache.http.impl.nio.*,
+                            org.apache.http.nio.*,
                         </Private-Package>
                         <Import-Package>
                             <!-- Exclude embedded packages from import -->
