@@ -69,10 +69,10 @@ public class MoesifCounterMetric implements CounterMetric {
             case RESPONSE:
             default:
                 return new MoesifMetricEventBuilder(
-                        GenericInputValidator.getInstance().getEventProperties(MetricSchema.RESPONSE));
+                        GenericInputValidator.getInstance().getEventProperties(MetricSchema.MOESIF_RESPONSE));
             case ERROR:
                 return new MoesifMetricEventBuilder(
-                        GenericInputValidator.getInstance().getEventProperties(MetricSchema.ERROR));
+                        GenericInputValidator.getInstance().getEventProperties(MetricSchema.MOESIF_ERROR));
             case CHOREO_RESPONSE:
                 return new MoesifMetricEventBuilder(
                         GenericInputValidator.getInstance().getEventProperties(MetricSchema.CHOREO_RESPONSE));

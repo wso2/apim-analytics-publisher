@@ -29,5 +29,7 @@ public enum MetricSchema {
     ELK_RESPONSE,
     ELK_ERROR,
     LATENCY,
-    PAYLOAD
+    PAYLOAD,
+    MOESIF_RESPONSE,
+    MOESIF_ERROR,
 }

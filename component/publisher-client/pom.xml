@@ -32,6 +32,14 @@
             <artifactId>moesifapi</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.moesif.unirest</groupId>
+            <artifactId>unirest-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpasyncclient</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-messaging-eventhubs</artifactId>
         </dependency>
@@ -143,8 +151,18 @@
                             org.wso2.am.analytics.publisher.properties.*;version="${project.version}",
                         </Export-Package>
                         <Private-Package>
+                            com.moesif.api.*;version="${moesif.api.version}",
+                            com.mashape.unirest.*,
+                            org.apache.http.impl.nio.*,
+                            org.apache.http.nio.*,
                         </Private-Package>
                         <Import-Package>
+                            <!-- Exclude embedded packages from import -->
+                            !com.moesif.api.*,
+                            !com.mashape.unirest.*,
+                            !org.apache.http.impl.nio.*,
+                            !org.apache.http.nio.*,
+
                             com.google.gson.*;version="${gson.import.version.range}",
                             com.google.gson.annotations.*;version="${google.gson.import.version.range}",
                             com.azure.core.credential.*;version="${azure.core.import.version.range}",
@@ -157,7 +175,7 @@
                             ua_parser.*;version="${ua_parser.import.version.range}",
                             com.microsoft.azure.proton.transport.*;version="${azure-qpid-proton-j-extensions.import.version.range}",
                             org.apache.http.*,
-                            com.moesif.api.*;resolution:=optional
+                            *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>

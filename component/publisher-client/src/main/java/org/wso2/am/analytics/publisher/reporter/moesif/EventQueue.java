@@ -19,7 +19,9 @@ package org.wso2.am.analytics.publisher.reporter.moesif;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.am.analytics.publisher.client.AbstractMoesifClient;
 import org.wso2.am.analytics.publisher.client.MoesifClient;
+import org.wso2.am.analytics.publisher.client.SimpleMoesifClient;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsThreadFactory;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
@@ -40,10 +42,17 @@ public class EventQueue {
     private final ExecutorService publisherExecutorService;
     private final AtomicInteger failureCount;
 
+    public EventQueue(int queueSize, int workerThreadCount, String key) {
+        this(queueSize, workerThreadCount, new SimpleMoesifClient(key));
+    }
+
     public EventQueue(int queueSize, int workerThreadCount, MoesifKeyRetriever moesifKeyRetriever) {
+        this(queueSize, workerThreadCount, new MoesifClient(moesifKeyRetriever));
+    }
+
+    public EventQueue(int queueSize, int workerThreadCount, AbstractMoesifClient moesifClient) {
         publisherExecutorService = Executors.newFixedThreadPool(workerThreadCount,
                 new DefaultAnalyticsThreadFactory("Queue-Worker"));
-        MoesifClient moesifClient = new MoesifClient(moesifKeyRetriever);
         eventQueue = new LinkedBlockingQueue<>(queueSize);
         failureCount = new AtomicInteger(0);
         for (int i = 0; i < workerThreadCount; i++) {
