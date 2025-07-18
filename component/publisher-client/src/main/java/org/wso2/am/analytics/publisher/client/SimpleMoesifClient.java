@@ -136,25 +136,15 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             }
 
         } else {
-            LinkedHashMap properties = (LinkedHashMap) data.get(Constants.PROPERTIES);
 
             modifiedUserName = (String) data.get(Constants.API_CREATION);
-
-            String apiContext = (String) ((LinkedHashMap) data.get(Constants.PROPERTIES)).get(Constants.API_CONTEXT);
-            String gwURL = (String) properties.get(Constants.GATEWAY_URL);
-            String apiResourceTemplate = (String) data.get(Constants.API_RESOURCE_TEMPLATE);
-            String uri = apiContext + apiResourceTemplate;
-
-            if (gwURL != null) {
-                uri = gwURL;
-            }
 
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
             Instant requestTimestamp = Instant.from(
                     dateTimeFormatter.parse((String) data.get(Constants.REQUEST_TIMESTAMP)));
 
-            eventReq = new EventRequestBuilder().time(Date.from(requestTimestamp)).uri(uri)
-                    .verb((String) data.get(Constants.API_METHOD)).apiVersion((String) data.get(Constants.API_VERSION))
+            eventReq = new EventRequestBuilder().time(Date.from(requestTimestamp)).uri(Constants.NOT_APPLICABLE)
+                    .verb(Constants.NOT_APPLICABLE).apiVersion((String) data.get(Constants.API_VERSION))
                     .headers(reqHeaders).build();
 
             Date dateNow = Date.from(Instant.now());
