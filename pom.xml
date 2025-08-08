@@ -289,9 +289,32 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-        </plugins>
-    </build>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${maven.checkstyle.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>compile</phase>
+                            <configuration>
+                                <configLocation>${session.topLevelProject.basedir}/checkstyle.xml</configLocation>
+                                <suppressionsLocation>${session.topLevelProject.basedir}/suppressions.xml</suppressionsLocation>
+                                <encoding>UTF-8</encoding>
+                                <consoleOutput>true</consoleOutput>
+                                <failsOnError>true</failsOnError>
+                                <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                                <excludes>**/gen/**/*</excludes>
+                            </configuration>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
     <properties>
         <gson.import.version.range>[2.0.0, 3.0.0)</gson.import.version.range>
         <moesif.api.version>1.7.4</moesif.api.version>
@@ -330,7 +353,8 @@
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
         <mockserver-netty.version>3.10.8</mockserver-netty.version>
         <mockito-inline.version>3.8.0</mockito-inline.version>
-    </properties>
+        <maven.checkstyle.plugin.version>2.17</maven.checkstyle.plugin.version>
+     </properties>
     <scm>
         <url>https://github.com/wso2/apim-analytics-publisher.git</url>
         <developerConnection>scm:git:https://github.com/wso2/apim-analytics-publisher.git</developerConnection>
