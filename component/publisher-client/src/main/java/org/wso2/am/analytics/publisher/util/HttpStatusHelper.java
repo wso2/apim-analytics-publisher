@@ -17,6 +17,9 @@
  */
 package org.wso2.am.analytics.publisher.util;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 /**
  * Utility class for handling HTTP status codes.
@@ -32,7 +35,8 @@ public class HttpStatusHelper {
     public static final int SERVER_ERROR_RANGE_START = 500;
     public static final int SERVER_ERROR_RANGE_END = 599;
 
-    private static final Set<Integer> RETRYABLE_CLIENT_ERRORS = Set.of(408, 429);
+    private static final Set<Integer> RETRYABLE_CLIENT_ERRORS =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(408, 429)));
     /**
      * Checks if the HTTP status code indicates a successful response.
      * Success range: 200-299
