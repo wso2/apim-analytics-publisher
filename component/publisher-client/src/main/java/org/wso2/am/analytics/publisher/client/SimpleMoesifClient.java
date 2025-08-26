@@ -127,7 +127,7 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
                     .ipAddress(userIP).headers(reqHeaders).build();
 
             eventRsp = new EventResponseBuilder().time(Date.from(responseTimestamp))
-                    .status((int) data.get(Constants.TARGET_RESPONSE_CODE)).headers(rspHeaders).build();
+                    .status((int) data.get(Constants.PROXY_RESPONSE_CODE)).headers(rspHeaders).build();
 
             if (userName.contains("@carbon.super")) {
                 modifiedUserName = userName.replace("@carbon.super", "");
@@ -188,7 +188,8 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
                 Constants.API_CREATION, Constants.API_CREATOR_TENANT_DOMAIN, Constants.API_VERSION,
                 Constants.CORRELATION_ID, Constants.RESPONSE_CACHE_HIT, Constants.USER_NAME,
                 Constants.RESPONSE_MEDIATION_LATENCY, Constants.DESTINATION, Constants.ERROR_CODE,
-                Constants.ERROR_MESSAGE, Constants.ERROR_TYPE
+                Constants.ERROR_MESSAGE, Constants.ERROR_TYPE, Constants.TARGET_RESPONSE_CODE,
+                Constants.REQUEST_MEDIATION_LATENCY
         ));
 
         data.entrySet().stream().filter(entry -> requiredKeys.contains(entry.getKey()))
