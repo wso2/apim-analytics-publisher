@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsMetricReporter;
 import org.wso2.am.analytics.publisher.reporter.elk.ELKMetricReporter;
+import org.wso2.am.analytics.publisher.reporter.moesif.MoesifReporter;
 import org.wso2.am.analytics.publisher.util.Constants;
 
 import java.lang.reflect.Constructor;
@@ -73,6 +74,21 @@ public class MetricReporterFactory {
         }
 
         MetricReporter reporterInstance = reporterRegistry.get(Constants.ELK_REPORTER);
+        log.info("Metric Reporter of type " + reporterInstance.getClass().toString().replaceAll("[\r\n]", "") +
+                " is already created. Hence returning same instance");
+        return reporterInstance;
+    }
+
+    public MetricReporter createMoesifMetricReporter(Map<String, String> properties) throws MetricCreationException {
+        if (reporterRegistry.get(Constants.MOESIF_REPORTER) == null) {
+            synchronized (this) {
+                if (reporterRegistry.get(Constants.MOESIF_REPORTER) == null) {
+                    MetricReporter reporterInstance = new MoesifReporter(properties);
+                    reporterRegistry.put(Constants.MOESIF_REPORTER, reporterInstance);
+                }
+            }
+        }
+        MetricReporter reporterInstance = reporterRegistry.get(Constants.MOESIF_REPORTER);
         log.info("Metric Reporter of type " + reporterInstance.getClass().toString().replaceAll("[\r\n]", "") +
                 " is already created. Hence returning same instance");
         return reporterInstance;
