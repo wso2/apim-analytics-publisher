@@ -96,7 +96,6 @@ public class Constants {
     //Reporter constants
     public static final String DEFAULT_REPORTER = "default";
     public static final String ELK_REPORTER = "elk";
-    public static final String MOESIF_REPORTER = "moesif";
 
     //EventHub Client retry options constants
     public static final int DEFAULT_MAX_RETRIES = 2;
