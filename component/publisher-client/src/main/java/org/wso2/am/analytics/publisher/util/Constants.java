@@ -96,7 +96,6 @@ public class Constants {
     //Reporter constants
     public static final String DEFAULT_REPORTER = "default";
     public static final String ELK_REPORTER = "elk";
-    public static final String MOESIF_REPORTER = "moesif";
 
     //EventHub Client retry options constants
     public static final int DEFAULT_MAX_RETRIES = 2;
@@ -135,6 +134,9 @@ public class Constants {
     public static final String NO_CACHE_VALUE = "no-cache";
     public static final String EXPIRES_VALUE = "-1";
     public static final String APPLICATION_JSON_UTF8_VALUE = "application/json; charset=utf-8";
+    public static final String TYPE = "type";
+    public static final String MOESIF = "moesif";
+
     public static final String MOESIF_KEY = "moesifKey";
     public static final String MOESIF_BASE_URL = "moesif_base_url";
     public static final String REQUEST_HEADERS = "requestHeaders";

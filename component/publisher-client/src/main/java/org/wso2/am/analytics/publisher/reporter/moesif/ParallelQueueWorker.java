@@ -72,15 +72,17 @@ public class ParallelQueueWorker implements Runnable {
                     batch.add(eventBuilder);
                 }
 
-                long currrentBatchTime = System.currentTimeMillis();
+                long currentBatchTime = System.currentTimeMillis();
                 boolean shouldSendBatch = batch.size() >= batchSize ||
-                        (currrentBatchTime - lastBatchTime) >= batchTimeoutMs;
+                        (currentBatchTime - lastBatchTime) >= batchTimeoutMs;
 
                 if (shouldSendBatch) {
-                    log.debug("Sending batch of {} events", batch.size());
-                    processBatch(new ArrayList<>(batch));
-                    batch.clear();
-                    lastBatchTime = currrentBatchTime;
+                    if (!batch.isEmpty()) {
+                        log.debug("Sending batch of {} events", batch.size());
+                        processBatch(new ArrayList<>(batch));
+                        batch.clear();
+                    }
+                    lastBatchTime = currentBatchTime;
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -90,10 +92,6 @@ public class ParallelQueueWorker implements Runnable {
         }
     }
     private void processBatch(List<MetricEventBuilder> batch) {
-        if (batch.isEmpty()) {
-            return;
-        }
-
         try {
             if (batch.size() == 1) {
                 client.publish(batch.get(0));
