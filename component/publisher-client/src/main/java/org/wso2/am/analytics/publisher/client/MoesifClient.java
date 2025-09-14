@@ -36,6 +36,7 @@ import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceCo
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 import org.wso2.am.analytics.publisher.util.Constants;
 import org.wso2.am.analytics.publisher.util.HttpStatusHelper;
+import org.wso2.am.analytics.publisher.util.LogSanitizer;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -237,14 +238,14 @@ public class MoesifClient extends AbstractMoesifClient {
                 } else if (HttpStatusHelper.shouldRetry(statusCode)) {
                     log.error("{} publishing failed for organization: {}. Moesif returned {}. Response {}",
                             eventType,
-                            orgId.replaceAll("[\r\n]", ""),
-                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
+                            LogSanitizer.sanitize(orgId),
+                            LogSanitizer.sanitize(String.valueOf(statusCode)),
                             response.getRawBody());
                     retryAction.run();
                 } else {
                     log.error("{} Event publishing failed for organization: {}. Response {}.",
                             eventType,
-                            orgId.replaceAll("[\r\n]", ""),
+                            LogSanitizer.sanitize(orgId),
                             response.getRawBody());
                 }
             }
@@ -389,7 +390,7 @@ public class MoesifClient extends AbstractMoesifClient {
      * Validates if event should be published based on environment settings.
      */
     private boolean isValidForEnvironment(Map<String, Object> event, String userSelectedEnvironment) {
-        LinkedHashMap properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
+        Map<String, Object> properties = (Map<String, Object>) event.get(Constants.PROPERTIES);
         String eventEnvironment = (String) properties.get(Constants.DEPLOYMENT_TYPE);
 
         return !(Constants.PRODUCTION.equals(userSelectedEnvironment) &&
