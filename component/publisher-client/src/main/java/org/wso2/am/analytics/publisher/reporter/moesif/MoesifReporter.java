@@ -49,8 +49,8 @@ public class MoesifReporter extends AbstractMetricReporter {
         if (properties.get(Constants.WORKER_THREAD_COUNT) != null) {
             workerThreads = Integer.parseInt(properties.get(Constants.WORKER_THREAD_COUNT));
         }
-        if (properties.get("type").equals("moesif")) {
-            String moesifKey = properties.get("moesifKey");
+        if (properties.get(Constants.TYPE).equals(Constants.MOESIF)) {
+            String moesifKey = properties.get(Constants.MOESIF_KEY);
             this.eventQueue = new EventQueue(queueSize, workerThreads, moesifKey);
         } else {
             String moesifBasePath = properties.get(

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+/**
+ * Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -32,6 +32,7 @@ import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
 import org.wso2.am.analytics.publisher.util.Constants;
 import org.wso2.am.analytics.publisher.util.HttpStatusHelper;
+import org.wso2.am.analytics.publisher.util.LogSanitizer;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -76,7 +77,7 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         if (builders == null || builders.isEmpty()) {
             return;
         }
-        List<EventModel> events = buidEventsfromBuilders(builders);
+        List<EventModel> events = buildEventsFromBuilders(builders);
 
         APICallBack<HttpResponse> callBack = createMoesifCallback(() -> doRetry(builders),
                 "Batch of " + builders.size() + " events");
@@ -253,13 +254,13 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
                 } else if (HttpStatusHelper.shouldRetry(statusCode)) {
                     log.error("{} publishing failed. Moesif returned {}. Response: {}. Retrying...",
                             operationType,
-                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
+                            LogSanitizer.sanitize(String.valueOf(statusCode)),
                             response.getRawBody());
                     retryAction.run();
                 } else {
                     log.error("{} publishing failed. Moesif returned {}. Response: {}. No retry.",
                             operationType,
-                            String.valueOf(statusCode).replaceAll("[\r\n]", ""),
+                            LogSanitizer.sanitize(String.valueOf(statusCode)),
                             response.getRawBody());
                 }
             }
@@ -275,17 +276,17 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
                 if (HttpStatusHelper.shouldRetry(statusCode)) {
                     log.error("{} publishing failed. Moesif returned {}. Retrying...",
                             operationType,
-                            String.valueOf(statusCode).replaceAll("[\r\n]", ""));
+                            LogSanitizer.sanitize(String.valueOf(statusCode)));
                     retryAction.run();
                 } else if (HttpStatusHelper.isClientError(statusCode)) {
                     log.error("{} publishing failed. Moesif returned {} due to error: {}",
                             operationType,
                             statusCode,
-                            errorMessage.replaceAll("[\r\n]", ""));
+                            LogSanitizer.sanitize(errorMessage));
                 } else {
                     log.error("{} publishing failed due to error: {}",
                             operationType,
-                            errorMessage.replaceAll("[\r\n]", ""));
+                            LogSanitizer.sanitize(errorMessage));
                 }
             }
         };

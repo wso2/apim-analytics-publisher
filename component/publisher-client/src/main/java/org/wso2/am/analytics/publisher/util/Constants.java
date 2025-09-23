@@ -134,5 +134,8 @@ public class Constants {
     public static final String NO_CACHE_VALUE = "no-cache";
     public static final String EXPIRES_VALUE = "-1";
     public static final String APPLICATION_JSON_UTF8_VALUE = "application/json; charset=utf-8";
+    public static final String TYPE = "type";
+    public static final String MOESIF = "moesif";
+    public static final String MOESIF_KEY = "moesifKey";
 
 }
