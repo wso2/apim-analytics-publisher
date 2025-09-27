@@ -138,7 +138,7 @@ public class Constants {
     public static final String TYPE = "type";
     public static final String MOESIF = "moesif";
     public static final String MOESIF_KEY = "moesifKey";
-    public static final String MOESIF_BASE_URL = "moesif_base_url";
+    public static String MOESIF_BASE_URL = "moesif_base_url";
     public static final String REQUEST_HEADERS = "requestHeaders";
     public static final String RESPONSE_HEADERS = "responseHeaders";
 
