@@ -51,7 +51,12 @@ public class MoesifReporter extends AbstractMetricReporter {
         }
         if (properties.get(Constants.TYPE).equals(Constants.MOESIF)) {
             String moesifKey = properties.get(Constants.MOESIF_KEY);
-            this.eventQueue = new EventQueue(queueSize, workerThreads, moesifKey);
+            String moesifBasePath = properties.get(Constants.MOESIF_BASE_URL);
+            if (moesifBasePath == null || moesifBasePath.isEmpty()) {
+                this.eventQueue = new EventQueue(queueSize, workerThreads, moesifKey);
+            } else {
+                this.eventQueue = new EventQueue(queueSize, workerThreads, moesifKey, moesifBasePath);
+            }
         } else {
             String moesifBasePath = properties.get(
                     MoesifMicroserviceConstants.MOESIF_PROTOCOL_WITH_FQDN_KEY) + properties.get(

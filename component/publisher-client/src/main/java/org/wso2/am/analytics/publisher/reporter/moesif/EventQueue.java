@@ -46,6 +46,10 @@ public class EventQueue {
         this(queueSize, workerThreadCount, new SimpleMoesifClient(key));
     }
 
+    public EventQueue(int queueSize, int workerThreadCount, String key, String baseUrl) {
+        this(queueSize, workerThreadCount, new SimpleMoesifClient(key, baseUrl));
+    }
+
     public EventQueue(int queueSize, int workerThreadCount, MoesifKeyRetriever moesifKeyRetriever) {
         this(queueSize, workerThreadCount, new MoesifClient(moesifKeyRetriever));
     }
