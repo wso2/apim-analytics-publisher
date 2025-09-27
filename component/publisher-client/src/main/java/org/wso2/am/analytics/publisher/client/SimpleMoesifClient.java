@@ -58,6 +58,11 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         this.api = moesifAPIClient.getAPI();
     }
 
+    public SimpleMoesifClient(String key, String url) {
+        this.moesifAPIClient = new MoesifAPIClient(key, url);
+        this.api = moesifAPIClient.getAPI();
+    }
+
     @Override
     public void publish(MetricEventBuilder builder) throws MetricReportingException {
         Map<String, Object> event = builder.build();

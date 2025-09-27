@@ -139,10 +139,6 @@
                                     <version>${proton-j.version}</version>
                                 </bundle>
                                 <bundle>
-                                    <symbolicName>org.apache.qpid.proton-j</symbolicName>
-                                    <version>${proton-j.version}</version>
-                                </bundle>
-                                <bundle>
                                     <symbolicName>ua-parser</symbolicName>
                                     <version>${ua_parser.version}</version>
                                 </bundle>

@@ -31,6 +31,9 @@ import org.wso2.am.analytics.publisher.util.Constants;
 import java.util.Map;
 import java.util.Timer;
 
+import static org.wso2.am.analytics.publisher.util.Constants.MOESIF_BASE_URL;
+import static org.wso2.am.analytics.publisher.util.Constants.MOESIF_KEY;
+
 /**
  * Moesif Metric Reporter Implementation. This implementation is responsible for sending analytics data into Moesif
  * dashboard in a secure and reliable way.
@@ -50,8 +53,13 @@ public class MoesifReporter extends AbstractMetricReporter {
             workerThreads = Integer.parseInt(properties.get(Constants.WORKER_THREAD_COUNT));
         }
         if (properties.get("type").equals("moesif")) {
-            String moesifKey = properties.get("moesifKey");
-            this.eventQueue = new EventQueue(queueSize, workerThreads, moesifKey);
+            String moesifKey = properties.get(MOESIF_KEY);
+            String moesifBasePath = properties.get(MOESIF_BASE_URL);
+            if (moesifBasePath == null || moesifBasePath.isEmpty()) {
+                this.eventQueue = new EventQueue(queueSize, workerThreads, moesifKey);
+            } else {
+                this.eventQueue = new EventQueue(queueSize, workerThreads, moesifKey, moesifBasePath);
+            }
         } else {
             String moesifBasePath = properties.get(
                     MoesifMicroserviceConstants.MOESIF_PROTOCOL_WITH_FQDN_KEY) + properties.get(
