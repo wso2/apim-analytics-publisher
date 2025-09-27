@@ -185,7 +185,7 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
                 Constants.CORRELATION_ID, Constants.RESPONSE_CACHE_HIT, Constants.USER_NAME,
                 Constants.RESPONSE_MEDIATION_LATENCY, Constants.DESTINATION, Constants.ERROR_CODE,
                 Constants.ERROR_MESSAGE, Constants.ERROR_TYPE, Constants.TARGET_RESPONSE_CODE,
-                Constants.REQUEST_MEDIATION_LATENCY
+                Constants.REQUEST_MEDIATION_LATENCY, Constants.API_RESOURCE_TEMPLATE
         ));
 
         data.entrySet().stream().filter(entry -> requiredKeys.contains(entry.getKey()))
