@@ -142,7 +142,6 @@ public class MoesifClient extends AbstractMoesifClient {
         EventResponseModel eventRsp;
         EventModel eventModel = new EventModel();
         String modifiedUserName;
-
         if (!data.containsKey(Constants.ERROR_CODE)) {
             final String userIP = (String) data.get(Constants.USER_IP);
             final String userName = (String) data.get(Constants.USER_NAME);
