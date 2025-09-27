@@ -80,15 +80,15 @@ public class MetricReporterFactory {
     }
 
     public MetricReporter createMoesifMetricReporter(Map<String, String> properties) throws MetricCreationException {
-        if (reporterRegistry.get(Constants.MOESIF_REPORTER) == null) {
+        if (reporterRegistry.get(Constants.MOESIF) == null) {
             synchronized (this) {
-                if (reporterRegistry.get(Constants.MOESIF_REPORTER) == null) {
+                if (reporterRegistry.get(Constants.MOESIF) == null) {
                     MetricReporter reporterInstance = new MoesifReporter(properties);
-                    reporterRegistry.put(Constants.MOESIF_REPORTER, reporterInstance);
+                    reporterRegistry.put(Constants.MOESIF, reporterInstance);
                 }
             }
         }
-        MetricReporter reporterInstance = reporterRegistry.get(Constants.MOESIF_REPORTER);
+        MetricReporter reporterInstance = reporterRegistry.get(Constants.MOESIF);
         log.info("Metric Reporter of type " + reporterInstance.getClass().toString().replaceAll("[\r\n]", "") +
                 " is already created. Hence returning same instance");
         return reporterInstance;
