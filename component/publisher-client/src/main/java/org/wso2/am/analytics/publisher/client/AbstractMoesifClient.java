@@ -50,9 +50,9 @@ public abstract class AbstractMoesifClient {
         reqHeaders.put(Constants.MOESIF_USER_AGENT_KEY,
                 (String) data.getOrDefault(Constants.USER_AGENT_HEADER, Constants.UNKNOWN_VALUE));
         reqHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, Constants.MOESIF_CONTENT_TYPE_HEADER);
-
-        if (data.containsKey(Constants.REQUEST_HEADERS) && data.get(Constants.REQUEST_HEADERS) != null) {
-            Map<String, String> headers = (Map<String, String>) data.get(Constants.REQUEST_HEADERS);
+        Map<String, Object> properties = (Map<String, Object>) data.get(Constants.PROPERTIES);
+        if (properties.containsKey(Constants.REQUEST_HEADERS) && properties.get(Constants.REQUEST_HEADERS) != null) {
+            Map<String, String> headers = (Map<String, String>) properties.get(Constants.REQUEST_HEADERS);
             reqHeaders.putAll(headers);
         }
 
@@ -62,8 +62,8 @@ public abstract class AbstractMoesifClient {
         rspHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, Constants.APPLICATION_JSON_UTF8_VALUE);
         rspHeaders.put(Constants.CACHE_CONTROL_HEADER, Constants.NO_CACHE_VALUE);
 
-        if (data.containsKey(Constants.RESPONSE_HEADERS) && data.get(Constants.RESPONSE_HEADERS) != null) {
-            Map<String, String> headers = (Map<String, String>) data.get(Constants.RESPONSE_HEADERS);
+        if (properties.containsKey(Constants.RESPONSE_HEADERS) && properties.get(Constants.RESPONSE_HEADERS) != null) {
+            Map<String, String> headers = (Map<String, String>) properties.get(Constants.RESPONSE_HEADERS);
             rspHeaders.putAll(headers);
         }
     }

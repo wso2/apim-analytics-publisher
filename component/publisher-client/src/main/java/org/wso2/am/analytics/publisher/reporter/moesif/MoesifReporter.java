@@ -49,7 +49,7 @@ public class MoesifReporter extends AbstractMetricReporter {
         if (properties.get(Constants.WORKER_THREAD_COUNT) != null) {
             workerThreads = Integer.parseInt(properties.get(Constants.WORKER_THREAD_COUNT));
         }
-        if (properties.get(Constants.TYPE).equals(Constants.MOESIF)) {
+        if (properties.get(Constants.TYPE).contains(Constants.MOESIF)) {
             String moesifKey = properties.get(Constants.MOESIF_KEY);
             String moesifBasePath = properties.get(Constants.MOESIF_BASE_URL);
             if (moesifBasePath == null || moesifBasePath.isEmpty()) {
