@@ -317,8 +317,8 @@
         </build>
     <properties>
         <gson.import.version.range>[2.0.0, 3.0.0)</gson.import.version.range>
-        <moesif.api.version>1.7.4</moesif.api.version>
-        <moesif.unirest.version>1.0.8</moesif.unirest.version>
+        <moesif.api.version>1.8.5</moesif.api.version>
+        <moesif.unirest.version>1.0.10</moesif.unirest.version>
         <apache.httpcomponents.version>4.0.2</apache.httpcomponents.version>
         <azure.messaging.evenhub.version>5.3.1</azure.messaging.evenhub.version>
         <gson.version>2.11.0</gson.version>
