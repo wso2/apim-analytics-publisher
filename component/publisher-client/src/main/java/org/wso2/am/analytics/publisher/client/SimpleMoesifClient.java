@@ -185,12 +185,13 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
                 Constants.CORRELATION_ID, Constants.RESPONSE_CACHE_HIT, Constants.USER_NAME,
                 Constants.RESPONSE_MEDIATION_LATENCY, Constants.DESTINATION, Constants.ERROR_CODE,
                 Constants.ERROR_MESSAGE, Constants.ERROR_TYPE, Constants.TARGET_RESPONSE_CODE,
-                Constants.REQUEST_MEDIATION_LATENCY, Constants.API_RESOURCE_TEMPLATE
+                Constants.REQUEST_MEDIATION_LATENCY, Constants.API_RESOURCE_TEMPLATE, Constants.RESPONSE_LATENCY
+
         ));
 
         data.entrySet().stream().filter(entry -> requiredKeys.contains(entry.getKey()))
                 .filter(entry -> entry.getValue() != null)
-                .forEach(entry -> metadata.put(entry.getKey(), String.valueOf(entry.getValue())));
+                .forEach(entry -> metadata.put(entry.getKey(),entry.getValue()));
 
         // Add AI metadata and token usage if present
         populateAIInfo(data, metadata);
@@ -310,17 +311,18 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         if (data.get(Constants.PROPERTIES) != null) {
             Map<String, Object> properties = (Map<String, Object>) data.get(Constants.PROPERTIES);
             if (properties.containsKey(Constants.AI_METADATA)) {
-                metadata.put(Constants.AI_METADATA, properties.get(Constants.AI_METADATA));
+                metadata.put(Constants.AI_METADATA, properties.remove(Constants.AI_METADATA));
             }
             if (properties.containsKey(Constants.AI_TOKEN_USAGE)) {
-                metadata.put(Constants.AI_TOKEN_USAGE, properties.get(Constants.AI_TOKEN_USAGE));
+                metadata.put(Constants.AI_TOKEN_USAGE, properties.remove(Constants.AI_TOKEN_USAGE));
             }
             if (properties.containsKey(Constants.IS_EGRESS)) {
-                metadata.put(Constants.IS_EGRESS, properties.get(Constants.IS_EGRESS));
+                metadata.put(Constants.IS_EGRESS, properties.remove(Constants.IS_EGRESS));
             }
             if (properties.containsKey(Constants.SUBTYPE)) {
-                metadata.put(Constants.SUBTYPE, properties.get(Constants.SUBTYPE));
+                metadata.put(Constants.SUBTYPE, properties.remove(Constants.SUBTYPE));
             }
+            metadata.putAll(properties);
         }
     }
 }

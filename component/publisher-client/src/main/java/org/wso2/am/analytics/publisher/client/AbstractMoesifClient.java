@@ -51,6 +51,9 @@ public abstract class AbstractMoesifClient {
                 (String) data.getOrDefault(Constants.USER_AGENT_HEADER, Constants.UNKNOWN_VALUE));
         reqHeaders.put(Constants.MOESIF_CONTENT_TYPE_KEY, Constants.MOESIF_CONTENT_TYPE_HEADER);
         Map<String, Object> properties = (Map<String, Object>) data.get(Constants.PROPERTIES);
+        if (properties == null) {
+            return;
+        }
         if (properties.containsKey(Constants.REQUEST_HEADERS) && properties.get(Constants.REQUEST_HEADERS) != null) {
             Map<String, String> headers = (Map<String, String>) properties.get(Constants.REQUEST_HEADERS);
             reqHeaders.putAll(headers);
