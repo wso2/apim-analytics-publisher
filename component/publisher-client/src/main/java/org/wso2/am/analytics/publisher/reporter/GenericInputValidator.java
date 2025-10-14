@@ -281,7 +281,8 @@ public class GenericInputValidator {
                     new AbstractMap.SimpleImmutableEntry<>(REGION_ID, String.class),
                     new AbstractMap.SimpleImmutableEntry<>(GATEWAY_TYPE, String.class),
                     new AbstractMap.SimpleImmutableEntry<>(PROXY_RESPONSE_CODE, Integer.class),
-                    new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class))
+                    new AbstractMap.SimpleImmutableEntry<>(TARGET_RESPONSE_CODE, Integer.class),
+                    new AbstractMap.SimpleImmutableEntry<>(PROPERTIES, LinkedHashMap.class))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     private static final List<String> configProperties = new ArrayList<>();
 
