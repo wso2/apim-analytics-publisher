@@ -191,7 +191,7 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
 
         data.entrySet().stream().filter(entry -> requiredKeys.contains(entry.getKey()))
                 .filter(entry -> entry.getValue() != null)
-                .forEach(entry -> metadata.put(entry.getKey(),entry.getValue()));
+                .forEach(entry -> metadata.put(entry.getKey(), entry.getValue()));
 
         // Add AI metadata and token usage if present
         populateAIInfo(data, metadata);
