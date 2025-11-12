@@ -275,6 +275,8 @@ public class GenericInputValidator {
                     new AbstractMap.SimpleImmutableEntry<>(API_VERSION, String.class),
                     new AbstractMap.SimpleImmutableEntry<>(API_CREATION, String.class),
                     new AbstractMap.SimpleImmutableEntry<>(API_CREATOR_TENANT_DOMAIN, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_METHOD, String.class),
+                    new AbstractMap.SimpleImmutableEntry<>(API_RESOURCE_TEMPLATE, String.class),
                     new AbstractMap.SimpleImmutableEntry<>(APPLICATION_ID, String.class),
                     new AbstractMap.SimpleImmutableEntry<>(APPLICATION_NAME, String.class),
                     new AbstractMap.SimpleImmutableEntry<>(APPLICATION_OWNER, String.class),

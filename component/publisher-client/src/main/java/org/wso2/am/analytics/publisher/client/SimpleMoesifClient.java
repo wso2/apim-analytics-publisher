@@ -108,6 +108,7 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         Map<String, Object> metadata = new HashMap<>();
         populateMetadata(data, metadata);
 
+        modifiedUserName = sanitizeUserName(data);
         if (!data.containsKey(Constants.ERROR_CODE)) {
             final String userIP = (String) data.get(Constants.USER_IP);
             final String userName = (String) data.get(Constants.USER_NAME);
@@ -135,22 +136,31 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             eventRsp = new EventResponseBuilder().time(Date.from(responseTimestamp))
                     .status((int) data.get(Constants.PROXY_RESPONSE_CODE)).headers(rspHeaders).build();
 
-            if (userName.contains("@carbon.super")) {
-                modifiedUserName = userName.replace("@carbon.super", "");
-            } else {
-                modifiedUserName = userName;
-            }
-
         } else {
-
-            modifiedUserName = (String) data.get(Constants.API_CREATION);
-
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
             Instant requestTimestamp = Instant.from(
                     dateTimeFormatter.parse((String) data.get(Constants.REQUEST_TIMESTAMP)));
 
-            eventReq = new EventRequestBuilder().time(Date.from(requestTimestamp)).uri(Constants.NOT_APPLICABLE)
-                    .verb(Constants.NOT_APPLICABLE).apiVersion((String) data.get(Constants.API_VERSION))
+            String verb = (String) data.get(Constants.API_METHOD);
+            if (verb == null || verb.isEmpty()) {
+                verb = Constants.NOT_APPLICABLE;
+            }
+
+            String uri = "";
+            String apiResourceTemplate = (String) data.get(Constants.API_RESOURCE_TEMPLATE);
+            LinkedHashMap properties = (LinkedHashMap) data.get(Constants.PROPERTIES);
+            String apiContext = (String) properties.get(Constants.API_CONTEXT);
+            String gwURL = (String) properties.get(Constants.GATEWAY_URL);
+            uri = apiContext + apiResourceTemplate;
+            if (gwURL != null) {
+                uri = gwURL;
+            }
+            if (uri.isEmpty()) {
+                uri = Constants.NOT_APPLICABLE;
+            }
+
+            eventReq = new EventRequestBuilder().time(Date.from(requestTimestamp)).uri(uri)
+                    .verb(verb).apiVersion((String) data.get(Constants.API_VERSION))
                     .headers(reqHeaders).build();
 
             Date dateNow = Date.from(Instant.now());
@@ -324,5 +334,51 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             }
             metadata.putAll(properties);
         }
+    }
+
+    /**
+     * Sanitizes the username by removing the @carbon.super suffix.
+     * Extracts username from data map or properties, then removes the @carbon.super suffix if present.
+     *
+     * @param data The data map containing user information.
+     * @return The sanitized username or `Constants.UNKNOWN_VALUE` if no username is found
+     */
+    private String sanitizeUserName(Map<String, Object> data) {
+
+        String sanitizedUserName = "";
+        String userName = (String) data.get(Constants.USER_NAME);
+        Object propertiesObj = data.get(Constants.PROPERTIES);
+
+        if (userName != null && !userName.isEmpty()) {
+            sanitizedUserName = userName;
+            if (log.isDebugEnabled()) {
+                log.debug("Using userName from data: {}", userName);
+            }
+        } else if (propertiesObj instanceof LinkedHashMap) {
+            // We've confirmed it's a LinkedHashMap, but we still need to
+            // suppress the warning for the *generic* part (<String, Object>),
+            // which `instanceof` cannot check.
+            @SuppressWarnings("unchecked")
+            LinkedHashMap<String, Object> properties = (LinkedHashMap<String, Object>) propertiesObj;
+            String propUserName = (String) properties.get(Constants.USER_NAME);
+            if (propUserName != null) {
+                sanitizedUserName = propUserName;
+                if (log.isDebugEnabled()) {
+                    log.debug("Using userName from properties: {}", propUserName);
+                }
+            }
+        }
+
+        if (sanitizedUserName.contains("@carbon.super")) {
+            return sanitizedUserName.replace("@carbon.super", "");
+        }
+
+        if (sanitizedUserName.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("No username found, returning UNKNOWN_VALUE");
+            }
+            return Constants.UNKNOWN_VALUE;
+        }
+        return sanitizedUserName;
     }
 }
