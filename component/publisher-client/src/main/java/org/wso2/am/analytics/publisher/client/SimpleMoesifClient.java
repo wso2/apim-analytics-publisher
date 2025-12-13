@@ -195,6 +195,8 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
 
         // Add AI metadata and token usage if present
         populateAIInfo(data, metadata);
+        // Add MCP metadata if present
+        populateMCPInfo(data, metadata);
 
     }
 
@@ -323,6 +325,25 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
                 metadata.put(Constants.SUBTYPE, properties.remove(Constants.SUBTYPE));
             }
             metadata.putAll(properties);
+        }
+    }
+
+    /**
+     * Populates MCP analytics information into the metadata map if available in the source data.
+     *
+     * This method checks for the presence of MCP analytics data in the properties of the source
+     * data map. If found, it removes the analytics data from the source map and transfers it
+     * to the metadata map.
+     *
+     * @param data     The source data map containing various fields, including properties with MCP analytics information.
+     * @param metadata The target metadata map that will be populated with MCP analytics data if present in the source data.
+     */
+    private void populateMCPInfo(Map<String, Object> data, Map<String, Object> metadata) {
+        if (data.get(Constants.PROPERTIES) != null) {
+            Map<String, Object> properties = (Map<String, Object>) data.get(Constants.PROPERTIES);
+            if (properties.containsKey(Constants.MCP_ANALYTICS)) {
+                metadata.put(Constants.MCP_ANALYTICS, properties.remove(Constants.MCP_ANALYTICS));
+            }
         }
     }
 }
