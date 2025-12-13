@@ -342,6 +342,9 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         if (data.get(Constants.PROPERTIES) != null) {
             Map<String, Object> properties = (Map<String, Object>) data.get(Constants.PROPERTIES);
             if (properties.containsKey(Constants.MCP_ANALYTICS)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("MCP analytics data found and transferred to metadata");
+                }
                 metadata.put(Constants.MCP_ANALYTICS, properties.remove(Constants.MCP_ANALYTICS));
             }
         }
