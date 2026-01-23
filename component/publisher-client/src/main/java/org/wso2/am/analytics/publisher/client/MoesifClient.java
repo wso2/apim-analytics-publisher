@@ -160,10 +160,14 @@ public class MoesifClient extends AbstractMoesifClient {
             if (gwURL != null) {
                 uri = gwURL;
             }
+            String billingCustomerId = (String) properties.get(Constants.BILLING_CUSTOMER_ID);
+            String billingSubscriptionId = (String) properties.get(Constants.BILLING_SUBSCRIPTION_ID);
 
             eventReq = new EventRequestBuilder()
                     .time(Date.from(requestTimestamp))
                     .uri(uri)
+                    .billingCustomerId(billingCustomerId)
+                    .billingSubscriptionId(billingSubscriptionId)
                     .verb((String) data.get(Constants.API_METHOD))
                     .apiVersion((String) data.get(Constants.API_VERSION))
                     .ipAddress(userIP)
@@ -189,6 +193,8 @@ public class MoesifClient extends AbstractMoesifClient {
 
             String apiContext = (String) data.get(Constants.API_CONTEXT);
             String gwURL = (String) properties.get(Constants.GATEWAY_URL);
+            String billingCustomerId = (String) properties.get(Constants.BILLING_CUSTOMER_ID);
+            String billingSubscriptionId = (String) properties.get(Constants.BILLING_SUBSCRIPTION_ID);
             String apiResourceTemplate = (String) data.get(Constants.API_RESOURCE_TEMPLATE);
             String uri = apiContext + apiResourceTemplate;
 
@@ -208,6 +214,8 @@ public class MoesifClient extends AbstractMoesifClient {
             eventReq = new EventRequestBuilder()
                     .time(errorRequestTimestamp)
                     .uri(uri)
+                    .billingCustomerId(billingCustomerId)
+                    .billingSubscriptionId(billingSubscriptionId)
                     .verb((String) properties.get(Constants.API_METHOD))
                     .apiVersion((String) data.get(Constants.API_VERSION))
                     .headers(reqHeaders)
