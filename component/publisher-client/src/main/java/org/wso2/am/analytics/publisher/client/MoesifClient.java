@@ -335,15 +335,18 @@ public class MoesifClient extends AbstractMoesifClient {
         for (Map.Entry<String, List<MetricEventBuilder>> envEntry : eventsByEnv.entrySet()) {
             String environment = envEntry.getKey();
             List<MetricEventBuilder> builders = envEntry.getValue();
-
-            // Get Moesif key for this environment
-            String moesifKey = envKeyMap.get(environment);
-            if (moesifKey == null) {
-                log.warn("No Moesif key found for organization: {} and environment: {}. Skipping {} events",
-                        orgId, environment, builders.size());
+            
+            String moesifKey;
+            if (envKeyMap.size() == 1) {
+                moesifKey = envKeyMap.values().iterator().next();
+            } else {
+                moesifKey = envKeyMap.get(environment);
+                if (moesifKey == null) {
+                    log.warn("No Moesif key found for organization: {} and environment: {}. Skipping {} events", 
+                    orgId, environment, builders.size());
                 continue;
+                }
             }
-
             // Build event models
             List<EventModel> validEvents = new ArrayList<>();
             for (MetricEventBuilder builder : builders) {
