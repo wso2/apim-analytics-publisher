@@ -371,11 +371,12 @@ public class MoesifClient extends AbstractMoesifClient {
 
             APICallBack<HttpResponse> callBack = createMoesifCallBack(() -> doRetry(orgId, builders),
                     "Batch event", orgId);
-
             try {
                 if (validEvents.size() == 1) {
+                    log.info("Publishing single event for org: {} environment: {}", orgId, environment);
                     api.createEventAsync(validEvents.get(0), callBack);
                 } else {
+                    log.info("Publishing batch of {} events for org: {} environment: {}", validEvents.size(), orgId, environment);
                     api.createEventsBatchAsync(validEvents, callBack);
                 }
             } catch (IOException e) {
