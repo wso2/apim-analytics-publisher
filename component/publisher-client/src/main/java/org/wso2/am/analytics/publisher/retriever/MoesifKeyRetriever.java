@@ -300,7 +300,7 @@ public class MoesifKeyRetriever {
             String moesifKey = entry.getMoesif_key();
             orgIDMoesifKeyMap.computeIfAbsent(orgID, k -> new ConcurrentHashMap<>()).put(env, moesifKey);
         }
-        log.info("Successfully updated Moesif keys for {} organizations", keyList.size());
+        log.info("Successfully updated Moesif keys for {} organizations", orgIDMoesifKeyMap.size());
     }
 
     /**

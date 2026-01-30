@@ -124,6 +124,8 @@ public class MoesifClient extends AbstractMoesifClient {
 
         Map<String, Map<String, List<MetricEventBuilder>>> eventsByOrgAndEnv =
                 groupEventsByOrganizationAndEnvironment(builders);
+        
+        log.info("Publishing batch of events for {} organizations", eventsByOrgAndEnv.size());
 
         for (Map.Entry<String, Map<String, List<MetricEventBuilder>>> orgEntry : eventsByOrgAndEnv.entrySet()) {
             String orgId = orgEntry.getKey();
