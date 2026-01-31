@@ -81,6 +81,11 @@ public class MoesifClient extends AbstractMoesifClient {
         }
 
         String eventEnvironment = (String) properties.get(Constants.DEPLOYMENT_TYPE);
+        
+        if (eventEnvironment == null || eventEnvironment.isEmpty()) {
+            log.debug("Event missing environment for organization: {}. Skipping event.", orgId);
+            return;
+        }
 
         if (!orgIDMoesifKeyMap.containsKey(orgId)) {
             log.debug("No Moesif key found for organization: {}. Skipping event.", orgId);
