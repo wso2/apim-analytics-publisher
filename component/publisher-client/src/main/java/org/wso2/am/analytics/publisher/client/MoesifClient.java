@@ -71,13 +71,14 @@ public class MoesifClient extends AbstractMoesifClient {
     @Override
     public void publish(MetricEventBuilder builder) throws MetricReportingException {
         Map<String, Object> event = builder.build();
-        ConcurrentHashMap<String, ConcurrentHashMap<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
         
         String orgId = (String) event.get(Constants.ORGANIZATION_ID);
         if (orgId == null || orgId.isEmpty()) {
             log.debug("Event missing organization ID. Skipping event.");
             return;
         }
+        
+        ConcurrentHashMap<String, ConcurrentHashMap<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
         
         LinkedHashMap properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
         if (properties == null) {
@@ -114,10 +115,6 @@ public class MoesifClient extends AbstractMoesifClient {
 
         // init moesif api client
         MoesifAPIClient client = new MoesifAPIClient(moesifKey);
-
-        // api object is a singleton which will make calls to
-        // moesif endpoints with the latest MoesifAPI client being provided.
-        // Hence avoid maintaining a map of MoesifAPIClient against moesif keys.
         APIController api = client.getAPI();
 
         APICallBack<HttpResponse> callBack = createMoesifCallBack(() -> doRetry(orgId, builder),
