@@ -72,16 +72,20 @@ public class MoesifClient extends AbstractMoesifClient {
     public void publish(MetricEventBuilder builder) throws MetricReportingException {
         Map<String, Object> event = builder.build();
         ConcurrentHashMap<String, ConcurrentHashMap<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
-        LinkedHashMap properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
+        
         String orgId = (String) event.get(Constants.ORGANIZATION_ID);
-
+        if (orgId == null || orgId.isEmpty()) {
+            log.debug("Event missing organization ID. Skipping event.");
+            return;
+        }
+        
+        LinkedHashMap properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
         if (properties == null) {
             log.debug("Event missing properties. Skipping event for organization: {}", orgId);
             return;
         }
-
-        String eventEnvironment = (String) properties.get(Constants.DEPLOYMENT_TYPE);
         
+        String eventEnvironment = (String) properties.get(Constants.DEPLOYMENT_TYPE);
         if (eventEnvironment == null || eventEnvironment.isEmpty()) {
             log.debug("Event missing environment for organization: {}. Skipping event.", orgId);
             return;
