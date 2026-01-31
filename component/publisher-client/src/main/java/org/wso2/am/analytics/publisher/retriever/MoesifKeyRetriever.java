@@ -276,6 +276,7 @@ public class MoesifKeyRetriever {
         String moesifKey = newKey.getMoesif_key();
         String env = newKey.getEnv();
         orgIDMoesifKeyMap.computeIfAbsent(orgID, k -> new ConcurrentHashMap<>()).put(env, moesifKey);
+        log.info("Updated Moesif key for organization: {} and environment: {}", orgID, env);
     }
 
     private synchronized void updateMap(String response) {
