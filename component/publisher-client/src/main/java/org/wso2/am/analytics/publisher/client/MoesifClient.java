@@ -407,11 +407,13 @@ public class MoesifClient extends AbstractMoesifClient {
                     log.info("Publishing single event for org: {} environment: {}", orgId, environment);
                     api.createEventAsync(validEvents.get(0), callBack);
                 } else {
-                    log.info("Publishing batch of {} events for org: {} environment: {}", validEvents.size(), orgId, environment);
+                    log.info("Publishing batch of {} events for org: {} environment: {}", 
+                    validEvents.size(), orgId, environment);
                     api.createEventsBatchAsync(validEvents, callBack);
                 }
             } catch (IOException e) {
-                log.error("Analytics event sending failed for organization {} and environment {}", orgId, environment, e);
+                log.error("Analytics event sending failed for organization {} and environment {}", 
+                orgId, environment, e);
             }
         }
     }

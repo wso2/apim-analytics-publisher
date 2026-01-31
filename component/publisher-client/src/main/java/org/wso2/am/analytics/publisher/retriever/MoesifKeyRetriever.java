@@ -299,6 +299,11 @@ public class MoesifKeyRetriever {
             String orgID = entry.getOrganization_id();
             String env = entry.getEnv();
             String moesifKey = entry.getMoesif_key();
+            if (orgID == null || env == null || moesifKey == null) {
+                log.warn("Skipping entry with null values - orgID: {}, env: {}, key present: {}",
+                orgID, env, moesifKey != null);
+                return;
+            }
             orgIDMoesifKeyMap.computeIfAbsent(orgID, k -> new ConcurrentHashMap<>()).put(env, moesifKey);
         }
         log.info("Successfully updated Moesif keys for {} organizations", orgIDMoesifKeyMap.size());
