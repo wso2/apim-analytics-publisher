@@ -302,7 +302,7 @@ public class MoesifKeyRetriever {
             if (orgID == null || env == null || moesifKey == null) {
                 log.warn("Skipping entry with null values - orgID: {}, env: {}, key present: {}",
                 orgID, env, moesifKey != null);
-                return;
+                continue;
             }
             orgIDMoesifKeyMap.computeIfAbsent(orgID, k -> new ConcurrentHashMap<>()).put(env, moesifKey);
         }
