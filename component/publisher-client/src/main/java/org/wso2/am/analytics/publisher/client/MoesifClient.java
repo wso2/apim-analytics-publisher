@@ -78,8 +78,6 @@ public class MoesifClient extends AbstractMoesifClient {
             return;
         }
         
-        ConcurrentHashMap<String, ConcurrentHashMap<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
-        
         LinkedHashMap properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
         if (properties == null) {
             log.debug("Event missing properties. Skipping event for organization: {}", orgId);
@@ -91,7 +89,9 @@ public class MoesifClient extends AbstractMoesifClient {
             log.debug("Event missing environment for organization: {}. Skipping event.", orgId);
             return;
         }
-
+        
+        ConcurrentHashMap<String, ConcurrentHashMap<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
+        
         if (!orgIDMoesifKeyMap.containsKey(orgId)) {
             log.debug("No Moesif key found for organization: {}. Skipping event.", orgId);
             return;
