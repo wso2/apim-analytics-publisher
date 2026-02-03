@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Thread-safe for concurrent access.
  */
 public class OrgMoesifKeyMapping {
-    private String organizationId;
+    private volatile String organizationId;
     private final Map<String, String> environmentKeyMap;
     private final Map<String, List<MoesifEventData>> environmentEventBatches;
 
@@ -97,7 +97,7 @@ public class OrgMoesifKeyMapping {
      * @return Map of environment names to Moesif API keys.
      */
     public Map<String, String> getEnvironmentKeyMap() {
-        return environmentKeyMap;
+        return Collections.unmodifiableMap(environmentKeyMap);
     }
 
     /**
@@ -240,7 +240,7 @@ public class OrgMoesifKeyMapping {
      * @return Map of environment to list of events.
      */
     public Map<String, List<MoesifEventData>> getEnvironmentEventBatches() {
-        return environmentEventBatches;
+        return Collections.unmodifiableMap(environmentEventBatches);
     }
 
     /**
@@ -281,6 +281,6 @@ public class OrgMoesifKeyMapping {
      * @return Set of environment names (normalized to lowercase).
      */
     public java.util.Set<String> getEnvironments() {
-        return environmentEventBatches.keySet();
+        return new java.util.HashSet<>(environmentEventBatches.keySet());
     }
 }
