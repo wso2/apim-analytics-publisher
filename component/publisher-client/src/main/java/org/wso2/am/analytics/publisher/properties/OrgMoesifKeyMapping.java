@@ -108,7 +108,7 @@ public class OrgMoesifKeyMapping {
      * @param environmentKeyMap Map of environment names to Moesif API keys.
      */
     public void setEnvironmentKeyMap(Map<String, String> environmentKeyMap) {
-        Map<String, String> normalizedMap = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, String> normalizedMap = new ConcurrentHashMap<>();
         if (environmentKeyMap != null) {
             for (Map.Entry<String, String> entry : environmentKeyMap.entrySet()) {
                 String key = entry.getKey();
@@ -174,8 +174,8 @@ public class OrgMoesifKeyMapping {
      * @return The Moesif API key if only one exists, null otherwise.
      */
     public String getSingleEnvironmentKey() {
-        if (hasSingleEnvironment()) {
-            return environmentKeyMap.values().iterator().next();
+        for (String value : environmentKeyMap.values()) {
+            return value;
         }
         return null;
     }
@@ -204,7 +204,7 @@ public class OrgMoesifKeyMapping {
     public void addEvent(String environment, MoesifEventData eventData) {
         if (environment != null && eventData != null) {
             environmentEventBatches
-                .computeIfAbsent(environment.toLowerCase(), k -> Collections.synchronizedList(new ArrayList<>()))
+                .computeIfAbsent(environment.toLowerCase(), k -> new java.util.concurrent.CopyOnWriteArrayList<>())
                 .add(eventData);
         }
     }
@@ -230,7 +230,8 @@ public class OrgMoesifKeyMapping {
         if (environment == null) {
             return Collections.emptyList();
         }
-        return environmentEventBatches.getOrDefault(environment.toLowerCase(), Collections.emptyList());
+        List<MoesifEventData> events = environmentEventBatches.get(environment.toLowerCase());
+        return events == null ? Collections.emptyList() : Collections.unmodifiableList(new ArrayList<>(events));
     }
 
     /**
