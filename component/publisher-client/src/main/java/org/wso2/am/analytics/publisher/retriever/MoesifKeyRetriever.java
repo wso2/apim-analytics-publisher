@@ -39,6 +39,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -51,7 +52,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class MoesifKeyRetriever {
     private static final Logger log = LogManager.getLogger(MoesifKeyRetriever.class);
     private static MoesifKeyRetriever moesifKeyRetriever;
-    private ConcurrentHashMap<String, ConcurrentHashMap<String, String>> orgIDMoesifKeyMap;
+    private Map<String, Map<String, String>> orgIDMoesifKeyMap;
     // username of Moesif microservice
     private String msAuthUsername;
     // password of Moesif microservice
@@ -314,7 +315,7 @@ public class MoesifKeyRetriever {
      *
      * @return orgIDMoesifKeyMap
      */
-    public ConcurrentHashMap<String, ConcurrentHashMap<String, String>> getMoesifKeyMap() {
+    public Map<String, Map<String, String>> getMoesifKeyMap() {
         return orgIDMoesifKeyMap;
     }
 

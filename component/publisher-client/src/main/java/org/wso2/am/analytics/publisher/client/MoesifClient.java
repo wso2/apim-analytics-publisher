@@ -49,7 +49,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This client is responsible for publishing events from choreo backend
@@ -78,7 +77,7 @@ public class MoesifClient extends AbstractMoesifClient {
             return;
         }
         
-        LinkedHashMap properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
+        Map properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
         if (properties == null) {
             log.debug("Event missing properties. Skipping event for organization: {}", orgId);
             return;
@@ -90,14 +89,14 @@ public class MoesifClient extends AbstractMoesifClient {
             return;
         }
         
-        ConcurrentHashMap<String, ConcurrentHashMap<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
+        Map<String, Map<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
         
         if (!orgIDMoesifKeyMap.containsKey(orgId)) {
             log.debug("No Moesif key found for organization: {}. Skipping event.", orgId);
             return;
         }
 
-        ConcurrentHashMap<String, String> envKeyMap = orgIDMoesifKeyMap.get(orgId);
+        Map<String, String> envKeyMap = orgIDMoesifKeyMap.get(orgId);
         String moesifKey;
 
         // If old records with only one environment, use that single key
@@ -353,14 +352,14 @@ public class MoesifClient extends AbstractMoesifClient {
      * Events are already grouped by environment, so each environment batch is published separately.
      */
     private void publishBatchForOrganization(String orgId, Map<String, List<Map<String, Object>>> eventsByEnv) {
-        ConcurrentHashMap<String, ConcurrentHashMap<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
+        Map<String, Map<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
 
         if (!orgIDMoesifKeyMap.containsKey(orgId)) {
             log.warn("No Moesif key found for organization: {}. Skipping events", orgId);
             return;
         }
 
-        ConcurrentHashMap<String, String> envKeyMap = orgIDMoesifKeyMap.get(orgId);
+        Map<String, String> envKeyMap = orgIDMoesifKeyMap.get(orgId);
 
         for (Map.Entry<String, List<Map<String, Object>>> envEntry : eventsByEnv.entrySet()) {
             String environment = envEntry.getKey();
@@ -434,7 +433,7 @@ public class MoesifClient extends AbstractMoesifClient {
                     continue;
                 }
 
-                LinkedHashMap properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
+                Map properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
                 String environment = (String) properties.get(Constants.DEPLOYMENT_TYPE);
                 if (environment == null || environment.isEmpty()) {
                     log.warn("Skipping event with no environment for organization: {}", orgId);
