@@ -31,6 +31,8 @@ import com.moesif.api.models.EventResponseModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
+import org.wso2.am.analytics.publisher.properties.MoesifEventData;
+import org.wso2.am.analytics.publisher.properties.OrgMoesifKeyMapping;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
@@ -63,6 +65,20 @@ public class MoesifClient extends AbstractMoesifClient {
     }
 
     /**
+     * Gets the OrgMoesifKeyMapping for a specific organization.
+     *
+     * @param orgId The organization FID.
+     * @return OrgMoesifKeyMapping instance, or null if not found.
+     */
+    private OrgMoesifKeyMapping getOrgMoesifKeyMapping(String orgId) {
+        Map<String, Map<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
+        if (orgIDMoesifKeyMap.containsKey(orgId)) {
+            return new OrgMoesifKeyMapping(orgId, orgIDMoesifKeyMap.get(orgId));
+        }
+        return null;
+    }
+
+    /**
      * publish method is responsible for checking the availability of relevant
      * moesif key
      * and initiating moesif client sdk.
@@ -91,22 +107,20 @@ public class MoesifClient extends AbstractMoesifClient {
             return;
         }
         
-        Map<String, Map<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
-        
-        if (!orgIDMoesifKeyMap.containsKey(orgId)) {
+        OrgMoesifKeyMapping orgKeyMapping = getOrgMoesifKeyMapping(orgId);
+        if (orgKeyMapping == null) {
             log.debug("No Moesif key found for organization: {}. Skipping event.", orgId);
             return;
         }
 
-        Map<String, String> envKeyMap = orgIDMoesifKeyMap.get(orgId);
         String moesifKey;
 
         // If old records with only one environment, use that single key
-        if (envKeyMap.size() == 1) {
-            moesifKey = envKeyMap.values().iterator().next();
+        if (orgKeyMapping.hasSingleEnvironment()) {
+            moesifKey = orgKeyMapping.getSingleEnvironmentKey();
         } else {
             // Multiple environments exist, get key for specific environment
-            moesifKey = envKeyMap.get(eventEnvironment);
+            moesifKey = orgKeyMapping.getMoesifKeyForEnvironment(eventEnvironment);
             if (moesifKey == null) {
                 log.debug("No Moesif key found for organization: {} and environment: {}. Skipping event.",
                         orgId, eventEnvironment);
@@ -134,18 +148,16 @@ public class MoesifClient extends AbstractMoesifClient {
             return;
         }
 
-        Map<String, Map<String, List<Map<String, Object>>>> eventsByOrgAndEnv =
-            groupEventsByOrganizationAndEnvironment(builders);
+        Map<String, OrgMoesifKeyMapping> orgMappings = groupEventsByOrganizationAndEnvironment(builders);
         
-        log.info("Publishing batch of events for {} organizations", eventsByOrgAndEnv.size());
+        log.info("Publishing batch of events for {} organizations", orgMappings.size());
 
-        for (Map.Entry<String, Map<String, List<Map<String, Object>>>> orgEntry
-        : eventsByOrgAndEnv.entrySet()) {
-            String orgId = orgEntry.getKey();
-            Map<String, List<Map<String, Object>>> eventsByEnv = orgEntry.getValue();
+        for (Map.Entry<String, OrgMoesifKeyMapping> entry : orgMappings.entrySet()) {
+            String orgId = entry.getKey();
+            OrgMoesifKeyMapping orgMapping = entry.getValue();
 
             try {
-                publishBatchForOrganization(orgId, eventsByEnv);
+                publishBatchForOrganization(orgMapping);
             } catch (Exception e) {
                 log.error("Error while processing events for organization: {}", orgId, e);
             }
@@ -295,7 +307,7 @@ public class MoesifClient extends AbstractMoesifClient {
         };
     }
 
-    private void doRetry(String orgId, Map<String, List<Map<String, Object>>> eventsByOrgAndEnv) {
+    private void doRetry(OrgMoesifKeyMapping orgMapping) {
         Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
 
         if (currentAttempt > 0) {
@@ -303,15 +315,13 @@ public class MoesifClient extends AbstractMoesifClient {
             MoesifClientContextHolder.PUBLISH_ATTEMPTS.set(currentAttempt);
             try {
                 Thread.sleep(MoesifMicroserviceConstants.TIME_TO_WAIT_PUBLISH);
-                Map<String, Map<String, List<Map<String, Object>>>> singleOrgMap = new HashMap<>();
-                singleOrgMap.put(orgId, eventsByOrgAndEnv);
-                publishBatchBuiltEvents(singleOrgMap);
+                publishBatchForOrganization(orgMapping);
             } catch (InterruptedException e) {
                 log.error("Failing retry attempt at Moesif client", e);
             }
         } else if (currentAttempt == 0) {
             log.error("Failed all retrying attempts. Event will be dropped for organization {}",
-                    orgId.replaceAll("[\r\n]", ""));
+                    orgMapping.getOrganizationId().replaceAll("[\r\n]", ""));
         }
     }
 
@@ -335,43 +345,26 @@ public class MoesifClient extends AbstractMoesifClient {
         }
     }
 
-    private void publishBatchBuiltEvents(
-        Map<String, Map<String, List<Map<String, Object>>>> eventsByOrgAndEnv) {
-
-        for (Map.Entry<String, Map<String, List<Map<String, Object>>>> orgEntry
-                : eventsByOrgAndEnv.entrySet()) {
-            String orgId = orgEntry.getKey();
-            Map<String, List<Map<String, Object>>> eventsByEnv = orgEntry.getValue();
-            try {
-                publishBatchForOrganization(orgId, eventsByEnv);
-            } catch (Exception e) {
-                log.error("Error while processing events for organization: {}", orgId, e);
-            }
-        }
-    }
     /**
      * Publishes a batch of events for a specific organization using true batch API.
      * Events are already grouped by environment, so each environment batch is published separately.
      */
-    private void publishBatchForOrganization(String orgId, Map<String, List<Map<String, Object>>> eventsByEnv) {
-        Map<String, Map<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
-
-        if (!orgIDMoesifKeyMap.containsKey(orgId)) {
+    private void publishBatchForOrganization(OrgMoesifKeyMapping orgMapping) {
+        String orgId = orgMapping.getOrganizationId();
+        
+        if (!orgMapping.hasKeys()) {
             log.warn("No Moesif key found for organization: {}. Skipping events", orgId);
             return;
         }
 
-        Map<String, String> envKeyMap = orgIDMoesifKeyMap.get(orgId);
-
-        for (Map.Entry<String, List<Map<String, Object>>> envEntry : eventsByEnv.entrySet()) {
-            String environment = envEntry.getKey();
-            List<Map<String, Object>> events = envEntry.getValue();
+        for (String environment : orgMapping.getEnvironments()) {
+            List<MoesifEventData> events = orgMapping.getEventsForEnvironment(environment);
             
             String moesifKey;
-            if (envKeyMap.size() == 1) {
-                moesifKey = envKeyMap.values().iterator().next();
+            if (orgMapping.hasSingleEnvironment()) {
+                moesifKey = orgMapping.getSingleEnvironmentKey();
             } else {
-                moesifKey = envKeyMap.get(environment);
+                moesifKey = orgMapping.getMoesifKeyForEnvironment(environment);
                 if (moesifKey == null) {
                     log.warn("No Moesif key found for organization: {} and environment: {}. Skipping {} events", 
                         orgId, environment, events.size());
@@ -380,9 +373,9 @@ public class MoesifClient extends AbstractMoesifClient {
             }
             
             List<EventModel> validEvents = new ArrayList<>();
-            for (Map<String, Object> event : events) {
+            for (MoesifEventData eventData : events) {
                 try {
-                    validEvents.add(buildEventResponse(event));
+                    validEvents.add(buildEventResponse(eventData.getEventData()));
                 } catch (Exception e) {
                     log.error("Failed to build event for batch processing", e);
                 }
@@ -396,11 +389,13 @@ public class MoesifClient extends AbstractMoesifClient {
             MoesifAPIClient client = new MoesifAPIClient(moesifKey);
             APIController api = client.getAPI();
 
-            Map<String, List<Map<String, Object>>> singleEnvMap = new HashMap<>();
-            singleEnvMap.put(environment, events);
+            OrgMoesifKeyMapping retryMapping = new OrgMoesifKeyMapping(orgId, orgMapping.getEnvironmentKeyMap());
+            Map<String, List<MoesifEventData>> retryBatch = new HashMap<>();
+            retryBatch.put(environment, events);
+            retryMapping.setEnvironmentEventBatches(retryBatch);
             
             APICallBack<HttpResponse> callBack = createMoesifCallBack(
-                () -> doRetry(orgId, singleEnvMap),
+                () -> doRetry(retryMapping),
                 "Batch event", orgId);
 
             try {
@@ -419,12 +414,11 @@ public class MoesifClient extends AbstractMoesifClient {
         }
     }
     /**
-     * Groups events by organization ID and environment for batch processing efficiency.
-     * Returns a nested map: orgId -> environment -> list of events
+     * Groups events by organization ID, and within each organization, groups them by environment.
      */
-    private Map<String, Map<String, List<Map<String, Object>>>> groupEventsByOrganizationAndEnvironment(
+    private Map<String, OrgMoesifKeyMapping> groupEventsByOrganizationAndEnvironment(
             List<MetricEventBuilder> builders) {
-        Map<String, Map<String, List<Map<String, Object>>>> eventsByOrgAndEnv = new HashMap<>();
+        Map<String, OrgMoesifKeyMapping> orgMappings = new HashMap<>();
         
         for (MetricEventBuilder builder : builders) {
             try {
@@ -442,14 +436,22 @@ public class MoesifClient extends AbstractMoesifClient {
                     continue;
                 }
 
-                eventsByOrgAndEnv
-                    .computeIfAbsent(orgId, k -> new HashMap<>())
-                    .computeIfAbsent(environment, k -> new ArrayList<>())
-                    .add(event);
+                OrgMoesifKeyMapping orgMapping = orgMappings.computeIfAbsent(orgId, id -> 
+                    getOrgMoesifKeyMapping(id)
+                );
+                
+                if (orgMapping == null || !orgMapping.hasKeys()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Skipping event for organization {} - no Moesif keys configured", orgId);
+                    }
+                    continue;
+                }
+                
+                orgMapping.addEvent(environment, event);
             } catch (Exception e) {
                 log.error("Failed to extract organization ID or environment from event, skipping", e);
             }
         }
-        return eventsByOrgAndEnv;
+        return orgMappings;
     }
 }

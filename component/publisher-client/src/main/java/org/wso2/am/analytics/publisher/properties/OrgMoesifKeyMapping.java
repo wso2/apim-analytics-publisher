@@ -1,0 +1,286 @@
+/*
+ * Copyright (c) 2026, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.wso2.am.analytics.publisher.properties;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Represents the Moesif key mapping for an organization.
+ * Maps environment names to their corresponding Moesif API keys.
+ * Also supports grouping events by environment for batch processing.
+ * Thread-safe for concurrent access.
+ */
+public class OrgMoesifKeyMapping {
+    private String organizationId;
+    private final Map<String, String> environmentKeyMap;
+    private final Map<String, List<MoesifEventData>> environmentEventBatches;
+
+    /**
+     * Default constructor.
+     */
+    public OrgMoesifKeyMapping() {
+        this.environmentKeyMap = new ConcurrentHashMap<>();
+        this.environmentEventBatches = new ConcurrentHashMap<>();
+    }
+
+    /**
+     * Constructor with organization ID.
+     *
+     * @param organizationId The organization ID.
+     */
+    public OrgMoesifKeyMapping(String organizationId) {
+        this.organizationId = organizationId;
+        this.environmentKeyMap = new ConcurrentHashMap<>();
+        this.environmentEventBatches = new ConcurrentHashMap<>();
+    }
+
+    /**
+     * Constructor with organization ID and environment key map.
+     *
+     * @param organizationId      The organization ID.
+     * @param environmentKeyMap   Map of environment to Moesif key.
+     */
+    public OrgMoesifKeyMapping(String organizationId, Map<String, String> environmentKeyMap) {
+        this.organizationId = organizationId;
+        this.environmentKeyMap = new ConcurrentHashMap<>();
+        // Normalize environment keys to lowercase for case-insensitive comparison
+        if (environmentKeyMap != null) {
+            for (Map.Entry<String, String> entry : environmentKeyMap.entrySet()) {
+                String key = entry.getKey();
+                if (key != null) {
+                    this.environmentKeyMap.put(key.toLowerCase(), entry.getValue());
+                }
+            }
+        }
+        this.environmentEventBatches = new ConcurrentHashMap<>();
+    }
+
+    /**
+     * Gets the organization ID.
+     *
+     * @return The organization ID.
+     */
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    /**
+     * Sets the organization ID.
+     *
+     * @param organizationId The organization ID.
+     */
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    /**
+     * Gets the environment to Moesif key mapping.
+     *
+     * @return Map of environment names to Moesif API keys.
+     */
+    public Map<String, String> getEnvironmentKeyMap() {
+        return environmentKeyMap;
+    }
+
+    /**
+     * Sets the environment to Moesif key mapping.
+     * Environment names are normalized to lowercase for case-insensitive comparison.
+     * This operation is atomic - the map is either fully updated or not at all.
+     *
+     * @param environmentKeyMap Map of environment names to Moesif API keys.
+     */
+    public void setEnvironmentKeyMap(Map<String, String> environmentKeyMap) {
+        // Build normalized map first for atomic replacement
+        Map<String, String> normalizedMap = new ConcurrentHashMap<>();
+        if (environmentKeyMap != null) {
+            for (Map.Entry<String, String> entry : environmentKeyMap.entrySet()) {
+                String key = entry.getKey();
+                if (key != null) {
+                    normalizedMap.put(key.toLowerCase(), entry.getValue());
+                }
+            }
+        }
+        // Atomic replacement
+        this.environmentKeyMap.clear();
+        this.environmentKeyMap.putAll(normalizedMap);
+    }
+
+    /**
+     * Gets the Moesif key for a specific environment.
+     * Environment name comparison is case-insensitive.
+     *
+     * @param environment The environment name.
+     * @return The Moesif API key for the environment, or null if not found.
+     */
+    public String getMoesifKeyForEnvironment(String environment) {
+        if (environment == null) {
+            return null;
+        }
+        return environmentKeyMap.get(environment.toLowerCase());
+    }
+
+    /**
+     * Adds or updates a Moesif key for an environment.
+     * Environment name is normalized to lowercase for case-insensitive comparison.
+     *
+     * @param environment The environment name.
+     * @param moesifKey   The Moesif API key.
+     */
+    public void putEnvironmentKey(String environment, String moesifKey) {
+        if (environment != null) {
+            environmentKeyMap.put(environment.toLowerCase(), moesifKey);
+        }
+    }
+
+    /**
+     * Checks if the organization has a Moesif key configured.
+     *
+     * @return true if at least one environment key is configured, false otherwise.
+     */
+    public boolean hasKeys() {
+        return !environmentKeyMap.isEmpty();
+    }
+
+    /**
+     * Checks if the organization has exactly one environment configured.
+     *
+     * @return true if only one environment key exists, false otherwise.
+     */
+    public boolean hasSingleEnvironment() {
+        return environmentKeyMap.size() == 1;
+    }
+
+    /**
+     * Gets the single Moesif key when only one environment exists.
+     *
+     * @return The Moesif API key if only one exists, null otherwise.
+     */
+    public String getSingleEnvironmentKey() {
+        if (hasSingleEnvironment()) {
+            return environmentKeyMap.values().iterator().next();
+        }
+        return null;
+    }
+
+    /**
+     * Checks if a Moesif key exists for the specified environment.
+     * Environment name comparison is case-insensitive.
+     *
+     * @param environment The environment name.
+     * @return true if a key exists for the environment, false otherwise.
+     */
+    public boolean hasEnvironment(String environment) {
+        if (environment == null) {
+            return false;
+        }
+        return environmentKeyMap.containsKey(environment.toLowerCase());
+    }
+
+    /**
+     * Adds an event to the batch for a specific environment.
+     * Environment name is normalized to lowercase for case-insensitive comparison.
+     *
+     * @param environment The environment name.
+     * @param eventData   The event data.
+     */
+    public void addEvent(String environment, MoesifEventData eventData) {
+        if (environment != null && eventData != null) {
+            environmentEventBatches
+                .computeIfAbsent(environment.toLowerCase(), k -> Collections.synchronizedList(new ArrayList<>()))
+                .add(eventData);
+        }
+    }
+
+    /**
+     * Adds an event to the batch for a specific environment.
+     *
+     * @param environment The environment name.
+     * @param eventMap    The event data map.
+     */
+    public void addEvent(String environment, Map<String, Object> eventMap) {
+        addEvent(environment, new MoesifEventData(eventMap));
+    }
+
+    /**
+     * Gets all events for a specific environment.
+     * Environment name comparison is case-insensitive.
+     *
+     * @param environment The environment name.
+     * @return List of events for the environment, or empty list if none exist.
+     */
+    public List<MoesifEventData> getEventsForEnvironment(String environment) {
+        if (environment == null) {
+            return Collections.emptyList();
+        }
+        return environmentEventBatches.getOrDefault(environment.toLowerCase(), Collections.emptyList());
+    }
+
+    /**
+     * Gets all environment event batches.
+     *
+     * @return Map of environment to list of events.
+     */
+    public Map<String, List<MoesifEventData>> getEnvironmentEventBatches() {
+        return environmentEventBatches;
+    }
+
+    /**
+     * Sets the environment event batches.
+     *
+     * @param environmentEventBatches Map of environment to list of events.
+     */
+    public void setEnvironmentEventBatches(Map<String, List<MoesifEventData>> environmentEventBatches) {
+        this.environmentEventBatches.clear();
+        if (environmentEventBatches != null) {
+            this.environmentEventBatches.putAll(environmentEventBatches);
+        }
+    }
+
+    /**
+     * Checks if there are any events in the batch.
+     *
+     * @return true if at least one event exists, false otherwise.
+     */
+    public boolean hasEvents() {
+        return !environmentEventBatches.isEmpty();
+    }
+
+    /**
+     * Gets the total number of events across all environments.
+     *
+     * @return Total event count.
+     */
+    public int getTotalEventCount() {
+        return environmentEventBatches.values().stream()
+            .mapToInt(List::size)
+            .sum();
+    }
+
+    /**
+     * Gets all environment names that have events.
+     *
+     * @return Set of environment names (normalized to lowercase).
+     */
+    public java.util.Set<String> getEnvironments() {
+        return environmentEventBatches.keySet();
+    }
+}
