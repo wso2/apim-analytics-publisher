@@ -62,7 +62,6 @@ public class OrgMoesifKeyMapping {
     public OrgMoesifKeyMapping(String organizationId, Map<String, String> environmentKeyMap) {
         this.organizationId = organizationId;
         this.environmentKeyMap = new ConcurrentHashMap<>();
-        // Normalize environment keys to lowercase for case-insensitive comparison
         if (environmentKeyMap != null) {
             for (Map.Entry<String, String> entry : environmentKeyMap.entrySet()) {
                 String key = entry.getKey();
@@ -109,7 +108,6 @@ public class OrgMoesifKeyMapping {
      * @param environmentKeyMap Map of environment names to Moesif API keys.
      */
     public void setEnvironmentKeyMap(Map<String, String> environmentKeyMap) {
-        // Build normalized map first for atomic replacement
         Map<String, String> normalizedMap = new ConcurrentHashMap<>();
         if (environmentKeyMap != null) {
             for (Map.Entry<String, String> entry : environmentKeyMap.entrySet()) {
@@ -119,9 +117,10 @@ public class OrgMoesifKeyMapping {
                 }
             }
         }
-        // Atomic replacement
-        this.environmentKeyMap.clear();
-        this.environmentKeyMap.putAll(normalizedMap);
+        synchronized (this.environmentKeyMap) {
+            this.environmentKeyMap.clear();
+            this.environmentKeyMap.putAll(normalizedMap);
+        }
     }
 
     /**
