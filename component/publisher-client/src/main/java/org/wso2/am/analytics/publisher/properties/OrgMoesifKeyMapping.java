@@ -129,8 +129,10 @@ public class OrgMoesifKeyMapping {
      * @return The Moesif API key if only one exists, null otherwise.
      */
     public String getSingleEnvironmentKey() {
-        for (String value : environmentKeyMap.values()) {
-            return value;
+        if (hasSingleEnvironment()) {
+            for (String value : environmentKeyMap.values()) {
+                return value;
+            }
         }
         return null;
     }
