@@ -72,9 +72,11 @@ public class MoesifClient extends AbstractMoesifClient {
         Map<String, Object> event = builder.build();
         
         String orgId = (String) event.get(Constants.ORGANIZATION_ID);
-        if (orgId == null || orgId.isEmpty()) {
-            log.debug("Event missing organization ID. Skipping event.");
-            return;
+        if (log.isDebugEnabled()) {
+            if (orgId == null || orgId.isEmpty()) {
+                log.debug("Event missing organization ID. Skipping event.");
+                return;
+            }
         }
         
         Map properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
