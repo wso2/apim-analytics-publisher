@@ -43,24 +43,4 @@ public class MoesifEventData {
     public Map<String, Object> getEventData() {
         return eventData;
     }
-
-    /**
-     * Gets a value from the event data by key.
-     *
-     * @param key The key to retrieve.
-     * @return The value, or null if not found.
-     */
-    public Object get(String key) {
-        return eventData.get(key);
-    }
-
-    /**
-     * Checks if the event data contains a specific key.
-     *
-     * @param key The key to check.
-     * @return true if the key exists, false otherwise.
-     */
-    public boolean containsKey(String key) {
-        return eventData.containsKey(key);
-    }
 }

@@ -83,44 +83,12 @@ public class OrgMoesifKeyMapping {
     }
 
     /**
-     * Sets the organization ID.
-     *
-     * @param organizationId The organization ID.
-     */
-    public void setOrganizationId(String organizationId) {
-        this.organizationId = organizationId;
-    }
-
-    /**
      * Gets the environment to Moesif key mapping.
      *
      * @return Map of environment names to Moesif API keys.
      */
     public Map<String, String> getEnvironmentKeyMap() {
         return Collections.unmodifiableMap(environmentKeyMap);
-    }
-
-    /**
-     * Sets the environment to Moesif key mapping.
-     * Environment names are normalized to lowercase for case-insensitive comparison.
-     * This operation is atomic - the map is either fully updated or not at all.
-     *
-     * @param environmentKeyMap Map of environment names to Moesif API keys.
-     */
-    public void setEnvironmentKeyMap(Map<String, String> environmentKeyMap) {
-        ConcurrentHashMap<String, String> normalizedMap = new ConcurrentHashMap<>();
-        if (environmentKeyMap != null) {
-            for (Map.Entry<String, String> entry : environmentKeyMap.entrySet()) {
-                String key = entry.getKey();
-                if (key != null) {
-                    normalizedMap.put(key.toLowerCase(), entry.getValue());
-                }
-            }
-        }
-        synchronized (this.environmentKeyMap) {
-            this.environmentKeyMap.clear();
-            this.environmentKeyMap.putAll(normalizedMap);
-        }
     }
 
     /**
@@ -135,19 +103,6 @@ public class OrgMoesifKeyMapping {
             return null;
         }
         return environmentKeyMap.get(environment.toLowerCase());
-    }
-
-    /**
-     * Adds or updates a Moesif key for an environment.
-     * Environment name is normalized to lowercase for case-insensitive comparison.
-     *
-     * @param environment The environment name.
-     * @param moesifKey   The Moesif API key.
-     */
-    public void putEnvironmentKey(String environment, String moesifKey) {
-        if (environment != null) {
-            environmentKeyMap.put(environment.toLowerCase(), moesifKey);
-        }
     }
 
     /**
@@ -178,20 +133,6 @@ public class OrgMoesifKeyMapping {
             return value;
         }
         return null;
-    }
-
-    /**
-     * Checks if a Moesif key exists for the specified environment.
-     * Environment name comparison is case-insensitive.
-     *
-     * @param environment The environment name.
-     * @return true if a key exists for the environment, false otherwise.
-     */
-    public boolean hasEnvironment(String environment) {
-        if (environment == null) {
-            return false;
-        }
-        return environmentKeyMap.containsKey(environment.toLowerCase());
     }
 
     /**
@@ -253,26 +194,6 @@ public class OrgMoesifKeyMapping {
         if (environmentEventBatches != null) {
             this.environmentEventBatches.putAll(environmentEventBatches);
         }
-    }
-
-    /**
-     * Checks if there are any events in the batch.
-     *
-     * @return true if at least one event exists, false otherwise.
-     */
-    public boolean hasEvents() {
-        return !environmentEventBatches.isEmpty();
-    }
-
-    /**
-     * Gets the total number of events across all environments.
-     *
-     * @return Total event count.
-     */
-    public int getTotalEventCount() {
-        return environmentEventBatches.values().stream()
-            .mapToInt(List::size)
-            .sum();
     }
 
     /**
