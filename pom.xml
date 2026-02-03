@@ -229,6 +229,10 @@
                             </goals>
                             <configuration>
                                 <dataFile>${basedir}/target/coverage-reports/jacoco-ut.exec</dataFile>
+                                <excludes>
+                                    <exclude>**/properties/OrgMoesifKeyMapping.class</exclude>
+                                    <exclude>**/properties/MoesifEventData.class</exclude>
+                                </excludes>
                                 <rules>
                                     <rule>
                                         <element>BUNDLE</element>

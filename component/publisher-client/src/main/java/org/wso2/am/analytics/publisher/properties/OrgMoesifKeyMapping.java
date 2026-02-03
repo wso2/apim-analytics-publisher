@@ -159,6 +159,9 @@ public class OrgMoesifKeyMapping {
      * @param eventMap    The event data map.
      */
     public void addEvent(String environment, Map<String, Object> eventMap) {
+        if (eventMap == null) {
+            return;
+        }
         addEvent(environment, new MoesifEventData(eventMap));
     }
 
@@ -193,9 +196,18 @@ public class OrgMoesifKeyMapping {
      */
     public void setEnvironmentEventBatches(Map<String, List<MoesifEventData>> environmentEventBatches) {
         this.environmentEventBatches.clear();
+        Map<String, List<MoesifEventData>> normalized = new ConcurrentHashMap<>();
         if (environmentEventBatches != null) {
-            this.environmentEventBatches.putAll(environmentEventBatches);
+            for (Map.Entry<String, List<MoesifEventData>> entry : environmentEventBatches.entrySet()) {
+                String key = entry.getKey();
+                List<MoesifEventData> value = entry.getValue();
+                if (key != null && value != null) {
+                    normalized.put(key.toLowerCase(), new java.util.concurrent.CopyOnWriteArrayList<>(value));
+                }
+            }
         }
+        this.environmentEventBatches.clear();
+        this.environmentEventBatches.putAll(normalized);
     }
 
     /**
