@@ -251,6 +251,11 @@
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>com.h3xstream.findsecbugs</groupId>
+                    <artifactId>findsecbugs-plugin</artifactId>
+                    <version>1.12.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
