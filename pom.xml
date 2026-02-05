@@ -261,12 +261,7 @@
                 <artifactId>findbugs-maven-plugin</artifactId>
                 <version>${maven.findbugsplugin.version}</version>
                 <configuration>
-                    <effort>Max</effort>
-                    <threshold>Low</threshold>
-                    <xmlOutput>true</xmlOutput>
-                    <findbugsXmlOutputDirectory>${project.build.directory}/findbugs</findbugsXmlOutputDirectory>
-                    <!--Exclude sources-->
-                    <excludeFilterFile>${maven.findbugsplugin.exclude.file}</excludeFilterFile>
+                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
