@@ -100,6 +100,7 @@ public class MoesifClient {
      */
     public void publish(MetricEventBuilder builder) throws MetricReportingException {
         Map<String, Object> event = builder.build();
+        log.info("Publishing metric event for Moesif analytics.");
         log.debug("Event data structure: {}", event.keySet());
         String orgId = (String) event.get(Constants.ORGANIZATION_ID);
 
