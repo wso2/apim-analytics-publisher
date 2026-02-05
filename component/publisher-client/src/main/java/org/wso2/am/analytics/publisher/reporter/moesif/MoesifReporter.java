@@ -41,6 +41,7 @@ public class MoesifReporter extends AbstractMetricReporter {
 
     public MoesifReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
+        log.info("Initializing Moesif Reporter with properties: {}", properties);
         String moesifBasePath = properties.get(MoesifMicroserviceConstants.MOESIF_PROTOCOL_WITH_FQDN_KEY) +
                 properties.get(MoesifMicroserviceConstants.MOESIF_MS_VERSIONING_KEY);
         MoesifKeyRetriever keyRetriever =
