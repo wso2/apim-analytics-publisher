@@ -31,6 +31,7 @@ import com.moesif.api.models.EventResponseModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
+import org.wso2.am.analytics.publisher.properties.OrgMoesifKeyMapping;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
@@ -45,7 +46,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Moesif Client is responsible for sending events to
@@ -80,35 +80,70 @@ public class MoesifClient {
     }
 
     /**
-     * publish method is responsible for checking the availability of relevant moesif key
+          * Gets the OrgMoesifKeyMapping for a specific organization.
+     *
+     * @param orgId The organization FID.
+     * @return OrgMoesifKeyMapping instance, or null if not found.
+     */
+    private OrgMoesifKeyMapping getOrgMoesifKeyMapping(String orgId) {
+        Map<String, Map<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
+        if (orgIDMoesifKeyMap.containsKey(orgId)) {
+            return new OrgMoesifKeyMapping(orgId, orgIDMoesifKeyMap.get(orgId));
+        }
+        return null;
+    }
+
+    /**
+     * publish method is responsible for checking the availability of relevant
+     * moesif key
      * and initiating moesif client sdk.
      */
     public void publish(MetricEventBuilder builder) throws MetricReportingException {
         Map<String, Object> event = builder.build();
-        ConcurrentHashMap<String, String> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
-        ConcurrentHashMap<String, String> orgIdEnvMap = keyRetriever.getEnvMap();
-        LinkedHashMap properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
-
+        log.info("Publishing metric event for Moesif analytics.");
+        log.debug("Event data structure: {}", event.keySet());
         String orgId = (String) event.get(Constants.ORGANIZATION_ID);
-        String moesifKey;
+
+        if (orgId == null || orgId.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Event missing organization ID. Skipping event.");
+            } 
+        }
+
+        Map properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
+        
+        if (properties == null) {
+            log.debug("Event missing properties. Skipping event for organization: {}", orgId);
+            return;
+        }
+        
         String eventEnvironment = (String) properties.get(Constants.DEPLOYMENT_TYPE);
-        String userSelectedEnvironment;
-        if (orgIDMoesifKeyMap.containsKey(orgId)) {
-            moesifKey = orgIDMoesifKeyMap.get(orgId);
-            if (orgIdEnvMap.containsKey(orgId)) {
-                userSelectedEnvironment = orgIdEnvMap.get(orgId);
-            } else {
+        if (eventEnvironment == null || eventEnvironment.isEmpty()) {
+            log.debug("Event missing environment for organization: {}. Skipping event.", orgId);
+            return;
+        }
+        
+        OrgMoesifKeyMapping orgKeyMapping = getOrgMoesifKeyMapping(orgId);
+        if (orgKeyMapping == null) {
+            log.debug("No Moesif key found for organization: {}. Skipping event.", orgId);
+            return;
+        }
+
+        String moesifKey;
+
+        // If old records with only one environment, use that single key
+        if (orgKeyMapping.hasSingleEnvironment()) {
+            moesifKey = orgKeyMapping.getSingleEnvironmentKey();
+        } else {
+            // Multiple environments exist, get key for specific environment
+            moesifKey = orgKeyMapping.getMoesifKeyForEnvironment(eventEnvironment);
+            if (moesifKey == null) {
+                log.debug("No Moesif key found for organization: {} and environment: {}. Skipping event.",
+                        orgId, eventEnvironment);
                 return;
             }
-        } else {
-            return;
         }
 
-        if (Constants.PRODUCTION.equals(userSelectedEnvironment) && !Constants.PRODUCTION.equals(eventEnvironment)) {
-            return;
-        }
-
-        // init moesif api client
         MoesifAPIClient client = new MoesifAPIClient(moesifKey);
 
         // api object is a singleton which will make calls to

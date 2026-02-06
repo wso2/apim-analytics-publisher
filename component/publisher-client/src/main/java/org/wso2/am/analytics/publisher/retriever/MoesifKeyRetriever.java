@@ -39,6 +39,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -51,8 +52,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class MoesifKeyRetriever {
     private static final Logger log = LoggerFactory.getLogger(MoesifKeyRetriever.class);
     private static MoesifKeyRetriever moesifKeyRetriever;
-    private ConcurrentHashMap<String, String> orgIDMoesifKeyMap;
-    private ConcurrentHashMap<String, String> orgIdEnvMap;
+    private Map<String, Map<String, String>> orgIDMoesifKeyMap;
     // username of Moesif microservice
     private String msAuthUsername;
     // password of Moesif microservice
@@ -63,8 +63,7 @@ public class MoesifKeyRetriever {
 
         this.msAuthUsername = authUsername;
         this.msAuthPwd = authPwd.toCharArray();
-        orgIDMoesifKeyMap = new ConcurrentHashMap();
-        orgIdEnvMap = new ConcurrentHashMap();
+        orgIDMoesifKeyMap = new ConcurrentHashMap<>();
         this.moesifBasePath = moesifBasePath;
     }
 
@@ -276,8 +275,8 @@ public class MoesifKeyRetriever {
         String orgID = newKey.getOrganization_id();
         String moesifKey = newKey.getMoesif_key();
         String env = newKey.getEnv();
-        orgIDMoesifKeyMap.put(orgID, moesifKey);
-        orgIdEnvMap.put(orgID, env);
+        orgIDMoesifKeyMap.computeIfAbsent(orgID, k -> new ConcurrentHashMap<>()).put(env, moesifKey);
+        log.info("Updated Moesif key for organization: {} and environment: {}", orgID, env);
     }
 
     private synchronized void updateMap(String response) {
@@ -300,8 +299,13 @@ public class MoesifKeyRetriever {
             String orgID = entry.getOrganization_id();
             String env = entry.getEnv();
             String moesifKey = entry.getMoesif_key();
-            orgIDMoesifKeyMap.put(orgID, moesifKey);
-            orgIdEnvMap.put(orgID, env);
+            if (orgID == null || env == null || moesifKey == null) {
+                log.warn("Skipping entry with null values - orgID: {}, env: {}, key present: {}",
+                orgID, env, moesifKey != null);
+                continue;
+            }
+            orgIDMoesifKeyMap.computeIfAbsent(orgID, k -> new ConcurrentHashMap<>()).put(env, moesifKey);
+            log.info("Successfully updated Moesif keys for {} organizations", orgIDMoesifKeyMap.size());
         }
     }
 
@@ -310,23 +314,13 @@ public class MoesifKeyRetriever {
      *
      * @return orgIDMoesifKeyMap
      */
-    public ConcurrentHashMap<String, String> getMoesifKeyMap() {
+    public Map<String, Map<String, String>> getMoesifKeyMap() {
         return orgIDMoesifKeyMap;
-    }
-
-    public ConcurrentHashMap<String, String> getEnvMap() {
-        return orgIdEnvMap;
     }
 
     public void clearMoesifKeyMap() {
         if (!orgIDMoesifKeyMap.isEmpty()) {
             orgIDMoesifKeyMap.clear();
-        }
-    }
-
-    public void clearEnvMap() {
-        if (!orgIdEnvMap.isEmpty()) {
-            orgIdEnvMap.clear();
         }
     }
 
