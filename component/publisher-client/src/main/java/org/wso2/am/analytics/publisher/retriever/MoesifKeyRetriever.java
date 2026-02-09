@@ -196,9 +196,11 @@ public class MoesifKeyRetriever {
                     updateMap(response.toString());
                 }
             } else if (responseCode >= 400 && responseCode < 500) {
-                log.error("Client error response from Moesif microservice. Response code: {}", responseCode);
+                log.error("Client error response from Moesif microservice. Response code: {}", 
+                responseCode);
             } else {
-                log.warn("Server error response from Moesif microservice. Response code: {}. Will retry.", responseCode);
+                log.warn("Server error response from Moesif microservice. Response code: {}. Will retry.", 
+                responseCode);
                 throw new APICallException("Getting " + responseCode + " from the Moesif microservice and retrying.");
             }
         } finally {
@@ -260,10 +262,12 @@ public class MoesifKeyRetriever {
                     return response.toString();
                 }
             } else if (responseCode >= 400 && responseCode < 500) {
-                log.error("Client error fetching Moesif key for organization: {}. Response code: {}", orgID, responseCode);
+                log.error("Client error fetching Moesif key for organization: {}. Response code: {}", 
+                orgID, responseCode);
                 return null;
             } else {
-                log.warn("Server error fetching Moesif key for organization: {}. Response code: {}. Will retry.", orgID, responseCode);
+                log.warn("Server error fetching Moesif key for organization: {}. Response code: {}. Will retry.", 
+                orgID, responseCode);
                 throw new APICallException("Getting " + responseCode + " from the Moesif microservice and retrying.");
             }
         } finally {
@@ -289,10 +293,12 @@ public class MoesifKeyRetriever {
         String moesifKey = newKey.getMoesif_key();
         String env = newKey.getEnv();
         if (moesifKey == null || moesifKey.isEmpty()) {
-            log.warn("Received empty or null Moesif key for organization: {} and environment: {}", orgID, env);
+            log.warn("Received empty or null Moesif key for organization: {} and environment: {}",
+            orgID, env);
         }
         orgIDMoesifKeyMap.computeIfAbsent(orgID, k -> new ConcurrentHashMap<>()).put(env, moesifKey);
-        log.info("Updated Moesif key for organization: {} and environment: {} (key present: {})", orgID, env, moesifKey != null && !moesifKey.isEmpty());
+        log.info("Updated Moesif key for organization: {} and environment: {} (key present: {})", 
+        orgID, env, moesifKey != null && !moesifKey.isEmpty());
     }
 
     private synchronized void updateMap(String response) {
