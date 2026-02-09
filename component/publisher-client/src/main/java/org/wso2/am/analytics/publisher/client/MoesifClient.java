@@ -61,20 +61,25 @@ public class MoesifClient {
 
     private void doRetry(String orgId, MetricEventBuilder builder) {
         Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
+        log.debug("Retry attempt for organization: {}. Remaining attempts: {}", orgId, currentAttempt);
 
         if (currentAttempt > 0) {
             currentAttempt -= 1;
             MoesifClientContextHolder.PUBLISH_ATTEMPTS.set(currentAttempt);
             try {
+                log.debug("Waiting {}ms before retry for organization: {}", 
+                        MoesifMicroserviceConstants.TIME_TO_WAIT_PUBLISH, orgId);
                 Thread.sleep(MoesifMicroserviceConstants.TIME_TO_WAIT_PUBLISH);
+                log.debug("Retrying publish for organization: {}", orgId);
                 publish(builder);
             } catch (MetricReportingException e) {
-                log.error("Failing retry attempt at Moesif client", e);
+                log.error("Retry attempt failed for organization: {}", orgId.replaceAll("[\r\n]", ""), e);
             } catch (InterruptedException e) {
-                log.error("Failing retry attempt at Moesif client", e);
+                log.error("Retry interrupted for organization: {}", orgId.replaceAll("[\r\n]", ""), e);
+                Thread.currentThread().interrupt();
             }
         } else if (currentAttempt == 0) {
-            log.error("Failed all retrying attempts. Event will be dropped for organization {}",
+            log.error("All retry attempts exhausted. Event will be dropped for organization: {}",
                     orgId.replaceAll("[\r\n]", ""));
         }
     }
@@ -87,9 +92,14 @@ public class MoesifClient {
      */
     private OrgMoesifKeyMapping getOrgMoesifKeyMapping(String orgId) {
         Map<String, Map<String, String>> orgIDMoesifKeyMap = keyRetriever.getMoesifKeyMap();
+        log.debug("Looking up Moesif key for organization: {}. Available organizations: {}", 
+                orgId, orgIDMoesifKeyMap.keySet());
         if (orgIDMoesifKeyMap.containsKey(orgId)) {
-            return new OrgMoesifKeyMapping(orgId, orgIDMoesifKeyMap.get(orgId));
+            Map<String, String> envKeys = orgIDMoesifKeyMap.get(orgId);
+            log.debug("Found Moesif keys for organization: {} with environments: {}", orgId, envKeys.keySet());
+            return new OrgMoesifKeyMapping(orgId, envKeys);
         }
+        log.warn("No Moesif key mapping found for organization: {}", orgId);
         return null;
     }
 
@@ -105,27 +115,28 @@ public class MoesifClient {
         String orgId = (String) event.get(Constants.ORGANIZATION_ID);
 
         if (orgId == null || orgId.isEmpty()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Event missing organization ID. Skipping event.");
-            } 
+            log.warn("Event missing organization ID. Skipping event.");
+            return;
         }
+        log.debug("Processing event for organization: {}", orgId);
 
         Map properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
         
         if (properties == null) {
-            log.debug("Event missing properties. Skipping event for organization: {}", orgId);
+            log.warn("Event missing properties. Skipping event for organization: {}", orgId);
             return;
         }
         
         String eventEnvironment = (String) properties.get(Constants.DEPLOYMENT_TYPE);
         if (eventEnvironment == null || eventEnvironment.isEmpty()) {
-            log.debug("Event missing environment for organization: {}. Skipping event.", orgId);
+            log.warn("Event missing environment (deployment type) for organization: {}. Skipping event.", orgId);
             return;
         }
+        log.debug("Event environment: {}", eventEnvironment);
         
         OrgMoesifKeyMapping orgKeyMapping = getOrgMoesifKeyMapping(orgId);
         if (orgKeyMapping == null) {
-            log.debug("No Moesif key found for organization: {}. Skipping event.", orgId);
+            log.warn("No Moesif key mapping found for organization: {}. Skipping event.", orgId);
             return;
         }
 
@@ -134,17 +145,31 @@ public class MoesifClient {
         // If old records with only one environment, use that single key
         if (orgKeyMapping.hasSingleEnvironment()) {
             moesifKey = orgKeyMapping.getSingleEnvironmentKey();
+            log.debug("Using single environment Moesif key for organization: {}", orgId);
         } else {
             // Multiple environments exist, get key for specific environment
+            log.debug("Multiple environments detected. Looking up key for environment: {}", eventEnvironment);
             moesifKey = orgKeyMapping.getMoesifKeyForEnvironment(eventEnvironment);
             if (moesifKey == null) {
-                log.debug("No Moesif key found for organization: {} and environment: {}. Skipping event.",
+                log.warn("No Moesif key found for organization: {} and environment: {}. Skipping event.",
                         orgId, eventEnvironment);
                 return;
             }
         }
+        
+        // Validate the key before using it
+        if (moesifKey == null || moesifKey.isEmpty()) {
+            log.error("Invalid Moesif key (null or empty) for organization: {} and environment: {}. Skipping event.",
+                    orgId, eventEnvironment);
+            return;
+        }
+        
+        log.debug("Using Moesif key for organization: {} and environment: {} (key length: {})", 
+                orgId, eventEnvironment, moesifKey.length());
 
-        MoesifAPIClient client = new MoesifAPIClient(moesifKey);
+        try {
+            log.debug("Initializing Moesif API client for organization: {}", orgId);
+            MoesifAPIClient client = new MoesifAPIClient(moesifKey);
 
         // api object is a singleton which will make calls to
         // moesif endpoints with the latest MoesifAPI client being provided.
@@ -154,10 +179,11 @@ public class MoesifClient {
         APICallBack<HttpResponse> callBack = new APICallBack<HttpResponse>() {
             public void onSuccess(HttpContext context, HttpResponse response) {
                 int statusCode = context.getResponse().getStatusCode();
+                log.debug("Moesif API response received for organization: {}. Status code: {}", orgId, statusCode);
                 if (statusCode == 200 || statusCode == 201 || statusCode == 202 || statusCode == 204) {
-                    log.debug("Event successfully published.");
+                    log.info("Event successfully published to Moesif for organization: {}", orgId);
                 } else if (statusCode >= 400 && statusCode < 500) {
-                    log.error("Event publishing failed for organization: {}. Moesif returned {}.",
+                    log.error("Client error publishing event for organization: {}. Moesif returned {}. Event will be dropped.",
                             orgId.replaceAll("[\r\n]", ""), String.valueOf(statusCode).replaceAll("[\r\n]", ""));
                 } else {
                     log.error("Event publishing failed for organization: {}. Retrying.",
@@ -168,14 +194,16 @@ public class MoesifClient {
 
             public void onFailure(HttpContext context, Throwable error) {
                 int statusCode = context.getResponse().getStatusCode();
+                log.debug("Moesif API failure callback triggered for organization: {}. Status code: {}", 
+                        orgId, statusCode);
 
                 if (statusCode >= 400 && statusCode < 500) {
-                    log.error("Event publishing failed for organization: {}. Moesif returned {}.",
+                    log.error("Client error in onFailure for organization: {}. Moesif returned {}. Event will be dropped.",
                             orgId.replaceAll("[\r\n]", ""), String.valueOf(statusCode).replaceAll("[\r\n]", ""));
                 } else if (error != null) {
-                    log.error("Event publishing failed for organization: {}. Event publishing failed.",
+                    log.error("Event publishing failed for organization: {}. Error: {}",
                             orgId.replaceAll("[\r\n]", ""),
-                            error.getMessage().replaceAll("[\r\n]", ""));
+                            error.getMessage().replaceAll("[\r\n]", ""), error);
                 } else {
                     log.error("Event publishing failed for organization: {}. Retrying.",
                             orgId.replaceAll("[\r\n]", ""));
@@ -184,9 +212,20 @@ public class MoesifClient {
             }
         };
         try {
-            api.createEventAsync(buildEventResponse(event), callBack);
+            log.debug("Building event model for organization: {}", orgId);
+            EventModel eventModel = buildEventResponse(event);
+            log.debug("Sending event asynchronously to Moesif for organization: {}", orgId);
+            api.createEventAsync(eventModel, callBack);
         } catch (IOException e) {
-            log.error("Analytics event sending failed. Event will be dropped", e);
+            log.error("Analytics event sending failed for organization: {}. Event will be dropped", 
+                    orgId.replaceAll("[\r\n]", ""), e);
+        } catch (MetricReportingException e) {
+            log.error("Failed to build event model for organization: {}. Event will be dropped", 
+                    orgId.replaceAll("[\r\n]", ""), e);
+        } catch (Exception e) {
+            log.error("Unexpected error during Moesif client initialization for organization: {}. " +
+                    "This may indicate an invalid Moesif key. Event will be dropped", 
+                    orgId.replaceAll("[\r\n]", ""), e);
         }
     }
 

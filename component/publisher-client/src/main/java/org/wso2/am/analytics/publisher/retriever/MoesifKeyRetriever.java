@@ -80,6 +80,7 @@ public class MoesifKeyRetriever {
      * Will refresh/refill the  orgID-MoesifKey map.
      */
     public void initOrRefreshOrgIDMoesifKeyMap() {
+        log.info("Initializing/Refreshing Moesif key map from microservice: {}", moesifBasePath);
         int attempts = MoesifMicroserviceConstants.NUM_RETRY_ATTEMPTS;
         try {
             callListResource();
@@ -110,6 +111,7 @@ public class MoesifKeyRetriever {
      * @return Moesif Key corresponding orgID
      */
     public String getMoesifKey(String orgID) {
+        log.debug("Fetching Moesif key for organization: {}", orgID);
         String response;
         int attempts = MoesifMicroserviceConstants.NUM_RETRY_ATTEMPTS;
         try {
@@ -144,6 +146,7 @@ public class MoesifKeyRetriever {
      * @param orgID
      */
     public void removeMoesifKeyFromMap(String orgID) {
+        log.info("Removing Moesif key for organization: {}", orgID);
         orgIDMoesifKeyMap.remove(orgID);
     }
 
@@ -154,8 +157,10 @@ public class MoesifKeyRetriever {
      * @throws APICallException
      */
     private void callListResource() throws IOException, APICallException {
+        log.debug("Calling Moesif microservice list resource");
         final URL obj;
         String url = this.moesifBasePath + MoesifMicroserviceConstants.MOESIF_EP_COMMON_PATH;
+        log.debug("Moesif microservice URL: {}", url);
         try {
             obj = new URL(url);
         } catch (MalformedURLException ex) {
@@ -177,6 +182,7 @@ public class MoesifKeyRetriever {
             con.setRequestProperty("Content-Type", MoesifMicroserviceConstants.CONTENT_TYPE);
             con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
             int responseCode = con.getResponseCode();
+            log.debug("Moesif microservice response code: {}", responseCode);
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 try (BufferedReader in = new BufferedReader(
                         new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));) {
@@ -186,11 +192,13 @@ public class MoesifKeyRetriever {
                     while ((inputLine = in.readLine()) != null) {
                         response.append(inputLine);
                     }
+                    log.debug("Received response from Moesif microservice, updating map");
                     updateMap(response.toString());
                 }
             } else if (responseCode >= 400 && responseCode < 500) {
-                log.error("Getting {} from the microservice.", responseCode);
+                log.error("Client error response from Moesif microservice. Response code: {}", responseCode);
             } else {
+                log.warn("Server error response from Moesif microservice. Response code: {}. Will retry.", responseCode);
                 throw new APICallException("Getting " + responseCode + " from the Moesif microservice and retrying.");
             }
         } finally {
@@ -209,6 +217,7 @@ public class MoesifKeyRetriever {
      * @throws APICallException
      */
     private String callDetailResource(String orgID) throws IOException, APICallException {
+        log.debug("Calling Moesif microservice detail resource for organization: {}", orgID);
         StringBuffer response = new StringBuffer();
         String url = this.moesifBasePath + MoesifMicroserviceConstants.MOESIF_EP_COMMON_PATH;
         // Protecting endpoint from SSRF.
@@ -236,6 +245,7 @@ public class MoesifKeyRetriever {
             con.setRequestProperty("Authorization", authHeaderValue);
             con.setReadTimeout(MoesifMicroserviceConstants.REQUEST_READ_TIMEOUT);
             int responseCode = con.getResponseCode();
+            log.debug("Moesif microservice detail response code: {}", responseCode);
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 try (BufferedReader in = new BufferedReader(
                         new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));) {
@@ -245,13 +255,15 @@ public class MoesifKeyRetriever {
                     while ((inputLine = in.readLine()) != null) {
                         response.append(inputLine);
                     }
+                    log.debug("Received Moesif key for organization: {}", orgID);
                     updateMoesifKey(response.toString());
                     return response.toString();
                 }
             } else if (responseCode >= 400 && responseCode < 500) {
-                log.error("Getting {} from the Moesif microservice.", responseCode);
+                log.error("Client error fetching Moesif key for organization: {}. Response code: {}", orgID, responseCode);
                 return null;
             } else {
+                log.warn("Server error fetching Moesif key for organization: {}. Response code: {}. Will retry.", orgID, responseCode);
                 throw new APICallException("Getting " + responseCode + " from the Moesif microservice and retrying.");
             }
         } finally {
@@ -269,17 +281,22 @@ public class MoesifKeyRetriever {
     }
 
     private synchronized void updateMoesifKey(String response) {
+        log.debug("Updating single Moesif key from response");
         Gson gson = new Gson();
         String json = response;
         MoesifKeyEntry newKey = gson.fromJson(json, MoesifKeyEntry.class);
         String orgID = newKey.getOrganization_id();
         String moesifKey = newKey.getMoesif_key();
         String env = newKey.getEnv();
+        if (moesifKey == null || moesifKey.isEmpty()) {
+            log.warn("Received empty or null Moesif key for organization: {} and environment: {}", orgID, env);
+        }
         orgIDMoesifKeyMap.computeIfAbsent(orgID, k -> new ConcurrentHashMap<>()).put(env, moesifKey);
-        log.info("Updated Moesif key for organization: {} and environment: {}", orgID, env);
+        log.info("Updated Moesif key for organization: {} and environment: {} (key present: {})", orgID, env, moesifKey != null && !moesifKey.isEmpty());
     }
 
     private synchronized void updateMap(String response) {
+        log.debug("Updating Moesif key map with response");
         Gson gson = new Gson();
         JsonParser jsonParser = new JsonParser();
         JsonArray jsonArray;
@@ -294,6 +311,7 @@ public class MoesifKeyRetriever {
 
         Type collectionType = new CustomType().getType();
         Collection<MoesifKeyEntry> newKeys = gson.fromJson(jsonArray, collectionType);
+        log.debug("Processing {} Moesif key entries", newKeys != null ? newKeys.size() : 0);
 
         for (MoesifKeyEntry entry : newKeys) {
             String orgID = entry.getOrganization_id();
@@ -304,9 +322,14 @@ public class MoesifKeyRetriever {
                 orgID, env, moesifKey != null);
                 continue;
             }
+            if (moesifKey.isEmpty()) {
+                log.warn("Empty Moesif key received for organization: {} and environment: {}", orgID, env);
+            }
             orgIDMoesifKeyMap.computeIfAbsent(orgID, k -> new ConcurrentHashMap<>()).put(env, moesifKey);
-            log.info("Successfully updated Moesif keys for {} organizations", orgIDMoesifKeyMap.size());
+            log.debug("Added Moesif key for organization: {} and environment: {}", orgID, env);
         }
+        log.info("Successfully updated Moesif keys for {} organizations with {} total environment mappings", 
+                orgIDMoesifKeyMap.size(), orgIDMoesifKeyMap.values().stream().mapToInt(Map::size).sum());
     }
 
     /**
@@ -315,11 +338,13 @@ public class MoesifKeyRetriever {
      * @return orgIDMoesifKeyMap
      */
     public Map<String, Map<String, String>> getMoesifKeyMap() {
+        log.debug("Retrieved Moesif key map with {} organizations", orgIDMoesifKeyMap.size());
         return orgIDMoesifKeyMap;
     }
 
     public void clearMoesifKeyMap() {
         if (!orgIDMoesifKeyMap.isEmpty()) {
+            log.info("Clearing Moesif key map containing {} organizations", orgIDMoesifKeyMap.size());
             orgIDMoesifKeyMap.clear();
         }
     }
