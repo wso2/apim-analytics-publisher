@@ -69,6 +69,9 @@ public class ErrorHandlingTestCase {
         UnitTestAppender appender = config.getAppender("UnitTestAppender");
         log.atLevel(Level.DEBUG);
 
+        // Clear messages from previous test
+        appender.getMessages().clear();
+
         Map<String, String> configMap = new HashMap<>();
         configMap.put(Constants.AUTH_API_URL, "https://localhost:1234/non-existance");
         configMap.put(Constants.AUTH_API_TOKEN, "some_token");
@@ -76,8 +79,8 @@ public class ErrorHandlingTestCase {
         factory.reset();
         MetricReporter metricReporter = factory.createMetricReporter(configMap);
         CounterMetric metric = metricReporter.createCounterMetric("test-connection-counter", MetricSchema.RESPONSE);
+        Thread.sleep(3000);
         List<String> messages = appender.getMessages();
-        Thread.sleep(1000);
         Assert.assertTrue(TestUtils.isContains(messages, "Recoverable error occurred when creating Eventhub Client. "
                                                          + "Retry attempts will be made"));
         Assert.assertTrue(TestUtils.isContains(messages, "Provided authentication endpoint "

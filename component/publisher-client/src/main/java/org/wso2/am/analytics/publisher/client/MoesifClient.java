@@ -54,9 +54,10 @@ import java.util.Map;
 public class MoesifClient {
     private final Logger log = LoggerFactory.getLogger(MoesifClient.class);
     private final MoesifKeyRetriever keyRetriever;
-
-    public MoesifClient(MoesifKeyRetriever keyRetriever) {
+    String baseEventUrl;
+    public MoesifClient(MoesifKeyRetriever keyRetriever, String baseEventUrl) {
         this.keyRetriever = keyRetriever;
+        this.baseEventUrl = baseEventUrl;
     }
 
     private void doRetry(String orgId, MetricEventBuilder builder) {
@@ -144,7 +145,8 @@ public class MoesifClient {
             }
         }
 
-        MoesifAPIClient client = new MoesifAPIClient(moesifKey);
+
+        MoesifAPIClient client = new MoesifAPIClient(moesifKey, baseEventUrl);
 
         // api object is a singleton which will make calls to
         // moesif endpoints with the latest MoesifAPI client being provided.

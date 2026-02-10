@@ -22,6 +22,7 @@ package org.wso2.am.analytics.publisher.reporter.moesif.util;
  */
 public class MoesifMicroserviceConstants {
     public static final String MOESIF_PROTOCOL_WITH_FQDN_KEY = "moesifProtocolWithFQDN";
+    public static final String MOESIF_EVENT_PUBLISHER_URL = "moesifEventPublisherURL";
     public static final String MOESIF_EP_COMMON_PATH = "moesif/moesif_key";
     public static final String MOESIF_MS_VERSIONING_KEY = "moesifMSVersioning";
     public static final String MS_USERNAME_CONFIG_KEY = "moesifMSAuthUsername";
