@@ -148,7 +148,7 @@ public class MoesifClient {
 
 
         MoesifAPIClient client;
-        if(!StringUtils.isBlank(baseEventUrl)) {
+        if (!StringUtils.isBlank(baseEventUrl)) {
             client = new MoesifAPIClient(moesifKey, baseEventUrl);
         } else {
             client = new MoesifAPIClient(moesifKey);
