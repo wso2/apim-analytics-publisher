@@ -40,10 +40,11 @@ public class EventQueue {
     private final ExecutorService publisherExecutorService;
     private final AtomicInteger failureCount;
 
-    public EventQueue(int queueSize, int workerThreadCount, MoesifKeyRetriever moesifKeyRetriever) {
+    public EventQueue(int queueSize, int workerThreadCount, MoesifKeyRetriever moesifKeyRetriever, 
+        String baseEventUrl) {
         publisherExecutorService = Executors.newFixedThreadPool(workerThreadCount,
                 new DefaultAnalyticsThreadFactory("Queue-Worker"));
-        MoesifClient moesifClient = new MoesifClient(moesifKeyRetriever);
+        MoesifClient moesifClient = new MoesifClient(moesifKeyRetriever, baseEventUrl);
         eventQueue = new LinkedBlockingQueue<>(queueSize);
         failureCount = new AtomicInteger(0);
         for (int i = 0; i < workerThreadCount; i++) {

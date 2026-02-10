@@ -56,7 +56,8 @@ public class MoesifReporter extends AbstractMetricReporter {
         if (properties.get(Constants.WORKER_THREAD_COUNT) != null) {
             workerThreads = Integer.parseInt(properties.get(Constants.WORKER_THREAD_COUNT));
         }
-        this.eventQueue = new EventQueue(queueSize, workerThreads, keyRetriever);
+        String baseEventUrl = properties.get(MoesifMicroserviceConstants.MOESIF_EVENT_PUBLISHER_URL);
+        this.eventQueue = new EventQueue(queueSize, workerThreads, keyRetriever, baseEventUrl);
 
         MissedEventHandler missedEventHandler = new MissedEventHandler(keyRetriever);
         // execute MissedEventHandler periodically.
