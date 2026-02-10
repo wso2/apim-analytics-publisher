@@ -28,6 +28,7 @@ import com.moesif.api.models.EventRequestModel;
 import com.moesif.api.models.EventResponseBuilder;
 import com.moesif.api.models.EventResponseModel;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
@@ -146,8 +147,12 @@ public class MoesifClient {
         }
 
 
-        MoesifAPIClient client = new MoesifAPIClient(moesifKey, baseEventUrl);
-
+        MoesifAPIClient client;
+        if(!StringUtils.isBlank(baseEventUrl)) {
+            client = new MoesifAPIClient(moesifKey, baseEventUrl);
+        } else {
+            client = new MoesifAPIClient(moesifKey);
+        }
         // api object is a singleton which will make calls to
         // moesif endpoints with the latest MoesifAPI client being provided.
         // Hence avoid maintaining a map of MoesifAPIClient against moesif keys.
