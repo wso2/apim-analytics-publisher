@@ -54,7 +54,7 @@ import java.util.Map;
 public class MoesifClient {
     private final Logger log = LoggerFactory.getLogger(MoesifClient.class);
     private final MoesifKeyRetriever keyRetriever;
-    String baseEventUrl;
+    private final String baseEventUrl;
     public MoesifClient(MoesifKeyRetriever keyRetriever, String baseEventUrl) {
         this.keyRetriever = keyRetriever;
         this.baseEventUrl = baseEventUrl;
