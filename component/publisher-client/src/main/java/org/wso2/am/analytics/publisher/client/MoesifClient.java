@@ -132,7 +132,7 @@ public class MoesifClient {
         }
 
         if ("SANDBOX".equalsIgnoreCase(eventEnvironment)) {
-            log.debug("Mapping sandbox environment to development for organization: {}", orgId);
+            log.debug("Mapping SANDBOX environment to Development for organization: {}", orgId);
             eventEnvironment = "Development";
         }
 
