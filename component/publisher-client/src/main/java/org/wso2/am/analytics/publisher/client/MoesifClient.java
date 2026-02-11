@@ -131,6 +131,11 @@ public class MoesifClient {
             return;
         }
 
+        if ("SANDBOX".equalsIgnoreCase(eventEnvironment)) {
+            log.debug("Mapping SANDBOX environment to Development for organization: {}", orgId);
+            eventEnvironment = "Development";
+        }
+
         String moesifKey;
 
         // If old records with only one environment, use that single key
