@@ -70,7 +70,7 @@ public class MoesifKeyRetriever {
     public static synchronized MoesifKeyRetriever getInstance(String authUsername, String authPwd,
                                                               String moesifBasePath) {
         if (moesifKeyRetriever == null) {
-            return new MoesifKeyRetriever(authUsername, authPwd, moesifBasePath);
+            moesifKeyRetriever = new MoesifKeyRetriever(authUsername, authPwd, moesifBasePath);
         }
         return moesifKeyRetriever;
     }
@@ -295,6 +295,7 @@ public class MoesifKeyRetriever {
         Type collectionType = new CustomType().getType();
         Collection<MoesifKeyEntry> newKeys = gson.fromJson(jsonArray, collectionType);
 
+        int updatedCount = 0;
         for (MoesifKeyEntry entry : newKeys) {
             String orgID = entry.getOrganization_id();
             String env = entry.getEnv();
@@ -305,8 +306,10 @@ public class MoesifKeyRetriever {
                 continue;
             }
             orgIDMoesifKeyMap.computeIfAbsent(orgID, k -> new ConcurrentHashMap<>()).put(env, moesifKey);
-            log.info("Successfully updated Moesif keys for {} organizations", orgIDMoesifKeyMap.size());
+            updatedCount++;
         }
+        log.info("Successfully updated Moesif keys for {} organizations (total organizations in map: {})", 
+                updatedCount, orgIDMoesifKeyMap.size());
     }
 
     /**
