@@ -127,7 +127,7 @@ public class MoesifClient {
         
         OrgMoesifKeyMapping orgKeyMapping = getOrgMoesifKeyMapping(orgId);
         if (orgKeyMapping == null) {
-            log.warn("No Moesif key found for organization: {}. Event will be skipped. This may indicate the organization is not yet synced.", orgId);
+            log.warn("No Moesif key found for organization: {}. Event will be skipped.", orgId);
             return;
         }
 
