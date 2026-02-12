@@ -115,19 +115,19 @@ public class MoesifClient {
         Map properties = (LinkedHashMap) event.get(Constants.PROPERTIES);
         
         if (properties == null) {
-            log.debug("Event missing properties. Skipping event for organization: {}", orgId);
+            log.warn("Event missing properties. Event will be skipped for organization: {}", orgId);
             return;
         }
         
         String eventEnvironment = (String) properties.get(Constants.DEPLOYMENT_TYPE);
         if (eventEnvironment == null || eventEnvironment.isEmpty()) {
-            log.debug("Event missing environment for organization: {}. Skipping event.", orgId);
+            log.warn("Event missing environment for organization: {}. Event will be skipped.", orgId);
             return;
         }
         
         OrgMoesifKeyMapping orgKeyMapping = getOrgMoesifKeyMapping(orgId);
         if (orgKeyMapping == null) {
-            log.debug("No Moesif key found for organization: {}. Skipping event.", orgId);
+            log.warn("No Moesif key found for organization: {}. Event will be skipped. This may indicate the organization is not yet synced.", orgId);
             return;
         }
 
@@ -145,7 +145,7 @@ public class MoesifClient {
             // Multiple environments exist, get key for specific environment
             moesifKey = orgKeyMapping.getMoesifKeyForEnvironment(eventEnvironment);
             if (moesifKey == null) {
-                log.debug("No Moesif key found for organization: {} and environment: {}. Skipping event.",
+                log.warn("No Moesif key found for organization: {} and environment: {}. Event will be skipped.",
                         orgId, eventEnvironment);
                 return;
             }
