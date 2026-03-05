@@ -43,10 +43,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Moesif Client is responsible for sending events to
@@ -212,6 +215,9 @@ public class MoesifClient {
         EventModel eventModel = new EventModel();
         String modifiedUserName;
 
+        Map<String, String> metadata = new HashMap<>();
+        populateMetadata(data, metadata);
+
         if (!data.containsKey(Constants.ERROR_CODE)) {
             final String userIP = (String) data.get(Constants.USER_IP);
             final String userName = (String) data.get(Constants.USER_NAME);
@@ -294,8 +300,35 @@ public class MoesifClient {
         eventModel.setResponse(eventRsp);
         eventModel.setUserId(modifiedUserName);
         eventModel.setCompanyId(null);
+        eventModel.setMetadata(metadata);
 
         return eventModel;
+    }
+
+    /**
+     * Populates the metadata map with required analytics fields from the source data.
+     *
+     * This method filters and transfers specific analytics-related fields from the source
+     * data map to the metadata map, ensuring only required fields with non-null values
+     * are included. All values are converted to String format for consistent metadata handling.
+     *@param data     The source data map containing various analytics fields and values.
+     *@param metadata The target metadata map to be populated with filtered analytics data.
+     **/
+    private void populateMetadata(Map<String, Object> data, Map<String, String> metadata) {
+        Set<String> requiredKeys = new HashSet<>(Arrays.asList(
+                Constants.API_ID, Constants.API_METHOD, Constants.API_NAME,
+                Constants.API_TYPE, Constants.APPLICATION_ID, Constants.APPLICATION_NAME, Constants.APPLICATION_OWNER,
+                Constants.BACKEND_LATENCY, Constants.GATEWAY_TYPE, Constants.KEY_TYPE, Constants.EVENT_TYPE,
+                Constants.API_CREATION, Constants.API_CREATOR_TENANT_DOMAIN, Constants.API_VERSION,
+                Constants.CORRELATION_ID, Constants.RESPONSE_CACHE_HIT, Constants.USER_NAME,
+                Constants.RESPONSE_MEDIATION_LATENCY, Constants.DESTINATION, Constants.ERROR_CODE,
+                Constants.ERROR_MESSAGE, Constants.ERROR_TYPE, Constants.TARGET_RESPONSE_CODE,
+                Constants.REQUEST_MEDIATION_LATENCY, Constants.API_RESOURCE_TEMPLATE, Constants.RESPONSE_LATENCY
+        ));
+
+        data.entrySet().stream().filter(entry -> requiredKeys.contains(entry.getKey()))
+                .filter(entry -> entry.getValue() != null)
+                .forEach(entry -> metadata.put(entry.getKey(), String.valueOf(entry.getValue())));
     }
 
     private static void populateHeaders(Map<String, Object> data, Map<String, String> reqHeaders,
