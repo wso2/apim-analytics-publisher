@@ -322,6 +322,12 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             if (properties.containsKey(Constants.SUBTYPE)) {
                 metadata.put(Constants.SUBTYPE, properties.remove(Constants.SUBTYPE));
             }
+            if (properties.containsKey(Constants.IS_GUARDRAIL_HIT)) {
+                metadata.put(Constants.IS_GUARDRAIL_HIT, properties.remove(Constants.IS_GUARDRAIL_HIT));
+            }
+            if (properties.containsKey(Constants.GUARDRAIL_NAME)) {
+                metadata.put(Constants.GUARDRAIL_NAME, properties.remove(Constants.GUARDRAIL_NAME));
+            }
             if (properties.containsKey(Constants.MCP_ANALYTICS)) {
                 if (log.isDebugEnabled()) {
                     log.debug("MCP analytics data found and transferred to metadata");

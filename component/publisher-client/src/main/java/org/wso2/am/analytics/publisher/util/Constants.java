@@ -64,6 +64,8 @@ public class Constants {
     public static final String AI_TOKEN_USAGE = "aiTokenUsage";
     public static final String IS_EGRESS = "isEgress";
     public static final String SUBTYPE = "subtype";
+    public static final String IS_GUARDRAIL_HIT = "isGuardrailHit";
+    public static final String GUARDRAIL_NAME = "guardrailName";
     public static final String AI_VENDOR_NAME = "vendorName";
     public static final String AI_VENDOR_VERSION = "vendorVersion";
     public static final String AI_MODEL = "model";
