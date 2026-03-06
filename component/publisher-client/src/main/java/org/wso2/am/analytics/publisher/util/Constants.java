@@ -64,6 +64,8 @@ public class Constants {
     public static final String AI_TOKEN_USAGE = "aiTokenUsage";
     public static final String IS_EGRESS = "isEgress";
     public static final String SUBTYPE = "subtype";
+    public static final String IS_GUARDRAIL_HIT = "isGuardrailHit";
+    public static final String GUARDRAIL_NAME = "guardrailName";
     public static final String AI_VENDOR_NAME = "vendorName";
     public static final String AI_VENDOR_VERSION = "vendorVersion";
     public static final String AI_MODEL = "model";
@@ -71,6 +73,7 @@ public class Constants {
     public static final String AI_COMPLETION_TOKEN_USAGE = "completionTokens";
     public static final String AI_TOTAL_TOKEN_USAGE = "totalTokens";
     public static final String NOT_APPLICABLE = "N/A";
+    public static final String MCP_ANALYTICS = "mcpAnalytics";
 
     //Builder event types
     public static final String RESPONSE_EVENT_TYPE = "response";
