@@ -121,7 +121,7 @@ public class MoesifClient {
             return;
         }
         
-        String eventEnvironment = (String) properties.get(Constants.DEPLOYMENT_TYPE);
+        String eventEnvironment = (String) properties.get(Constants.ENVIRONMENT_NAME);
         if (eventEnvironment == null || eventEnvironment.isEmpty()) {
             log.warn("Event missing environment for organization: {}. Event will be skipped.", orgId);
             return;
@@ -131,11 +131,6 @@ public class MoesifClient {
         if (orgKeyMapping == null) {
             log.debug("No Moesif key found for organization: {}. Event will be skipped.", orgId);
             return;
-        }
-
-        if ("SANDBOX".equalsIgnoreCase(eventEnvironment)) {
-            log.debug("Mapping SANDBOX environment to Development for organization: {}", orgId);
-            eventEnvironment = "Development";
         }
 
         String moesifKey;
