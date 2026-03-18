@@ -213,6 +213,16 @@ public class MoesifClient {
         Map<String, String> metadata = new HashMap<>();
         populateMetadata(data, metadata);
 
+        LinkedHashMap billingProperties = (LinkedHashMap) data.get(Constants.PROPERTIES);
+        if (billingProperties != null) {
+            String billingCustomerId = (String) billingProperties.get(Constants.BILLING_CUSTOMER_ID);
+            String billingSubscriptionId = (String) billingProperties.get(Constants.BILLING_SUBSCRIPTION_ID);
+            metadata.put(Constants.BILLING_CUSTOMER_ID,
+                    (billingCustomerId != null && !billingCustomerId.isEmpty()) ? billingCustomerId : null);
+            metadata.put(Constants.BILLING_SUBSCRIPTION_ID,
+                    (billingSubscriptionId != null && !billingSubscriptionId.isEmpty()) ? billingSubscriptionId : null);
+        }
+
         if (!data.containsKey(Constants.ERROR_CODE)) {
             final String userIP = (String) data.get(Constants.USER_IP);
             final String userName = (String) data.get(Constants.USER_NAME);
