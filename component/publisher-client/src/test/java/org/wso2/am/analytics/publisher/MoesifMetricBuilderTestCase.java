@@ -124,6 +124,9 @@ public class MoesifMetricBuilderTestCase {
 
         LinkedHashMap values = new LinkedHashMap<>();
         values.put("x-original-gw-url", "foo");
+        values.put("billingCustomerId", "customer1234");
+        values.put("billingSubscriptionId", "subscription5678");
+
         LinkedHashMap properties = new LinkedHashMap();
         properties.put("properties", values);
 
@@ -162,7 +165,7 @@ public class MoesifMetricBuilderTestCase {
                 .build();
 
         Assert.assertFalse(eventMap.isEmpty());
-        // We expect only 30 attributes in Moesif scenario unlike in choreo scenario.
+        // We expect only 31 attributes in Moesif scenario unlike in choreo scenario.
         // In choreo scenario we parse user agent header,
         // and build one additional attribute.
         Assert.assertEquals(eventMap.size(), 31, "Some attributes are missing from the resulting event map");

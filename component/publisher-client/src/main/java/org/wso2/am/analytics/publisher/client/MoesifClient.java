@@ -213,6 +213,7 @@ public class MoesifClient {
         Map<String, String> metadata = new HashMap<>();
         populateMetadata(data, metadata);
 
+
         if (!data.containsKey(Constants.ERROR_CODE)) {
             final String userIP = (String) data.get(Constants.USER_IP);
             final String userName = (String) data.get(Constants.USER_NAME);
@@ -324,6 +325,17 @@ public class MoesifClient {
         data.entrySet().stream().filter(entry -> requiredKeys.contains(entry.getKey()))
                 .filter(entry -> entry.getValue() != null)
                 .forEach(entry -> metadata.put(entry.getKey(), String.valueOf(entry.getValue())));
+
+        LinkedHashMap billingProperties = (LinkedHashMap) data.get(Constants.PROPERTIES);
+        if (billingProperties != null) {
+            String customerId = (String) billingProperties.get(Constants.BILLING_CUSTOMER_ID);
+            metadata.put(Constants.BILLING_CUSTOMER_ID,
+                    customerId != null ? customerId : Constants.UNKNOWN_VALUE);
+
+            String subscriptionId = (String) billingProperties.get(Constants.BILLING_SUBSCRIPTION_ID);
+            metadata.put(Constants.BILLING_SUBSCRIPTION_ID,
+                    subscriptionId != null ? subscriptionId : Constants.UNKNOWN_VALUE);
+        }
     }
 
     private static void populateHeaders(Map<String, Object> data, Map<String, String> reqHeaders,

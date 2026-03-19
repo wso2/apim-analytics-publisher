@@ -113,6 +113,8 @@ public class Constants {
     public static final String MOESIF_CONTENT_TYPE_KEY = "Content-Type";
     public static final String MOESIF_USER_AGENT_KEY = "User-Agent";
     public static final String GATEWAY_URL = "x-original-gw-url";
+    public static final String BILLING_CUSTOMER_ID = "billingCustomerId";
+    public static final String BILLING_SUBSCRIPTION_ID = "billingSubscriptionId";
     public static final String DEPLOYMENT_TYPE = "deployment-type";
     public static final String ENVIRONMENT_NAME = "api-environment-name";
     public static final String PRODUCTION = "PRODUCTION";
