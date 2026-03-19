@@ -120,6 +120,10 @@ public class MoesifClient {
             log.warn("Event missing properties. Event will be skipped for organization: {}", orgId);
             return;
         }
+
+          if (log.isDebugEnabled()) {
+                log.debug("Event properties for organization {}: {}", orgId, properties);
+            }
         
         String eventEnvironment = (String) properties.get(Constants.ENVIRONMENT_NAME);
         if (eventEnvironment == null || eventEnvironment.isEmpty()) {
