@@ -120,10 +120,6 @@ public class MoesifClient {
             log.warn("Event missing properties. Event will be skipped for organization: {}", orgId);
             return;
         }
-
-          if (log.isDebugEnabled()) {
-                log.debug("Event properties for organization {}: {}", orgId, properties);
-            }
         
         String eventEnvironment = (String) properties.get(Constants.ENVIRONMENT_NAME);
         if (eventEnvironment == null || eventEnvironment.isEmpty()) {
@@ -217,15 +213,6 @@ public class MoesifClient {
         Map<String, String> metadata = new HashMap<>();
         populateMetadata(data, metadata);
 
-        LinkedHashMap billingProperties = (LinkedHashMap) data.get(Constants.PROPERTIES);
-        if (billingProperties != null) {
-            String billingCustomerId = (String) billingProperties.get(Constants.BILLING_CUSTOMER_ID);
-            String billingSubscriptionId = (String) billingProperties.get(Constants.BILLING_SUBSCRIPTION_ID);
-            metadata.put(Constants.BILLING_CUSTOMER_ID,
-                    (billingCustomerId != null && !billingCustomerId.isEmpty()) ? billingCustomerId : null);
-            metadata.put(Constants.BILLING_SUBSCRIPTION_ID,
-                    (billingSubscriptionId != null && !billingSubscriptionId.isEmpty()) ? billingSubscriptionId : null);
-        }
 
         if (!data.containsKey(Constants.ERROR_CODE)) {
             final String userIP = (String) data.get(Constants.USER_IP);
@@ -338,6 +325,17 @@ public class MoesifClient {
         data.entrySet().stream().filter(entry -> requiredKeys.contains(entry.getKey()))
                 .filter(entry -> entry.getValue() != null)
                 .forEach(entry -> metadata.put(entry.getKey(), String.valueOf(entry.getValue())));
+
+        LinkedHashMap billingProperties = (LinkedHashMap) data.get(Constants.PROPERTIES);
+        if (billingProperties != null) {
+            String customerId = (String) billingProperties.get(Constants.BILLING_CUSTOMER_ID);
+            metadata.put(Constants.BILLING_CUSTOMER_ID,
+                    customerId != null ? customerId : Constants.UNKNOWN_VALUE);
+
+            String subscriptionId = (String) billingProperties.get(Constants.BILLING_SUBSCRIPTION_ID);
+            metadata.put(Constants.BILLING_SUBSCRIPTION_ID,
+                    subscriptionId != null ? subscriptionId : Constants.UNKNOWN_VALUE);
+        }
     }
 
     private static void populateHeaders(Map<String, Object> data, Map<String, String> reqHeaders,
