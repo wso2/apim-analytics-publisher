@@ -96,7 +96,9 @@ public class OrgMoesifKeyMapping {
         if (environment == null) {
             return null;
         }
-        return environmentKeyMap.get(environment.toLowerCase());
+        String normalizedEnv = environment.toLowerCase();
+        String envKey = normalizedEnv.split("-", 2)[0];
+        return environmentKeyMap.get(envKey);
     }
 
     /**
