@@ -116,6 +116,5 @@ public class Constants {
     public static final String BILLING_CUSTOMER_ID = "billingCustomerId";
     public static final String BILLING_SUBSCRIPTION_ID = "billingSubscriptionId";
     public static final String DEPLOYMENT_TYPE = "deployment-type";
-    public static final String ENVIRONMENT_NAME = "api-environment-name";
     public static final String PRODUCTION = "PRODUCTION";
 }
