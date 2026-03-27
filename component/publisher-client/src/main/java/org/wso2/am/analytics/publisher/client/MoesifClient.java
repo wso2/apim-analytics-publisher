@@ -291,11 +291,16 @@ public class MoesifClient {
                     .headers(rspHeaders)
                     .build();
         }
+        String companyId = null;
+        LinkedHashMap billingProperties = (LinkedHashMap) data.get(Constants.PROPERTIES);
+        if (billingProperties != null) {
+            companyId = (String) billingProperties.get(Constants.BILLING_CUSTOMER_ID);
+        }
 
         eventModel.setRequest(eventReq);
         eventModel.setResponse(eventRsp);
         eventModel.setUserId(modifiedUserName);
-        eventModel.setCompanyId(null);
+        eventModel.setCompanyId(companyId);
         eventModel.setMetadata(metadata);
 
         return eventModel;
