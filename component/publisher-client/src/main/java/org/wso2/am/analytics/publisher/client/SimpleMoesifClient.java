@@ -53,6 +53,7 @@ import java.util.Set;
 public class SimpleMoesifClient extends AbstractMoesifClient {
     private final MoesifAPIClient moesifAPIClient;
     private final APIController api;
+    private static final String CARBON_SUPER_SUFFIX = "@carbon.super";
 
     public SimpleMoesifClient(String key) {
         this.moesifAPIClient = new MoesifAPIClient(key);
@@ -378,8 +379,9 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             }
         }
 
-        if (sanitizedUserName.contains("@carbon.super")) {
-            return sanitizedUserName.replace("@carbon.super", "");
+        if (sanitizedUserName.endsWith(CARBON_SUPER_SUFFIX)) {
+            return sanitizedUserName.substring(0,
+                    sanitizedUserName.length() - CARBON_SUPER_SUFFIX.length());
         }
 
         if (sanitizedUserName.isEmpty()) {
