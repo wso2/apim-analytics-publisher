@@ -145,17 +145,16 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
                 verb = Constants.NOT_APPLICABLE;
             }
 
-            String uri = "";
+            String uri = Constants.NOT_APPLICABLE;
             String apiResourceTemplate = (String) data.get(Constants.API_RESOURCE_TEMPLATE);
             LinkedHashMap properties = (LinkedHashMap) data.get(Constants.PROPERTIES);
             String apiContext = (String) properties.get(Constants.API_CONTEXT);
             String gwURL = (String) properties.get(Constants.GATEWAY_URL);
-            uri = apiContext + apiResourceTemplate;
-            if (gwURL != null) {
+            if (gwURL != null && !gwURL.isEmpty()) {
                 uri = gwURL;
-            }
-            if (uri.isEmpty()) {
-                uri = Constants.NOT_APPLICABLE;
+            } else if (apiContext != null && !apiContext.isEmpty()
+                    && apiResourceTemplate != null && !apiResourceTemplate.isEmpty()) {
+                uri = apiContext + apiResourceTemplate;
             }
 
             eventReq = new EventRequestBuilder().time(Date.from(requestTimestamp)).uri(uri)
