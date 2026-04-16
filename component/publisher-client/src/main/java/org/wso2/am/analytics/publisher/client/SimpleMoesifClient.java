@@ -27,6 +27,7 @@ import com.moesif.api.models.EventRequestBuilder;
 import com.moesif.api.models.EventRequestModel;
 import com.moesif.api.models.EventResponseBuilder;
 import com.moesif.api.models.EventResponseModel;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
@@ -142,7 +143,7 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
                     dateTimeFormatter.parse((String) data.get(Constants.REQUEST_TIMESTAMP)));
 
             String verb = (String) data.get(Constants.API_METHOD);
-            if (verb == null || verb.isEmpty()) {
+            if (StringUtils.isEmpty(verb)) {
                 verb = Constants.NOT_APPLICABLE;
             }
 
