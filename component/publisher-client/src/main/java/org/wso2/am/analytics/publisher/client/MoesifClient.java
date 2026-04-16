@@ -209,8 +209,8 @@ public class MoesifClient extends AbstractMoesifClient {
                     .headers(rspHeaders)
                     .build();
 
-            if (userName.contains("@carbon.super")) {
-                modifiedUserName = userName.replace("@carbon.super", "");
+            if (userName.contains(Constants.CARBON_SUPER_SUFFIX)) {
+                modifiedUserName = userName.replace(Constants.CARBON_SUPER_SUFFIX, "");
             } else {
                 modifiedUserName = userName;
             }
