@@ -145,4 +145,5 @@ public class Constants {
     public static final String REQUEST_HEADERS = "requestHeaders";
     public static final String RESPONSE_HEADERS = "responseHeaders";
 
+    public static final String CARBON_SUPER_SUFFIX = "@carbon.super";
 }

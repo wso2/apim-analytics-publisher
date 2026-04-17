@@ -27,6 +27,7 @@ import com.moesif.api.models.EventRequestBuilder;
 import com.moesif.api.models.EventRequestModel;
 import com.moesif.api.models.EventResponseBuilder;
 import com.moesif.api.models.EventResponseModel;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
@@ -108,9 +109,9 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         Map<String, Object> metadata = new HashMap<>();
         populateMetadata(data, metadata);
 
+        modifiedUserName = sanitizeUserName(data);
         if (!data.containsKey(Constants.ERROR_CODE)) {
             final String userIP = (String) data.get(Constants.USER_IP);
-            final String userName = (String) data.get(Constants.USER_NAME);
             final String apiContext = (String) ((LinkedHashMap) data.get(Constants.PROPERTIES)).get(
                     Constants.API_CONTEXT);
             final String apiResourceTemplate = (String) data.get(Constants.API_RESOURCE_TEMPLATE);
@@ -135,22 +136,30 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             eventRsp = new EventResponseBuilder().time(Date.from(responseTimestamp))
                     .status((int) data.get(Constants.PROXY_RESPONSE_CODE)).headers(rspHeaders).build();
 
-            if (userName.contains("@carbon.super")) {
-                modifiedUserName = userName.replace("@carbon.super", "");
-            } else {
-                modifiedUserName = userName;
-            }
-
         } else {
-
-            modifiedUserName = (String) data.get(Constants.API_CREATION);
-
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
             Instant requestTimestamp = Instant.from(
                     dateTimeFormatter.parse((String) data.get(Constants.REQUEST_TIMESTAMP)));
 
-            eventReq = new EventRequestBuilder().time(Date.from(requestTimestamp)).uri(Constants.NOT_APPLICABLE)
-                    .verb(Constants.NOT_APPLICABLE).apiVersion((String) data.get(Constants.API_VERSION))
+            String verb = (String) data.get(Constants.API_METHOD);
+            if (StringUtils.isEmpty(verb)) {
+                verb = Constants.NOT_APPLICABLE;
+            }
+
+            String uri = Constants.NOT_APPLICABLE;
+            String apiResourceTemplate = (String) data.get(Constants.API_RESOURCE_TEMPLATE);
+            LinkedHashMap properties = (LinkedHashMap) data.get(Constants.PROPERTIES);
+            String apiContext = (String) properties.get(Constants.API_CONTEXT);
+            String gwURL = (String) properties.get(Constants.GATEWAY_URL);
+            if (StringUtils.isNotEmpty(gwURL)) {
+                uri = gwURL;
+            } else if (StringUtils.isNotEmpty(apiContext) 
+                && StringUtils.isNotEmpty(apiResourceTemplate)) {
+                uri = apiContext + apiResourceTemplate;
+            }
+
+            eventReq = new EventRequestBuilder().time(Date.from(requestTimestamp)).uri(uri)
+                    .verb(verb).apiVersion((String) data.get(Constants.API_VERSION))
                     .headers(reqHeaders).build();
 
             Date dateNow = Date.from(Instant.now());
@@ -338,4 +347,49 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         }
     }
 
+    /**
+     * Sanitizes the username by removing the @carbon.super suffix.
+     * Extracts username from data map or properties, then removes the @carbon.super suffix if present.
+     *
+     * @param data The data map containing user information.
+     * @return The sanitized username or `Constants.UNKNOWN_VALUE` if no username is found
+     */
+    private String sanitizeUserName(Map<String, Object> data) {
+        String sanitizedUserName = "";
+        String userName = (String) data.get(Constants.USER_NAME);
+        Object propertiesObj = data.get(Constants.PROPERTIES);
+
+        if (StringUtils.isNotEmpty(userName)) {
+            sanitizedUserName = userName;
+            if (log.isDebugEnabled()) {
+                log.debug("Using userName from data: {}", userName);
+            }
+        } else if (propertiesObj instanceof LinkedHashMap) {
+            // We've confirmed it's a LinkedHashMap, but we still need to
+            // suppress the warning for the *generic* part (<String, Object>),
+            // which `instanceof` cannot check.
+            @SuppressWarnings("unchecked")
+            LinkedHashMap<String, Object> properties = (LinkedHashMap<String, Object>) propertiesObj;
+            String propUserName = (String) properties.get(Constants.USER_NAME);
+            if (propUserName != null) {
+                sanitizedUserName = propUserName;
+                if (log.isDebugEnabled()) {
+                    log.debug("Using userName from properties: {}", propUserName);
+                }
+            }
+        }
+
+        if (sanitizedUserName.endsWith(Constants.CARBON_SUPER_SUFFIX)) {
+            return sanitizedUserName.substring(0,
+                    sanitizedUserName.length() - Constants.CARBON_SUPER_SUFFIX.length());
+        }
+
+        if (sanitizedUserName.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("No username found, returning UNKNOWN_VALUE");
+            }
+            return Constants.UNKNOWN_VALUE;
+        }
+        return sanitizedUserName;
+    }
 }
