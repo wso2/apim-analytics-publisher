@@ -359,7 +359,7 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         String userName = (String) data.get(Constants.USER_NAME);
         Object propertiesObj = data.get(Constants.PROPERTIES);
 
-        if (userName != null && !userName.isEmpty()) {
+        if (StringUtils.isNotEmpty(userName)) {
             sanitizedUserName = userName;
             if (log.isDebugEnabled()) {
                 log.debug("Using userName from data: {}", userName);
