@@ -151,10 +151,10 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             LinkedHashMap properties = (LinkedHashMap) data.get(Constants.PROPERTIES);
             String apiContext = (String) properties.get(Constants.API_CONTEXT);
             String gwURL = (String) properties.get(Constants.GATEWAY_URL);
-            if (gwURL != null && !gwURL.isEmpty()) {
+            if (StringUtils.isNotEmpty(gwURL)) {
                 uri = gwURL;
-            } else if (apiContext != null && !apiContext.isEmpty()
-                    && apiResourceTemplate != null && !apiResourceTemplate.isEmpty()) {
+            } else if (StringUtils.isNotEmpty(apiContext) 
+                && StringUtils.isNotEmpty(apiResourceTemplate)) {
                 uri = apiContext + apiResourceTemplate;
             }
 
