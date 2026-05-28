@@ -36,19 +36,19 @@ public class MoesifMicroserviceConstants {
     public static final long PERIODIC_CALL_DELAY = 300000;
 
     // Dynamic sampling config (driven by Moesif app config endpoint)
-    public static final String SAMPLING_ENABLED_KEY = "sampling.enabled";
-    public static final String SAMPLING_REFRESH_INTERVAL_KEY = "sampling.refresh.interval.ms";
-    public static final String SAMPLING_FALLBACK_RATE_KEY = "sampling.fallback.rate";
+    public static final String SAMPLING_ENABLED_KEY = "sampling_enabled";
+    public static final String SAMPLING_REFRESH_INTERVAL_KEY = "sampling_refresh_interval_ms";
+    public static final String SAMPLING_FALLBACK_RATE_KEY = "sampling_fallback_rate";
     public static final long DEFAULT_SAMPLING_REFRESH_INTERVAL_MS = 60000;
     public static final int DEFAULT_SAMPLING_FALLBACK_RATE = 100;
 
     // In-memory retry buffer (per Moesif key) for when Moesif is unreachable.
-    public static final String RETRY_BUFFER_ENABLED_KEY = "retry.buffer.enabled";
-    public static final String RETRY_BUFFER_SIZE_KEY = "retry.buffer.size";
-    public static final String RETRY_INTERVAL_SECONDS_KEY = "retry.interval.seconds";
-    public static final String RETRY_LOG_MULTIPLIER_KEY = "retry.log.multiplier";
-    public static final String RETRY_DRAIN_BURST_SIZE_KEY = "retry.drain.burst.size";
-    public static final String RETRY_DRAIN_BATCH_DELAY_MS_KEY = "retry.drain.batch.delay.ms";
+    public static final String RETRY_BUFFER_ENABLED_KEY = "retry_buffer_enabled";
+    public static final String RETRY_BUFFER_SIZE_KEY = "retry_buffer_size";
+    public static final String RETRY_INTERVAL_SECONDS_KEY = "retry_interval_seconds";
+    public static final String RETRY_LOG_MULTIPLIER_KEY = "retry_log_multiplier";
+    public static final String RETRY_DRAIN_BURST_SIZE_KEY = "retry_drain_burst_size";
+    public static final String RETRY_DRAIN_BATCH_DELAY_MS_KEY = "retry_drain_batch_delay_ms";
     public static final boolean DEFAULT_RETRY_BUFFER_ENABLED = true;
     public static final int DEFAULT_RETRY_BUFFER_SIZE = 10000;
     public static final long DEFAULT_RETRY_INTERVAL_SECONDS = 5;
