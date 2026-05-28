@@ -15,6 +15,9 @@
  */
 package org.wso2.am.analytics.publisher.reporter.cloud;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -22,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Custom Thread Factory for Analytics publisher impl.
  */
 public class DefaultAnalyticsThreadFactory implements ThreadFactory {
+    private static final Logger log = LogManager.getLogger(DefaultAnalyticsThreadFactory.class);
     private static final AtomicInteger poolNumber = new AtomicInteger(1);
     final ThreadGroup group;
     final AtomicInteger threadNumber = new AtomicInteger(1);
@@ -42,6 +46,8 @@ public class DefaultAnalyticsThreadFactory implements ThreadFactory {
         if (t.getPriority() != Thread.NORM_PRIORITY) {
             t.setPriority(Thread.NORM_PRIORITY);
         }
+        t.setUncaughtExceptionHandler((thread, throwable) ->
+                log.error("Uncaught error in analytics publisher thread {}", thread.getName(), throwable));
         return t;
     }
 }

@@ -24,6 +24,7 @@ import org.wso2.am.analytics.publisher.client.MoesifClient;
 import org.wso2.am.analytics.publisher.client.SimpleMoesifClient;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsThreadFactory;
+import org.wso2.am.analytics.publisher.reporter.moesif.retry.RetryConfig;
 import org.wso2.am.analytics.publisher.reporter.moesif.sampling.MoesifSamplingManager;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 
@@ -56,8 +57,18 @@ public class EventQueue {
         this(queueSize, workerThreadCount, new SimpleMoesifClient(key, baseUrl, samplingManager));
     }
 
+    public EventQueue(int queueSize, int workerThreadCount, String key, String baseUrl,
+                      MoesifSamplingManager samplingManager, RetryConfig retryConfig) {
+        this(queueSize, workerThreadCount, new SimpleMoesifClient(key, baseUrl, samplingManager, retryConfig));
+    }
+
     public EventQueue(int queueSize, int workerThreadCount, MoesifKeyRetriever moesifKeyRetriever) {
         this(queueSize, workerThreadCount, new MoesifClient(moesifKeyRetriever));
+    }
+
+    public EventQueue(int queueSize, int workerThreadCount, MoesifKeyRetriever moesifKeyRetriever,
+                      RetryConfig retryConfig) {
+        this(queueSize, workerThreadCount, new MoesifClient(moesifKeyRetriever, retryConfig));
     }
 
     public EventQueue(int queueSize, int workerThreadCount, AbstractMoesifClient moesifClient) {

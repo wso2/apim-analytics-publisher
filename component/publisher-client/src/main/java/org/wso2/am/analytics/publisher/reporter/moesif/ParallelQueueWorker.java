@@ -63,10 +63,9 @@ public class ParallelQueueWorker implements Runnable {
     public void run() {
         List<MetricEventBuilder> batch = new ArrayList<>(batchSize);
         long lastBatchTime = System.currentTimeMillis();
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             MetricEventBuilder eventBuilder;
             try {
-
                 eventBuilder = eventQueue.poll(100, java.util.concurrent.TimeUnit.MILLISECONDS);
                 if (eventBuilder != null) {
                     batch.add(eventBuilder);
@@ -86,10 +85,15 @@ public class ParallelQueueWorker implements Runnable {
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-            } catch (Exception e) {
-                log.error("Analytics event sending failed. Event will be dropped", e);
+                break;
+            } catch (Throwable t) {
+                log.error("Failed to send analytics events. Dropping {} pending events and continuing",
+                        batch.size(), t);
+                batch.clear();
+                lastBatchTime = System.currentTimeMillis();
             }
         }
+        log.info("Analytics publisher thread stopped");
     }
     private void processBatch(List<MetricEventBuilder> batch) {
         try {

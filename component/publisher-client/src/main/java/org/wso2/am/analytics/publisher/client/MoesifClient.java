@@ -34,7 +34,8 @@ import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.properties.MoesifEventData;
 import org.wso2.am.analytics.publisher.properties.OrgMoesifKeyMapping;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
-import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
+import org.wso2.am.analytics.publisher.reporter.moesif.retry.MoesifRetryBuffer;
+import org.wso2.am.analytics.publisher.reporter.moesif.retry.RetryConfig;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 import org.wso2.am.analytics.publisher.util.Constants;
 import org.wso2.am.analytics.publisher.util.HttpStatusHelper;
@@ -51,6 +52,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This client is responsible for publishing events from choreo backend
@@ -59,9 +61,29 @@ import java.util.Map;
 public class MoesifClient extends AbstractMoesifClient {
     private final Logger log = LogManager.getLogger(MoesifClient.class);
     private final MoesifKeyRetriever keyRetriever;
+    private final RetryConfig retryConfig;
+    private final ConcurrentHashMap<String, MoesifAPIClient> apiClients = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, MoesifRetryBuffer> retryBuffers = new ConcurrentHashMap<>();
 
     public MoesifClient(MoesifKeyRetriever keyRetriever) {
+        this(keyRetriever, null);
+    }
+
+    public MoesifClient(MoesifKeyRetriever keyRetriever, RetryConfig retryConfig) {
         this.keyRetriever = keyRetriever;
+        this.retryConfig = retryConfig;
+    }
+
+    private MoesifAPIClient apiClientFor(String moesifKey) {
+        return apiClients.computeIfAbsent(moesifKey, MoesifAPIClient::new);
+    }
+
+    private MoesifRetryBuffer retryBufferFor(String moesifKey) {
+        if (retryConfig == null) {
+            return null;
+        }
+        return retryBuffers.computeIfAbsent(moesifKey,
+                k -> new MoesifRetryBuffer(k, apiClientFor(k), retryConfig));
     }
 
     /**
@@ -128,16 +150,39 @@ public class MoesifClient extends AbstractMoesifClient {
             }
         }
 
-        // init moesif api client
-        MoesifAPIClient client = new MoesifAPIClient(moesifKey);
+        MoesifAPIClient client = apiClientFor(moesifKey);
         APIController api = client.getAPI();
+        MoesifRetryBuffer buffer = retryBufferFor(moesifKey);
 
-        APICallBack<HttpResponse> callBack = createMoesifCallBack(() -> doRetry(orgId, builder),
+        EventModel eventModel;
+        try {
+            eventModel = buildEventResponse(event);
+        } catch (IOException e) {
+            log.error("Failed to build event for org {}. Event will be dropped",
+                    LogSanitizer.sanitize(orgId), e);
+            return;
+        }
+        List<EventModel> singletonBatch = new ArrayList<>(1);
+        singletonBatch.add(eventModel);
+
+        if (buffer != null && !buffer.isHealthy()) {
+            buffer.stash(singletonBatch);
+            return;
+        }
+
+        APICallBack<HttpResponse> callBack = createMoesifCallBack(singletonBatch, buffer,
                 "Single event", orgId);
         try {
-            api.createEventAsync(buildEventResponse(event), callBack);
+            api.createEventAsync(eventModel, callBack);
         } catch (IOException e) {
-            log.error("Analytics event sending failed. Event will be dropped", e);
+            if (buffer != null) {
+                log.debug("Single event could not be sent for org {}; queueing for retry",
+                        LogSanitizer.sanitize(orgId), e);
+                buffer.onRetryableFailure(singletonBatch);
+            } else {
+                log.error("Failed to send analytics event for org {}; event will be dropped",
+                        LogSanitizer.sanitize(orgId), e);
+            }
         }
     }
 
@@ -261,88 +306,69 @@ public class MoesifClient extends AbstractMoesifClient {
         return eventModel;
     }
 
-    private APICallBack<HttpResponse> createMoesifCallBack(
-            Runnable retryAction, String eventType, String orgId) {
+    private APICallBack<HttpResponse> createMoesifCallBack(List<EventModel> batch, MoesifRetryBuffer buffer,
+                                                           String eventType, String orgId) {
         return new APICallBack<HttpResponse>() {
             public void onSuccess(HttpContext context, HttpResponse response) {
-                int statusCode = context.getResponse().getStatusCode();
-                if (HttpStatusHelper.isSuccess(statusCode)) {
-                    log.debug("{} successfully published.", eventType);
-                } else if (HttpStatusHelper.shouldRetry(statusCode)) {
-                    log.error("{} publishing failed for organization: {}. Moesif returned {}. Response {}",
-                            eventType,
-                            LogSanitizer.sanitize(orgId),
-                            LogSanitizer.sanitize(String.valueOf(statusCode)),
-                            response.getRawBody());
-                    retryAction.run();
-                } else {
-                    log.error("{} Event publishing failed for organization: {}. Response {}.",
-                            eventType,
-                            LogSanitizer.sanitize(orgId),
-                            response.getRawBody());
+                try {
+                    int statusCode = context.getResponse().getStatusCode();
+                    if (HttpStatusHelper.isSuccess(statusCode)) {
+                        log.debug("{} successfully published for org {}.", eventType, LogSanitizer.sanitize(orgId));
+                        if (buffer != null) {
+                            buffer.onSuccess();
+                        }
+                    } else if (HttpStatusHelper.shouldRetry(statusCode)) {
+                        handleRetryable(statusCode);
+                    } else {
+                        log.error("{} publishing failed for org {}. Moesif returned {}. Response {}. No retry.",
+                                eventType,
+                                LogSanitizer.sanitize(orgId),
+                                LogSanitizer.sanitize(String.valueOf(statusCode)),
+                                response.getRawBody());
+                    }
+                } catch (Throwable t) {
+                    log.error("Unexpected error after sending {} for org {}", eventType,
+                            LogSanitizer.sanitize(orgId), t);
                 }
             }
 
             public void onFailure(HttpContext context, Throwable error) {
-                int statusCode = context.getResponse().getStatusCode();
+                try {
+                    int statusCode = context != null && context.getResponse() != null
+                            ? context.getResponse().getStatusCode()
+                            : 0;
+                    String errorMessage = error != null ? error.getMessage() : "Unknown error";
 
-                if (HttpStatusHelper.shouldRetry(statusCode)) {
-                    log.error("{} publishing failed for organization: {}. Moesif returned {}. Retrying",
-                            eventType,
-                            orgId.replaceAll("[\r\n]", ""),
-                            String.valueOf(statusCode).replaceAll("[\r\n]", ""));
-                    retryAction.run();
-                } else if (HttpStatusHelper.isClientError(statusCode)) {
-                    log.error("{} publishing failed for organization: {} due to error: {}",
-                            eventType,
-                            orgId.replaceAll("[\r\n]", ""),
-                            error.getMessage().replaceAll("[\r\n]", ""));
+                    if (statusCode == 0 || HttpStatusHelper.shouldRetry(statusCode)) {
+                        handleRetryable(statusCode);
+                    } else if (HttpStatusHelper.isClientError(statusCode)) {
+                        log.error("{} publishing failed for org {}. Moesif returned {} due to error: {}",
+                                eventType,
+                                LogSanitizer.sanitize(orgId),
+                                statusCode,
+                                LogSanitizer.sanitize(errorMessage));
+                    } else {
+                        log.error("{} publishing failed for org {} due to error: {}",
+                                eventType,
+                                LogSanitizer.sanitize(orgId),
+                                LogSanitizer.sanitize(errorMessage));
+                    }
+                } catch (Throwable t) {
+                    log.error("Unexpected error while handling {} send failure for org {}", eventType,
+                            LogSanitizer.sanitize(orgId), t);
+                }
+            }
+
+            private void handleRetryable(int statusCode) {
+                if (buffer != null) {
+                    buffer.onRetryableFailure(batch);
                 } else {
-                    log.error("{} publishing failed for organization: {}. Retrying.",
-                            eventType,
-                            orgId.replaceAll("[\r\n]", ""));
-                    retryAction.run();
+                    log.error("Failed to send {} for org {} (status {}); retry queue disabled, events will be dropped",
+                            eventType, LogSanitizer.sanitize(orgId),
+                            LogSanitizer.sanitize(String.valueOf(statusCode)));
                 }
             }
         };
-    }
-
-    private void doRetry(OrgMoesifKeyMapping orgMapping) {
-        Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
-
-        if (currentAttempt > 0) {
-            currentAttempt -= 1;
-            MoesifClientContextHolder.PUBLISH_ATTEMPTS.set(currentAttempt);
-            try {
-                Thread.sleep(MoesifMicroserviceConstants.TIME_TO_WAIT_PUBLISH);
-                publishBatchForOrganization(orgMapping);
-            } catch (InterruptedException e) {
-                log.error("Failing retry attempt at Moesif client", e);
-            }
-        } else if (currentAttempt == 0) {
-            log.error("Failed all retrying attempts. Event will be dropped for organization {}",
-                    orgMapping.getOrganizationId().replaceAll("[\r\n]", ""));
-        }
-    }
-
-    private void doRetry(String orgId, MetricEventBuilder builder) {
-        Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
-
-        if (currentAttempt > 0) {
-            currentAttempt -= 1;
-            MoesifClientContextHolder.PUBLISH_ATTEMPTS.set(currentAttempt);
-            try {
-                Thread.sleep(MoesifMicroserviceConstants.TIME_TO_WAIT_PUBLISH);
-                publish(builder);
-            } catch (MetricReportingException e) {
-                log.error("Failing retry attempt at Moesif client", e);
-            } catch (InterruptedException e) {
-                log.error("Failing retry attempt at Moesif client", e);
-            }
-        } else if (currentAttempt == 0) {
-            log.error("Failed all retrying attempts. Event will be dropped for organization {}",
-                    orgId.replaceAll("[\r\n]", ""));
-        }
     }
 
     /**
@@ -351,7 +377,7 @@ public class MoesifClient extends AbstractMoesifClient {
      */
     private void publishBatchForOrganization(OrgMoesifKeyMapping orgMapping) {
         String orgId = orgMapping.getOrganizationId();
-        
+
         if (!orgMapping.hasKeys()) {
             log.warn("No Moesif key found for organization: {}. Skipping events", orgId);
             return;
@@ -359,19 +385,19 @@ public class MoesifClient extends AbstractMoesifClient {
 
         for (String environment : orgMapping.getEnvironments()) {
             List<MoesifEventData> events = orgMapping.getEventsForEnvironment(environment);
-            
+
             String moesifKey;
             if (orgMapping.hasSingleEnvironment()) {
                 moesifKey = orgMapping.getSingleEnvironmentKey();
             } else {
                 moesifKey = orgMapping.getMoesifKeyForEnvironment(environment);
                 if (moesifKey == null) {
-                    log.warn("No Moesif key found for organization: {} and environment: {}. Skipping {} events", 
+                    log.warn("No Moesif key found for organization: {} and environment: {}. Skipping {} events",
                         orgId, environment, events.size());
                     continue;
                 }
             }
-            
+
             List<EventModel> validEvents = new ArrayList<>();
             for (MoesifEventData eventData : events) {
                 try {
@@ -386,30 +412,34 @@ public class MoesifClient extends AbstractMoesifClient {
                 continue;
             }
 
-            MoesifAPIClient client = new MoesifAPIClient(moesifKey);
-            APIController api = client.getAPI();
+            APIController api = apiClientFor(moesifKey).getAPI();
+            MoesifRetryBuffer buffer = retryBufferFor(moesifKey);
 
-            OrgMoesifKeyMapping retryMapping = new OrgMoesifKeyMapping(orgId, orgMapping.getEnvironmentKeyMap());
-            Map<String, List<MoesifEventData>> retryBatch = new HashMap<>();
-            retryBatch.put(environment, events);
-            retryMapping.setEnvironmentEventBatches(retryBatch);
-            
-            APICallBack<HttpResponse> callBack = createMoesifCallBack(
-                () -> doRetry(retryMapping),
-                "Batch event", orgId);
+            if (buffer != null && !buffer.isHealthy()) {
+                buffer.stash(validEvents);
+                continue;
+            }
+
+            APICallBack<HttpResponse> callBack = createMoesifCallBack(validEvents, buffer, "Batch event", orgId);
 
             try {
                 if (validEvents.size() == 1) {
                     log.info("Publishing single event for org: {} environment: {}", orgId, environment);
                     api.createEventAsync(validEvents.get(0), callBack);
                 } else {
-                    log.info("Publishing batch of {} events for org: {} environment: {}", 
+                    log.info("Publishing batch of {} events for org: {} environment: {}",
                     validEvents.size(), orgId, environment);
                     api.createEventsBatchAsync(validEvents, callBack);
                 }
             } catch (IOException e) {
-                log.error("Analytics event sending failed for organization {} and environment {}", 
-                orgId, environment, e);
+                if (buffer != null) {
+                    log.debug("Batch could not be sent for org {} env {}; queueing for retry",
+                            LogSanitizer.sanitize(orgId), environment, e);
+                    buffer.onRetryableFailure(validEvents);
+                } else {
+                    log.error("Failed to send analytics events for org {} env {}; events will be dropped",
+                    orgId, environment, e);
+                }
             }
         }
     }

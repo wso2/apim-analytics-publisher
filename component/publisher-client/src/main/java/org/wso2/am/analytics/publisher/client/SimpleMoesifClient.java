@@ -30,8 +30,9 @@ import com.moesif.api.models.EventResponseModel;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
+import org.wso2.am.analytics.publisher.reporter.moesif.retry.MoesifRetryBuffer;
+import org.wso2.am.analytics.publisher.reporter.moesif.retry.RetryConfig;
 import org.wso2.am.analytics.publisher.reporter.moesif.sampling.MoesifSamplingManager;
-import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
 import org.wso2.am.analytics.publisher.util.Constants;
 import org.wso2.am.analytics.publisher.util.HttpStatusHelper;
 import org.wso2.am.analytics.publisher.util.LogSanitizer;
@@ -58,16 +59,22 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
     private final APIController api;
     private final String moesifKey;
     private final MoesifSamplingManager samplingManager;
+    private final MoesifRetryBuffer retryBuffer;
 
     public SimpleMoesifClient(String key) {
-        this(key, null, null);
+        this(key, null, null, null);
     }
 
     public SimpleMoesifClient(String key, String url) {
-        this(key, url, null);
+        this(key, url, null, null);
     }
 
     public SimpleMoesifClient(String key, String url, MoesifSamplingManager samplingManager) {
+        this(key, url, samplingManager, null);
+    }
+
+    public SimpleMoesifClient(String key, String url, MoesifSamplingManager samplingManager,
+                              RetryConfig retryConfig) {
         this.moesifAPIClient = (url == null || url.isEmpty())
                 ? new MoesifAPIClient(key)
                 : new MoesifAPIClient(key, url);
@@ -77,6 +84,9 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         if (samplingManager != null) {
             samplingManager.register(key, moesifAPIClient);
         }
+        this.retryBuffer = retryConfig == null
+                ? null
+                : new MoesifRetryBuffer(key, moesifAPIClient, retryConfig);
     }
 
     @Override
@@ -94,13 +104,9 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             return;
         }
 
-        APICallBack<HttpResponse> callBack = createMoesifCallback(() -> doRetry(builder),
-                "Single event");
-        try {
-            api.createEventAsync(eventModel, callBack);
-        } catch (IOException e) {
-            log.error("Analytics event sending failed. Event will be dropped", e);
-        }
+        List<EventModel> singletonBatch = new ArrayList<>(1);
+        singletonBatch.add(eventModel);
+        sendOrStash(singletonBatch, "Single event");
     }
 
     @Override
@@ -119,13 +125,33 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         if (sampled.isEmpty()) {
             return;
         }
+        sendOrStash(sampled, "Batch of " + sampled.size() + " events");
+    }
 
-        APICallBack<HttpResponse> callBack = createMoesifCallback(() -> doRetry(builders),
-                "Batch of " + sampled.size() + " events");
+    /**
+     * Sends the batch via the Moesif SDK, or stashes it in the retry buffer when configured
+     * and Moesif is currently unhealthy. Retryable failures from the callback also feed the
+     * buffer instead of recursing through the SDK callback thread.
+     */
+    private void sendOrStash(List<EventModel> batch, String operationType) {
+        if (retryBuffer != null && !retryBuffer.isHealthy()) {
+            retryBuffer.stash(batch);
+            return;
+        }
+        APICallBack<HttpResponse> callBack = createMoesifCallback(batch, operationType);
         try {
-            api.createEventsBatchAsync(sampled, callBack);
+            if (batch.size() == 1) {
+                api.createEventAsync(batch.get(0), callBack);
+            } else {
+                api.createEventsBatchAsync(batch, callBack);
+            }
         } catch (IOException e) {
-            log.error("Analytics event sending failed. Event will be dropped", e);
+            if (retryBuffer != null) {
+                log.debug("{} could not be sent now; queueing for retry", operationType, e);
+                retryBuffer.onRetryableFailure(batch);
+            } else {
+                log.error("Failed to send analytics events; events will be dropped", e);
+            }
         }
     }
 
@@ -258,101 +284,61 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
 
     }
 
-    /**
-     * Retries publishing the Batch of events using the provided List of `MetricEventBuilder`
-     * if retry attempts are available.
-     * Decrements the retry attempt count and waits for a specified duration before retrying.
-     * Logs errors if the retry attempt fails or if all retry attempts are exhausted.
-     *
-     * @param builders The List of `MetricEventBuilder` containing the event data to be published.
-     */
-    private void doRetry(List<MetricEventBuilder> builders) {
-        Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
-
-        if (currentAttempt > 0) {
-            currentAttempt -= 1;
-            MoesifClientContextHolder.PUBLISH_ATTEMPTS.set(currentAttempt);
-            try {
-                Thread.sleep(MoesifMicroserviceConstants.TIME_TO_WAIT_PUBLISH);
-                publishBatch(builders);
-            } catch (InterruptedException e) {
-                log.error("Failing retry attempt at Moesif client", e);
-            }
-        } else if (currentAttempt == 0) {
-            log.error("Failed all retrying attempts. Event will be dropped");
-        }
-    }
-    /**
-     * Retries publishing the event using the provided `MetricEventBuilder` if retry attempts are available.
-     * Decrements the retry attempt count and waits for a specified duration before retrying.
-     * Logs errors if the retry attempt fails or if all retry attempts are exhausted.
-     *
-     * @param builder The List of `MetricEventBuilder` containing the event data to be published.
-     */
-    private void doRetry(MetricEventBuilder builder) {
-        Integer currentAttempt = MoesifClientContextHolder.PUBLISH_ATTEMPTS.get();
-
-        if (currentAttempt > 0) {
-            currentAttempt -= 1;
-            MoesifClientContextHolder.PUBLISH_ATTEMPTS.set(currentAttempt);
-            try {
-                Thread.sleep(MoesifMicroserviceConstants.TIME_TO_WAIT_PUBLISH);
-                publish(builder);
-            } catch (InterruptedException e) {
-                log.error("Failing retry attempt at Moesif client", e);
-            } catch (MetricReportingException e) {
-                log.error("Failed to publish event during retry attempt", e);
-            }
-        } else if (currentAttempt == 0) {
-            log.error("Failed all retrying attempts. Event will be dropped");
-        }
-    }
-    private APICallBack<HttpResponse> createMoesifCallback(Runnable retryAction, String operationType) {
+    private APICallBack<HttpResponse> createMoesifCallback(List<EventModel> batch, String operationType) {
         return new APICallBack<HttpResponse>() {
-            /**
-             * Handles successful HTTP response from Moesif API.
-             */
             @Override
             public void onSuccess(HttpContext httpContext, HttpResponse response) {
-                int statusCode = httpContext.getResponse().getStatusCode();
-                if (HttpStatusHelper.isSuccess(statusCode)) {
-                    log.debug("{} successfully published. Status: {}", operationType, statusCode);
-                } else if (HttpStatusHelper.shouldRetry(statusCode)) {
-                    log.error("{} publishing failed. Moesif returned {}. Response: {}. Retrying...",
-                            operationType,
-                            LogSanitizer.sanitize(String.valueOf(statusCode)),
-                            response.getRawBody());
-                    retryAction.run();
-                } else {
-                    log.error("{} publishing failed. Moesif returned {}. Response: {}. No retry.",
-                            operationType,
-                            LogSanitizer.sanitize(String.valueOf(statusCode)),
-                            response.getRawBody());
+                try {
+                    int statusCode = httpContext.getResponse().getStatusCode();
+                    if (HttpStatusHelper.isSuccess(statusCode)) {
+                        log.debug("{} successfully published. Status: {}", operationType, statusCode);
+                        if (retryBuffer != null) {
+                            retryBuffer.onSuccess();
+                        }
+                    } else if (HttpStatusHelper.shouldRetry(statusCode)) {
+                        handleRetryable(statusCode);
+                    } else {
+                        log.error("{} publishing failed. Moesif returned {}. Response: {}. No retry.",
+                                operationType,
+                                LogSanitizer.sanitize(String.valueOf(statusCode)),
+                                response.getRawBody());
+                    }
+                } catch (Throwable t) {
+                    log.error("Unexpected error after sending {} to Moesif", operationType, t);
                 }
             }
-            /**
-             * Handles failed HTTP responses from Moesif API.
-             * Processes failures based on status code and error details.
-             */
+
             @Override
             public void onFailure(HttpContext httpContext, Throwable error) {
-                int statusCode = httpContext.getResponse().getStatusCode();
-                String errorMessage = error != null ? error.getMessage() : "Unknown error";
+                try {
+                    int statusCode = httpContext != null && httpContext.getResponse() != null
+                            ? httpContext.getResponse().getStatusCode()
+                            : 0;
+                    String errorMessage = error != null ? error.getMessage() : "Unknown error";
 
-                if (HttpStatusHelper.shouldRetry(statusCode)) {
-                    log.error("{} publishing failed. Moesif returned {}. Retrying...",
-                            operationType,
-                            LogSanitizer.sanitize(String.valueOf(statusCode)));
-                    retryAction.run();
-                } else if (HttpStatusHelper.isClientError(statusCode)) {
-                    log.error("{} publishing failed. Moesif returned {} due to error: {}",
-                            operationType,
-                            statusCode,
-                            LogSanitizer.sanitize(errorMessage));
+                    if (statusCode == 0 || HttpStatusHelper.shouldRetry(statusCode)) {
+                        handleRetryable(statusCode);
+                    } else if (HttpStatusHelper.isClientError(statusCode)) {
+                        log.error("{} publishing failed. Moesif returned {} due to error: {}",
+                                operationType,
+                                statusCode,
+                                LogSanitizer.sanitize(errorMessage));
+                    } else {
+                        log.error("{} publishing failed due to error: {}",
+                                operationType,
+                                LogSanitizer.sanitize(errorMessage));
+                    }
+                } catch (Throwable t) {
+                    log.error("Unexpected error while handling {} send failure", operationType, t);
+                }
+            }
+
+            private void handleRetryable(int statusCode) {
+                if (retryBuffer != null) {
+                    retryBuffer.onRetryableFailure(batch);
                 } else {
-                    log.error("{} publishing failed due to error: {}",
-                            operationType,
-                            LogSanitizer.sanitize(errorMessage));
+                    log.error("Failed to send {} (status {}); retry queue disabled, events will be dropped",
+                            operationType, LogSanitizer.sanitize(String.valueOf(statusCode)));
                 }
             }
         };
