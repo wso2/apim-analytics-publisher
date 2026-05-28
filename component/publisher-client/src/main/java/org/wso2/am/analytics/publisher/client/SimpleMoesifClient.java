@@ -30,6 +30,7 @@ import com.moesif.api.models.EventResponseModel;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
+import org.wso2.am.analytics.publisher.reporter.moesif.sampling.MoesifSamplingManager;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
 import org.wso2.am.analytics.publisher.util.Constants;
 import org.wso2.am.analytics.publisher.util.HttpStatusHelper;
@@ -38,6 +39,7 @@ import org.wso2.am.analytics.publisher.util.LogSanitizer;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -54,25 +56,48 @@ import java.util.Set;
 public class SimpleMoesifClient extends AbstractMoesifClient {
     private final MoesifAPIClient moesifAPIClient;
     private final APIController api;
+    private final String moesifKey;
+    private final MoesifSamplingManager samplingManager;
 
     public SimpleMoesifClient(String key) {
-        this.moesifAPIClient = new MoesifAPIClient(key);
-        this.api = moesifAPIClient.getAPI();
+        this(key, null, null);
     }
 
     public SimpleMoesifClient(String key, String url) {
-        this.moesifAPIClient = new MoesifAPIClient(key, url);
+        this(key, url, null);
+    }
+
+    public SimpleMoesifClient(String key, String url, MoesifSamplingManager samplingManager) {
+        this.moesifAPIClient = (url == null || url.isEmpty())
+                ? new MoesifAPIClient(key)
+                : new MoesifAPIClient(key, url);
         this.api = moesifAPIClient.getAPI();
+        this.moesifKey = key;
+        this.samplingManager = samplingManager;
+        if (samplingManager != null) {
+            samplingManager.register(key, moesifAPIClient);
+        }
     }
 
     @Override
     public void publish(MetricEventBuilder builder) throws MetricReportingException {
         Map<String, Object> event = builder.build();
 
+        EventModel eventModel;
+        try {
+            eventModel = buildEventResponse(event);
+        } catch (IOException e) {
+            log.error("Analytics event sending failed. Event will be dropped", e);
+            return;
+        }
+        if (!applySampling(eventModel)) {
+            return;
+        }
+
         APICallBack<HttpResponse> callBack = createMoesifCallback(() -> doRetry(builder),
                 "Single event");
         try {
-            api.createEventAsync(buildEventResponse(event), callBack);
+            api.createEventAsync(eventModel, callBack);
         } catch (IOException e) {
             log.error("Analytics event sending failed. Event will be dropped", e);
         }
@@ -85,13 +110,39 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
         }
         List<EventModel> events = buildEventsFromBuilders(builders);
 
+        List<EventModel> sampled = new ArrayList<>(events.size());
+        for (EventModel e : events) {
+            if (applySampling(e)) {
+                sampled.add(e);
+            }
+        }
+        if (sampled.isEmpty()) {
+            return;
+        }
+
         APICallBack<HttpResponse> callBack = createMoesifCallback(() -> doRetry(builders),
-                "Batch of " + builders.size() + " events");
+                "Batch of " + sampled.size() + " events");
         try {
-            api.createEventsBatchAsync(events, callBack);
+            api.createEventsBatchAsync(sampled, callBack);
         } catch (IOException e) {
             log.error("Analytics event sending failed. Event will be dropped", e);
         }
+    }
+
+    /**
+     * Applies the dynamic sampling decision: returns false if the event should be dropped, otherwise stamps
+     * the event's weight so Moesif can extrapolate metrics correctly. When sampling is disabled, returns true
+     * with no weight change.
+     */
+    private boolean applySampling(EventModel event) {
+        if (samplingManager == null || !samplingManager.isEnabled()) {
+            return true;
+        }
+        if (!samplingManager.shouldSend(moesifKey, event)) {
+            return false;
+        }
+        event.setWeight(samplingManager.weightFor(moesifKey, event));
+        return true;
     }
 
     @Override

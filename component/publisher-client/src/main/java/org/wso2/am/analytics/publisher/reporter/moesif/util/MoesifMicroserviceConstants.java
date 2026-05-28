@@ -35,4 +35,10 @@ public class MoesifMicroserviceConstants {
     public static final int REQUEST_READ_TIMEOUT = 10000;
     public static final long PERIODIC_CALL_DELAY = 300000;
 
+    // Dynamic sampling config (driven by Moesif app config endpoint)
+    public static final String SAMPLING_ENABLED_KEY = "sampling.enabled";
+    public static final String SAMPLING_REFRESH_INTERVAL_KEY = "sampling.refresh.interval.ms";
+    public static final String SAMPLING_FALLBACK_RATE_KEY = "sampling.fallback.rate";
+    public static final long DEFAULT_SAMPLING_REFRESH_INTERVAL_MS = 60000;
+    public static final int DEFAULT_SAMPLING_FALLBACK_RATE = 100;
 }

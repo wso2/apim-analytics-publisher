@@ -24,6 +24,7 @@ import org.wso2.am.analytics.publisher.reporter.AbstractMetricReporter;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import org.wso2.am.analytics.publisher.reporter.TimerMetric;
+import org.wso2.am.analytics.publisher.reporter.moesif.sampling.MoesifSamplingManager;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 import org.wso2.am.analytics.publisher.util.Constants;
@@ -49,10 +50,13 @@ public class MoesifReporter extends AbstractMetricReporter {
         if (properties.get(Constants.WORKER_THREAD_COUNT) != null) {
             workerThreads = Integer.parseInt(properties.get(Constants.WORKER_THREAD_COUNT));
         }
+        MoesifSamplingManager samplingManager = buildSamplingManager(properties);
         if (properties.get(Constants.TYPE).contains(Constants.MOESIF)) {
             String moesifKey = properties.get(Constants.MOESIF_KEY);
             String moesifBasePath = properties.get(Constants.MOESIF_BASE_URL);
-            if (moesifBasePath == null || moesifBasePath.isEmpty()) {
+            if (samplingManager != null && samplingManager.isEnabled()) {
+                this.eventQueue = new EventQueue(queueSize, workerThreads, moesifKey, moesifBasePath, samplingManager);
+            } else if (moesifBasePath == null || moesifBasePath.isEmpty()) {
                 this.eventQueue = new EventQueue(queueSize, workerThreads, moesifKey);
             } else {
                 this.eventQueue = new EventQueue(queueSize, workerThreads, moesifKey, moesifBasePath);
@@ -72,6 +76,35 @@ public class MoesifReporter extends AbstractMetricReporter {
             Timer timer = new Timer();
             timer.schedule(missedEventHandler, 0, MoesifMicroserviceConstants.PERIODIC_CALL_DELAY);
         }
+    }
+
+    private MoesifSamplingManager buildSamplingManager(Map<String, String> properties) {
+        boolean enabled = Boolean.parseBoolean(
+                properties.getOrDefault(MoesifMicroserviceConstants.SAMPLING_ENABLED_KEY, "false"));
+        if (!enabled) {
+            return null;
+        }
+        long refreshInterval = MoesifMicroserviceConstants.DEFAULT_SAMPLING_REFRESH_INTERVAL_MS;
+        int fallbackRate = MoesifMicroserviceConstants.DEFAULT_SAMPLING_FALLBACK_RATE;
+        try {
+            String refresh = properties.get(MoesifMicroserviceConstants.SAMPLING_REFRESH_INTERVAL_KEY);
+            if (refresh != null) {
+                refreshInterval = Long.parseLong(refresh);
+            }
+        } catch (NumberFormatException e) {
+            log.warn("Invalid {} value, using default {}ms",
+                    MoesifMicroserviceConstants.SAMPLING_REFRESH_INTERVAL_KEY, refreshInterval);
+        }
+        try {
+            String rate = properties.get(MoesifMicroserviceConstants.SAMPLING_FALLBACK_RATE_KEY);
+            if (rate != null) {
+                fallbackRate = Integer.parseInt(rate);
+            }
+        } catch (NumberFormatException e) {
+            log.warn("Invalid {} value, using default {}",
+                    MoesifMicroserviceConstants.SAMPLING_FALLBACK_RATE_KEY, fallbackRate);
+        }
+        return new MoesifSamplingManager(true, refreshInterval, fallbackRate);
     }
 
     @Override

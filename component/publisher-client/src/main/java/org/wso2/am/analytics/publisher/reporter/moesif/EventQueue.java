@@ -24,6 +24,7 @@ import org.wso2.am.analytics.publisher.client.MoesifClient;
 import org.wso2.am.analytics.publisher.client.SimpleMoesifClient;
 import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsThreadFactory;
+import org.wso2.am.analytics.publisher.reporter.moesif.sampling.MoesifSamplingManager;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 
 import java.util.concurrent.BlockingQueue;
@@ -48,6 +49,11 @@ public class EventQueue {
 
     public EventQueue(int queueSize, int workerThreadCount, String key, String baseUrl) {
         this(queueSize, workerThreadCount, new SimpleMoesifClient(key, baseUrl));
+    }
+
+    public EventQueue(int queueSize, int workerThreadCount, String key, String baseUrl,
+                      MoesifSamplingManager samplingManager) {
+        this(queueSize, workerThreadCount, new SimpleMoesifClient(key, baseUrl, samplingManager));
     }
 
     public EventQueue(int queueSize, int workerThreadCount, MoesifKeyRetriever moesifKeyRetriever) {
