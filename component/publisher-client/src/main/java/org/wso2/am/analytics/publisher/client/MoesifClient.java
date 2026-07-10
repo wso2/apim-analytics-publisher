@@ -210,7 +210,7 @@ public class MoesifClient {
         EventModel eventModel = new EventModel();
         String modifiedUserName;
 
-        Map<String, String> metadata = new HashMap<>();
+        Map<String, Object> metadata = new HashMap<>();
         populateMetadata(data, metadata);
 
 
@@ -311,11 +311,13 @@ public class MoesifClient {
      *
      * This method filters and transfers specific analytics-related fields from the source
      * data map to the metadata map, ensuring only required fields with non-null values
-     * are included. All values are converted to String format for consistent metadata handling.
-     *@param data     The source data map containing various analytics fields and values.
-     *@param metadata The target metadata map to be populated with filtered analytics data.
-     **/
-    private void populateMetadata(Map<String, Object> data, Map<String, String> metadata) {
+     * are included. Numeric values (latency, response codes) are preserved as their native
+     * types so Moesif can perform numeric aggregations on them.
+     *
+     * @param data     The source data map containing various analytics fields and values.
+     * @param metadata The target metadata map to be populated with filtered analytics data.
+     */
+    private void populateMetadata(Map<String, Object> data, Map<String, Object> metadata) {
         Set<String> requiredKeys = new HashSet<>(Arrays.asList(
                 Constants.API_ID, Constants.API_METHOD, Constants.API_NAME,
                 Constants.API_TYPE, Constants.APPLICATION_ID, Constants.APPLICATION_NAME, Constants.APPLICATION_OWNER,
@@ -327,9 +329,10 @@ public class MoesifClient {
                 Constants.REQUEST_MEDIATION_LATENCY, Constants.API_RESOURCE_TEMPLATE, Constants.RESPONSE_LATENCY
         ));
 
-        data.entrySet().stream().filter(entry -> requiredKeys.contains(entry.getKey()))
+        data.entrySet().stream()
+                .filter(entry -> requiredKeys.contains(entry.getKey()))
                 .filter(entry -> entry.getValue() != null)
-                .forEach(entry -> metadata.put(entry.getKey(), String.valueOf(entry.getValue())));
+                .forEach(entry -> metadata.put(entry.getKey(), entry.getValue()));
 
         LinkedHashMap billingProperties = (LinkedHashMap) data.get(Constants.PROPERTIES);
         if (billingProperties != null) {
