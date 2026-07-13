@@ -202,6 +202,7 @@ public class EventHubClientTestCase extends AuthAPIMockService {
             verify(client, timeout(20000).times(1)).send(any(EventDataBatch.class));
 
             // verify worker thread has already identified the Unrecoverable error
+            Thread.sleep(1000);
             String msg = "Unrecoverable error occurred when event flushing. Analytics event flushing will be disabled "
                     + "until issue is rectified. Reason: org.wso2.am.analytics.publisher.exception."
                     + "ConnectionUnrecoverableException: ConnectionUnrecoverableException";
