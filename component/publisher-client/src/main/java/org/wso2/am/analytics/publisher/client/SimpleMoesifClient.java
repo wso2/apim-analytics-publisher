@@ -17,6 +17,7 @@
  */
 package org.wso2.am.analytics.publisher.client;
 
+import com.moesif.api.BodyParser;
 import com.moesif.api.MoesifAPIClient;
 import com.moesif.api.controllers.APIController;
 import com.moesif.api.http.client.APICallBack;
@@ -178,6 +179,20 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
 
         populateHeaders(data, reqHeaders, rspHeaders);
 
+        // Override the headers-map Content-Type with the captured body's real media type so Moesif can
+        // label/parse the body even when send_headers is off (populateHeaders otherwise defaults it to
+        // application/json). Done before resolveBody so BodyParser's JSON detection also sees the right
+        // type. Applied only when a body is actually present, so no-body events keep their headers.
+        applyBodyContentType(data, reqHeaders, Constants.REQUEST_BODY, Constants.REQUEST_CONTENT_TYPE);
+        applyBodyContentType(data, rspHeaders, Constants.RESPONSE_BODY, Constants.RESPONSE_CONTENT_TYPE);
+
+        // Resolve request/response bodies (and their transfer encodings) from properties, removing them
+        // so they are not also duplicated into metadata by populateAIInfo's metadata.putAll(properties).
+        BodyParser.BodyWrapper requestBody = resolveBody(data, reqHeaders,
+                Constants.REQUEST_BODY, Constants.REQUEST_BODY_TRANSFER_ENCODING);
+        BodyParser.BodyWrapper responseBody = resolveBody(data, rspHeaders,
+                Constants.RESPONSE_BODY, Constants.RESPONSE_BODY_TRANSFER_ENCODING);
+
         EventRequestModel eventReq;
         EventResponseModel eventRsp;
         EventModel eventModel = new EventModel();
@@ -208,10 +223,12 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
 
             eventReq = new EventRequestBuilder().time(Date.from(requestTimestamp)).uri(uri)
                     .verb((String) data.get(Constants.API_METHOD)).apiVersion((String) data.get(Constants.API_VERSION))
-                    .ipAddress(userIP).headers(reqHeaders).build();
+                    .ipAddress(userIP).headers(reqHeaders)
+                    .body(requestBody.body).transferEncoding(requestBody.transferEncoding).build();
 
             eventRsp = new EventResponseBuilder().time(Date.from(responseTimestamp))
-                    .status((int) data.get(Constants.PROXY_RESPONSE_CODE)).headers(rspHeaders).build();
+                    .status((int) data.get(Constants.PROXY_RESPONSE_CODE)).headers(rspHeaders)
+                    .body(responseBody.body).transferEncoding(responseBody.transferEncoding).build();
 
         } else {
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
@@ -237,12 +254,14 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
 
             eventReq = new EventRequestBuilder().time(Date.from(requestTimestamp)).uri(uri)
                     .verb(verb).apiVersion((String) data.get(Constants.API_VERSION))
-                    .headers(reqHeaders).build();
+                    .headers(reqHeaders)
+                    .body(requestBody.body).transferEncoding(requestBody.transferEncoding).build();
 
             Date dateNow = Date.from(Instant.now());
 
             eventRsp = new EventResponseBuilder().time(dateNow).status((int) data.get(Constants.PROXY_RESPONSE_CODE))
-                    .headers(rspHeaders).build();
+                    .headers(rspHeaders)
+                    .body(responseBody.body).transferEncoding(responseBody.transferEncoding).build();
         }
 
         eventModel.setRequest(eventReq);
@@ -382,6 +401,82 @@ public class SimpleMoesifClient extends AbstractMoesifClient {
             }
             metadata.putAll(properties);
         }
+    }
+
+    /**
+     * Removes and returns a body value ({@code requestBody}/{@code responseBody}) from the event's
+     * nested {@code properties} map. Removing it prevents the raw body from also being copied into
+     * Moesif metadata by {@link #populateAIInfo}.
+     *
+     * @param data the event data map
+     * @param key  the body property key
+     * @return the raw body value, or {@code null} if absent
+     */
+    private Object extractAndRemoveBody(Map<String, Object> data, String key) {
+        Object propertiesObj = data.get(Constants.PROPERTIES);
+        if (propertiesObj instanceof Map) {
+            return ((Map<String, Object>) propertiesObj).remove(key);
+        }
+        return null;
+    }
+
+    /**
+     * When a body is present in the event's {@code properties}, sets the given headers map's
+     * {@code Content-Type} to the captured body's media type (property {@code contentTypeKey}), so Moesif
+     * renders the body correctly regardless of {@code send_headers}. Only real media types (containing
+     * "/") override the default; the content-type property is left in {@code properties} as metadata.
+     *
+     * @param data           the event data map
+     * @param headers        the request/response headers map to update
+     * @param bodyKey        the body property key (presence gates the override)
+     * @param contentTypeKey the content-type property key
+     */
+    private void applyBodyContentType(Map<String, Object> data, Map<String, String> headers,
+                                      String bodyKey, String contentTypeKey) {
+        Object propertiesObj = data.get(Constants.PROPERTIES);
+        if (!(propertiesObj instanceof Map)) {
+            return;
+        }
+        Map<String, Object> properties = (Map<String, Object>) propertiesObj;
+        Object body = properties.get(bodyKey);
+        if (!(body instanceof String) || ((String) body).isEmpty()) {
+            return;
+        }
+        Object contentType = properties.get(contentTypeKey);
+        if (contentType instanceof String && ((String) contentType).contains("/")) {
+            headers.put(Constants.MOESIF_CONTENT_TYPE_KEY, ((String) contentType).trim());
+        }
+    }
+
+    /**
+     * Resolves a captured body into a Moesif {@link BodyParser.BodyWrapper} (body + transferEncoding),
+     * removing both the body and its transfer-encoding hint from the event's nested {@code properties}
+     * map so they are not also copied into Moesif metadata by {@link #populateAIInfo}.
+     *
+     * <p>Binary payloads are pre-encoded as Base64 by the gateway and passed through with
+     * {@code transferEncoding=base64}. JSON/text payloads are handed to Moesif's {@link BodyParser},
+     * which renders JSON as a structured object and Base64-encodes anything else (the Moesif standard).</p>
+     *
+     * @param data        the event data map
+     * @param headers     the request/response headers (used by BodyParser to detect JSON)
+     * @param bodyKey     the body property key
+     * @param encodingKey the transfer-encoding hint property key
+     * @return a body wrapper; {@code body}/{@code transferEncoding} are {@code null} when no body captured
+     */
+    private BodyParser.BodyWrapper resolveBody(Map<String, Object> data, Map<String, String> headers,
+                                               String bodyKey, String encodingKey) {
+        Object encoding = extractAndRemoveBody(data, encodingKey);
+        Object body = extractAndRemoveBody(data, bodyKey);
+        if (!(body instanceof String) || ((String) body).isEmpty()) {
+            return new BodyParser.BodyWrapper(null, null);
+        }
+        String bodyString = (String) body;
+        if (Constants.TRANSFER_ENCODING_BASE64.equals(encoding)) {
+            // Binary: already Base64-encoded by the gateway; pass through verbatim.
+            return new BodyParser.BodyWrapper(bodyString, Constants.TRANSFER_ENCODING_BASE64);
+        }
+        // JSON/text: Moesif standard - structured JSON object, otherwise Base64.
+        return BodyParser.parseBody(headers, bodyString);
     }
 
     /**
