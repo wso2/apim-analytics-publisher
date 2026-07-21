@@ -144,6 +144,15 @@ public class Constants {
     public static final String MOESIF_BASE_URL = "moesif_base_url";
     public static final String REQUEST_HEADERS = "requestHeaders";
     public static final String RESPONSE_HEADERS = "responseHeaders";
+    public static final String REQUEST_BODY = "requestBody";
+    public static final String RESPONSE_BODY = "responseBody";
+    public static final String REQUEST_BODY_TRANSFER_ENCODING = "requestBodyTransferEncoding";
+    public static final String RESPONSE_BODY_TRANSFER_ENCODING = "responseBodyTransferEncoding";
+    public static final String TRANSFER_ENCODING_BASE64 = "base64";
+    // The captured body's Content-Type, sent by the gateway so a logged body can be labeled/parsed
+    // correctly by Moesif even when full header sending (send_headers) is disabled.
+    public static final String REQUEST_CONTENT_TYPE = "requestContentType";
+    public static final String RESPONSE_CONTENT_TYPE = "responseContentType";
 
     public static final String CARBON_SUPER_SUFFIX = "@carbon.super";
 }
