@@ -29,6 +29,7 @@
                 <class name="org.wso2.am.analytics.publisher.DefaultFaultMetricBuilderTestCase"/>
                 <class name="org.wso2.am.analytics.publisher.ErrorHandlingTestCase"/>
                 <class name="org.wso2.am.analytics.publisher.EventHubClientTestCase"/>
+                <class name="org.wso2.am.analytics.publisher.UserAgentParserTestCase"/>
             </classes>
         </parameter>
     </test>
