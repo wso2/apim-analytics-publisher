@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import ua_parser.Client;
 import ua_parser.Parser;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -39,14 +40,14 @@ public class UserAgentParser {
     private UserAgentParser() {
         uaParser = new Parser();
         isInitialized = true;
-        clientCache = new LinkedHashMap<String, Client>(Constants.USER_AGENT_DEFAULT_CACHE_SIZE
-                                                                + Constants.DEFAULT_WORKER_THREADS) {
+        clientCache = Collections.synchronizedMap(new LinkedHashMap<String, Client>(
+                Constants.USER_AGENT_DEFAULT_CACHE_SIZE + Constants.DEFAULT_WORKER_THREADS) {
             static final int MAX = Constants.USER_AGENT_DEFAULT_CACHE_SIZE;
             @Override
             protected boolean removeEldestEntry(Map.Entry eldest) {
                 return size() > MAX;
             }
-        };
+        });
     }
 
     public static UserAgentParser getInstance() {
