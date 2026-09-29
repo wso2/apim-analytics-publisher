@@ -39,8 +39,8 @@ import java.util.concurrent.TimeUnit;
 
 public class UserAgentParserTestCase {
     private static final Logger log = LogManager.getLogger(UserAgentParserTestCase.class);
-    private static final String USER_AGENT = "Wing Bank/5.5.1 (Linux; Android 14; SDK 34; samsung SM-A556E; en) "
-            + "DeviceId/%s AppBuild/551";
+    private static final String USER_AGENT = "SampleApp/1.0.0 (Linux; Android 14; SDK 34; Generic Device; en) "
+            + "DeviceId/%s AppBuild/100";
 
     @Test
     public void testParseUserAgent() {
