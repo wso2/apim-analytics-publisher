@@ -60,6 +60,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -207,10 +208,16 @@ public class EventHubClientTestCase extends AuthAPIMockService {
         List<String> messages = new ArrayList<String>(appender.getMessages());
         Assert.assertTrue(TestUtils.isContains(messages, msg));
 
+        // Reset the mock to create fresh builder for second event
+        MetricEventBuilder secondBuilder = metric.getEventBuilder();
+        TestUtils.populateBuilder(secondBuilder);
+
         // try to publish another event
-        metric.incrementCount(builder);
+        metric.incrementCount(secondBuilder);
         // waiting to confirm that the event is not added to the queue
-        verify(eventDataBatch, timeout(10000).times(1)).tryAdd(any(EventData.class));
+        Thread.sleep(2000);
+        // verify it is not trying to add event queue, after identified unrecoverable error
+        verify(eventDataBatch, times(1)).tryAdd(any(EventData.class));
     }
 
 
