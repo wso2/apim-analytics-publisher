@@ -304,9 +304,7 @@ public class MoesifRetryBuffer {
                         recordFailureTransition();
                         logFailureThrottled();
                     } else {
-                        log.error("Moesif rejected {} queued analytics events with status {} (key ...{}); "
-                                        + "these events will not be retried",
-                                batch.size(), code, keyTail());
+                        dropRejected(code);
                     }
                 } catch (Throwable t) {
                     restoreFront(batch);
@@ -322,6 +320,16 @@ public class MoesifRetryBuffer {
             @Override
             public void onFailure(HttpContext context, Throwable error) {
                 try {
+                    // The SDK reports every non-2xx response as a failure. Only re-queue when there was no response
+                    // (e.g. Moesif or the proxy is unreachable) or the status is retryable, otherwise a rejected
+                    // batch would be retried forever.
+                    int code = context != null && context.getResponse() != null
+                            ? context.getResponse().getStatusCode()
+                            : 0;
+                    if (code != 0 && !HttpStatusHelper.shouldRetry(code)) {
+                        dropRejected(code);
+                        return;
+                    }
                     restoreFront(batch);
                     recordFailureTransition();
                     logFailureThrottled();
@@ -332,6 +340,20 @@ public class MoesifRetryBuffer {
                         inflightBurstSteps.decrementAndGet();
                     }
                     probeInFlight.release();
+                }
+            }
+
+            /**
+             * Drops a queued batch that Moesif rejected with a non-retryable status. Moesif answered, so it is
+             * reachable: switch back to normal sending and keep draining the remaining queued batches.
+             */
+            private void dropRejected(int code) {
+                log.error("Moesif rejected {} queued analytics events with status {} (key ...{}); "
+                                + "these events will not be retried",
+                        batch.size(), code, keyTail());
+                MoesifRetryBuffer.this.onSuccess();
+                if (fromBurst) {
+                    scheduleBurstStep();
                 }
             }
         };
