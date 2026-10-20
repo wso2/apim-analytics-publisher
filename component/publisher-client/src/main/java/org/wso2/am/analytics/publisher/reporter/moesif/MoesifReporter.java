@@ -28,6 +28,7 @@ import org.wso2.am.analytics.publisher.reporter.cloud.DefaultAnalyticsThreadFact
 import org.wso2.am.analytics.publisher.reporter.moesif.retry.RetryConfig;
 import org.wso2.am.analytics.publisher.reporter.moesif.sampling.MoesifSamplingManager;
 import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifMicroserviceConstants;
+import org.wso2.am.analytics.publisher.reporter.moesif.util.MoesifProxyUtils;
 import org.wso2.am.analytics.publisher.retriever.MoesifKeyRetriever;
 import org.wso2.am.analytics.publisher.util.Constants;
 
@@ -47,6 +48,8 @@ public class MoesifReporter extends AbstractMetricReporter {
 
     public MoesifReporter(Map<String, String> properties) throws MetricCreationException {
         super(properties);
+        // Route the Moesif SDK (Unirest) traffic through the configured proxy, if any.
+        MoesifProxyUtils.configureProxyIfEnabled(properties);
         int queueSize = Constants.DEFAULT_QUEUE_SIZE;
         int workerThreads = Constants.DEFAULT_WORKER_THREADS;
         if (properties.get(Constants.QUEUE_SIZE) != null) {

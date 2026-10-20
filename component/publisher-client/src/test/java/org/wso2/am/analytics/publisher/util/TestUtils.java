@@ -66,9 +66,12 @@ public class TestUtils {
     }
 
     public static boolean isContains(List<String> messages, String message) {
-        for (String log : messages) {
-            if (log.contains(message)) {
-                return true;
+        // Log messages can be appended by background threads while iterating.
+        synchronized (messages) {
+            for (String log : messages) {
+                if (log.contains(message)) {
+                    return true;
+                }
             }
         }
         return false;
