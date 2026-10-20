@@ -50,6 +50,7 @@ public class MoesifProxyUtils {
     // Same defaults Unirest uses when it builds its own clients.
     private static final int CONNECTION_TIMEOUT = (int) Options.CONNECTION_TIMEOUT;
     private static final int SOCKET_TIMEOUT = 60000;
+    private static final int MAX_PORT = 65535;
 
     private MoesifProxyUtils() {
 
@@ -82,6 +83,10 @@ public class MoesifProxyUtils {
             proxyPort = Integer.parseInt(StringUtils.trim(proxyPortValue));
         } catch (NumberFormatException e) {
             throw new MetricCreationException("Invalid " + Constants.PROXY_PORT + " value: " + proxyPortValue, e);
+        }
+        if (proxyPort < 1 || proxyPort > MAX_PORT) {
+            throw new MetricCreationException("Invalid " + Constants.PROXY_PORT + " value: " + proxyPortValue
+                    + ". The port must be between 1 and " + MAX_PORT + ".");
         }
         if (StringUtils.isBlank(proxyProtocol)) {
             proxyProtocol = HTTP_PROTOCOL;

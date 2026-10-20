@@ -110,6 +110,18 @@ public class MoesifProxyUtilsTestCase {
     }
 
     @Test(expectedExceptions = MetricCreationException.class)
+    public void testProxyPortBelowRange() throws MetricCreationException {
+
+        MoesifProxyUtils.configureProxyIfEnabled(proxyProperties("127.0.0.1", "0"));
+    }
+
+    @Test(expectedExceptions = MetricCreationException.class)
+    public void testProxyPortAboveRange() throws MetricCreationException {
+
+        MoesifProxyUtils.configureProxyIfEnabled(proxyProperties("127.0.0.1", "65536"));
+    }
+
+    @Test(expectedExceptions = MetricCreationException.class)
     public void testMissingProxyPort() throws MetricCreationException {
 
         MoesifProxyUtils.configureProxyIfEnabled(proxyProperties("127.0.0.1", ""));
