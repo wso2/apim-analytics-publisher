@@ -90,6 +90,7 @@ public class Constants {
     public static final String PROXY_USERNAME = "proxy_config_username";
     public static final String PROXY_PASSWORD = "proxy_config_password";
     public static final String PROXY_PROTOCOL = "proxy_config_protocol";
+    public static final String MOESIF_PROXY_ENABLE = "moesif_proxy_enable";
     public static final String KEYSTORE_LOCATION = "keystore_location";
     public static final String KEYSTORE_PASSWORD = "keystore_password";
     public static final String HTTPS_PROTOCOL = "https";

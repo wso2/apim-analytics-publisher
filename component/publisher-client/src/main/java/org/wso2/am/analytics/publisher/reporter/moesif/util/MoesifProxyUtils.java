@@ -58,14 +58,18 @@ public class MoesifProxyUtils {
 
     /**
      * Configures the Unirest clients used by the Moesif SDK to connect through the proxy defined by the
-     * {@code proxy_config_*} analytics properties. Does nothing if {@code proxy_config_enable} is not true.
+     * {@code proxy_config_*} analytics properties. Does nothing unless {@code moesif_proxy_enable} is true.
+     * <p>
+     * {@code proxy_config_enable} is not considered, since the {@code proxy_config_*} properties default to the values
+     * of {@code [apim.proxy_config]}. Hence Moesif traffic stays direct unless the proxy is explicitly enabled for
+     * Moesif.
      *
      * @param properties analytics configuration properties
-     * @throws MetricCreationException if proxy is enabled but the proxy configuration is invalid
+     * @throws MetricCreationException if the proxy is enabled but the proxy configuration is invalid
      */
     public static void configureProxyIfEnabled(Map<String, String> properties) throws MetricCreationException {
 
-        if (!Boolean.parseBoolean(properties.get(Constants.PROXY_ENABLE))) {
+        if (!Boolean.parseBoolean(properties.get(Constants.MOESIF_PROXY_ENABLE))) {
             return;
         }
         String proxyHost = properties.get(Constants.PROXY_HOST);
@@ -75,8 +79,8 @@ public class MoesifProxyUtils {
         String proxyPassword = properties.get(Constants.PROXY_PASSWORD);
 
         if (StringUtils.isBlank(proxyHost)) {
-            throw new MetricCreationException(Constants.PROXY_HOST + " is required when " + Constants.PROXY_ENABLE
-                    + " is set to true.");
+            throw new MetricCreationException(Constants.PROXY_HOST + " is required when "
+                    + Constants.MOESIF_PROXY_ENABLE + " is set to true.");
         }
         int proxyPort;
         try {
