@@ -88,13 +88,57 @@ public class MoesifProxyUtilsTestCase {
         Object asyncClientBefore = Options.getOption(Option.ASYNCHTTPCLIENT);
 
         MoesifProxyUtils.configureProxyIfEnabled(new HashMap<>());
-        Map<String, String> properties = proxyProperties("127.0.0.1", "3128");
-        properties.put(Constants.PROXY_ENABLE, "false");
-        MoesifProxyUtils.configureProxyIfEnabled(properties);
 
         Assert.assertNull(Options.getOption(Option.PROXY), "Proxy should not be set when proxy is disabled");
         Assert.assertSame(Options.getOption(Option.ASYNCHTTPCLIENT), asyncClientBefore,
                 "Unirest async client should not be replaced when proxy is disabled");
+    }
+
+    @Test
+    public void testProxyNotConfiguredWithoutMoesifProxyEnable() throws MetricCreationException {
+
+        // proxy_config_* may be inherited from [apim.proxy_config]. They must not route Moesif traffic through the
+        // proxy unless moesif_proxy_enable is true.
+        Object asyncClientBefore = Options.getOption(Option.ASYNCHTTPCLIENT);
+        Object httpClientBefore = Options.getOption(Option.HTTPCLIENT);
+        Map<String, String> properties = proxyProperties("127.0.0.1", "3128");
+        properties.put(Constants.PROXY_USERNAME, PROXY_USERNAME);
+        properties.put(Constants.PROXY_PASSWORD, PROXY_PASSWORD);
+        properties.remove(Constants.MOESIF_PROXY_ENABLE);
+        properties.put(Constants.PROXY_ENABLE, "true");
+        MoesifProxyUtils.configureProxyIfEnabled(properties);
+        properties.put(Constants.MOESIF_PROXY_ENABLE, "false");
+        MoesifProxyUtils.configureProxyIfEnabled(properties);
+
+        Assert.assertNull(Options.getOption(Option.PROXY),
+                "Proxy should not be set when " + Constants.MOESIF_PROXY_ENABLE + " is not true");
+        Assert.assertSame(Options.getOption(Option.ASYNCHTTPCLIENT), asyncClientBefore,
+                "Unirest async client should not be replaced when " + Constants.MOESIF_PROXY_ENABLE + " is not true");
+        Assert.assertSame(Options.getOption(Option.HTTPCLIENT), httpClientBefore,
+                "Unirest client should not be replaced when " + Constants.MOESIF_PROXY_ENABLE + " is not true");
+    }
+
+    @Test
+    public void testProxyConfiguredRegardlessOfProxyConfigEnable() throws MetricCreationException {
+
+        // Only moesif_proxy_enable decides whether Moesif traffic uses the proxy.
+        Map<String, String> properties = proxyProperties("127.0.0.1", "3128");
+        properties.put(Constants.PROXY_ENABLE, "false");
+        MoesifProxyUtils.configureProxyIfEnabled(properties);
+
+        Assert.assertEquals(Options.getOption(Option.PROXY), new HttpHost("127.0.0.1", 3128, "http"));
+    }
+
+    @Test
+    public void testInvalidProxyConfigIgnoredWithoutMoesifProxyEnable() throws MetricCreationException {
+
+        // An invalid inherited proxy configuration must not fail the Moesif reporter when the proxy is not used.
+        Map<String, String> properties = proxyProperties("", "abc");
+        properties.remove(Constants.MOESIF_PROXY_ENABLE);
+        properties.put(Constants.PROXY_ENABLE, "true");
+        MoesifProxyUtils.configureProxyIfEnabled(properties);
+
+        Assert.assertNull(Options.getOption(Option.PROXY));
     }
 
     @Test(expectedExceptions = MetricCreationException.class)
@@ -315,6 +359,29 @@ public class MoesifProxyUtilsTestCase {
         }
     }
 
+    @Test
+    public void testMoesifReporterIgnoresProxyWithoutMoesifProxyEnable() throws Exception {
+
+        try (TestHttpProxy proxy = new TestHttpProxy()) {
+            // Same as having only [apim.proxy_config] in deployment.toml.
+            Map<String, String> properties = proxyProperties(proxy.getHost(), String.valueOf(proxy.getPort()));
+            properties.remove(Constants.MOESIF_PROXY_ENABLE);
+            properties.put(Constants.PROXY_ENABLE, "true");
+            properties.put(Constants.TYPE, Constants.MOESIF);
+            properties.put(Constants.MOESIF_KEY, "test-application-id");
+            properties.put(Constants.MOESIF_BASE_URL, TARGET_BASE_URL);
+            properties.put(Constants.WORKER_THREAD_COUNT, "1");
+
+            new MoesifReporter(properties);
+
+            Assert.assertNull(Options.getOption(Option.PROXY));
+            // The SDK client created by the reporter fetches its config on startup. Give it time to do so, then
+            // make sure nothing reached the proxy.
+            Thread.sleep(TimeUnit.SECONDS.toMillis(2));
+            Assert.assertTrue(proxy.getRequests().isEmpty(), "Moesif SDK sent requests via the proxy");
+        }
+    }
+
     @Test(expectedExceptions = MetricCreationException.class)
     public void testMoesifReporterFailsOnInvalidProxyConfig() throws MetricCreationException {
 
@@ -381,7 +448,7 @@ public class MoesifProxyUtilsTestCase {
     private static Map<String, String> proxyProperties(String host, String port) {
 
         Map<String, String> properties = new HashMap<>();
-        properties.put(Constants.PROXY_ENABLE, "true");
+        properties.put(Constants.MOESIF_PROXY_ENABLE, "true");
         properties.put(Constants.PROXY_HOST, host);
         properties.put(Constants.PROXY_PORT, port);
         return properties;

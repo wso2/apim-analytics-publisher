@@ -177,7 +177,7 @@ public class MoesifPublishRetryTestCase {
         TestHttpProxy proxy = new TestHttpProxy();
         proxy.setResponseStatus(responseStatus);
         Map<String, String> properties = new HashMap<>();
-        properties.put(Constants.PROXY_ENABLE, "true");
+        properties.put(Constants.MOESIF_PROXY_ENABLE, "true");
         properties.put(Constants.PROXY_HOST, proxy.getHost());
         properties.put(Constants.PROXY_PORT, String.valueOf(proxy.getPort()));
         MoesifProxyUtils.configureProxyIfEnabled(properties);
